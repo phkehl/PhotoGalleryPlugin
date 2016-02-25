@@ -1,6 +1,40 @@
 !noci
-data/System/PhotoGalleryPlugin.txt 0644 Documentation page
-data/System/VarEXAMPLETAG.txt 0644 Tag documentation
-data/Sandbox/PluginTestPhotoGalleryPlugin.txt 0644 Examples
+
+# plugin code and configuration specs
 lib/Foswiki/Plugins/PhotoGalleryPlugin.pm 0444 Perl module
 lib/Foswiki/Plugins/PhotoGalleryPlugin/Config.spec 0444 Configuration
+
+# upload form extension templates
+templates/attach.photogallery.tmpl 0644 Attachment page options for Pattern skin
+templates/metadata.photogallery.tmpl 0644 Attachment page options for TopicInteractionPlugin skin
+
+# plugin documentation
+data/System/PhotoGalleryPlugin.txt 0644 Documentation page
+data/System/VarPHOTOGALLERY.txt 0644 Tag documentation
+pub/System/PhotoGalleryPlugin/screenshot1.jpg 0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot2.jpg 0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot3.jpg 0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot4.jpg 0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/photogalleryplugin.js 0644 Plugin Javascript code
+pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.js 0644 Plugin Javascript code
+pub/System/PhotoGalleryPlugin/photogalleryplugin.css 0644 Plugin stylesheet
+pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.css 0644 Plugin stylesheet
+pub/System/PhotoGalleryPlugin/default-skin.css 0644 PhotoSwipe skin styles
+pub/System/PhotoGalleryPlugin/default-skin.compressed.css 0644 PhotoSwipe skin styles
+pub/System/PhotoGalleryPlugin/default-skin.png 0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/default-skin.svg 0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/photoswipe-ui-default.js 0644 PhotoSwipe UI javascript code
+pub/System/PhotoGalleryPlugin/photoswipe-ui-default.compressed.js 0644 PhotoSwipe UI javascript code
+pub/System/PhotoGalleryPlugin/photoswipe.css 0644 PhotoSwipe stylesheet
+pub/System/PhotoGalleryPlugin/photoswipe.compressed.css 0644 PhotoSwipe stylesheet
+pub/System/PhotoGalleryPlugin/photoswipe.js 0644 PhotoSwipe javascript code
+pub/System/PhotoGalleryPlugin/photoswipe.compressed.js 0644 PhotoSwipe javascript code
+
+# test topic
+data/Sandbox/PhotoGalleryPluginTest.txt
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1262.jpg 0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1265.jpg 0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1323.jpg 0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1324.jpg 0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1071.JPG 0644 Plugin test photo
+

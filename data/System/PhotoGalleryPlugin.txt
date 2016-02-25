@@ -1,51 +1,144 @@
-%META:TOPICINFO{author="ProjectContributor" date="1443123313" format="1.1" version="1"}%
+%META:TOPICINFO{author="PhilippeKehl" comment="" date="1456435698" format="1.1" version="4"}%
 %META:TOPICPARENT{name="Plugins"}%
----+!! Empty Plugin
+---+!! %SPACEOUT{ "%TOPIC%" }%
 %FORMFIELD{"Description"}%
 
 %TOC%
 
-Learn how to create your own plugin in %SYSTEMWEB%.DevelopingPlugins.
-Documentation for Plugin API is in [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][PerlDoc for PhotoGalleryPlugin.pm]].
+---++ Description
 
-<div class="foswikiHelp">%T% Note that PhotoGalleryPlugin is documentation only.  Its
-settings are ignored by =configure= and it cannot be enabled.</div>
+This plugin renders galleries from photos attached to topics. It renders a grid
+of square thumbnails. Clicking on a thumbnail zooms the image to the original
+attached photo. Currently [[http://photoswipe.com][PhotoSwipe]] by Dmitry
+Semenov is used to display the photos. It allows zooming and browsing the image
+gallery with the keyboard, the mouse and finger swipes on touch devices. This
+plugin adds a slideshow functionality not currently present in the original
+<nop>PhotoSwipe gallery. The thumbnails expose a tools menu by hovering over
+their top right corner. Available tools include losslessly rotating the photo
+using [[https://www.kraxel.org/blog/linux/fbida/][exiftran]], editing the
+attachment comment, correcting the attachment timestamp to the photo exposure
+date, moving the attachment to another topic, and deleting the attachment.
 
+This plugin works only with [[Wikipedia:JPEG][JPEG]] images and it works best
+with photos from digital cameras that have [[Wikipedia:EXIF][EXIF]] data
+embedded.
+
+See %SYSTEMWEB%.VarPHOTOGALLERY on how to use it. See
+[[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
+for developer details.
+
+
+
+---
+---++ Screenshots
+
+Here are a few screenshots of the plugin in action:
+
+%IMAGE{ "screenshot1.jpg" width="346" height="173" type="frame" align="none" caption="grid of square thumbnails" }%
+%IMAGE{ "screenshot4.jpg" width="313" height="198" type="frame" align="none" caption="image zoomed and shown in !PhotoSwipe gallery, caption composed from attachment comment and EXIF meta data" }%
+%IMAGE{ "screenshot2.jpg" width="283" height="127" type="frame" align="none" caption="action menu pops up when hovering the top right corner of the thumbnail" }%
+%IMAGE{ "screenshot3.jpg" width="264" height="144" type="frame" align="none" caption="edit attachment comment dialog" }%
+
+
+
+
+
+---
 ---++ Preferences
 
-Plugin preferences should be set using =configure=, as described in
-%SYSTEMWEB%.DevelopingPlugins.
+---+++ Plugin Configuration and Defaults
 
-You can also use [[%SYSTEMWEB%.PreferenceSettings][preference settings]]
-to define any user-controllable configuration. You are strongly advised
-to use the name of the plugin as a prefix, to avoid the risk of namespace
-clashes with other extensions that may try to use the same name.
+The following settings are available in the [[%SCRIPTURLPATH{"configure"}%][configure]]
+interface:
 
-*BAD*
-   * Set EXAMPLE = Example setting
-   * Set FORMAT  = %d-%m-%y
-*Good*
-   * Set EMPTYPLUGIN_EXAMPLE = Example setting
-   * Set EMPTYPLUGIN_FORMAT  = %d-%m-%y
+   * path to the =exiftran= utility (={Plugins}{PhotoGalleryPlugin}{ExifTranPath}=)
+   * the default thumbnail quality factor (={Plugins}{PhotoGalleryPlugin}{QualityDefault}=)
+   * the default time format to render timestamps (={Plugins}{PhotoGalleryPlugin}{DateFmtDefault}=)
+   * the default caption format for thumbnails and photos (={Plugins}{PhotoGalleryPlugin}{CaptFmtDefault}=)
+   * the default admin mode (={Plugins}{PhotoGalleryPlugin}{AdminDefault}=)
+   * the default thumbnail size (={Plugins}{PhotoGalleryPlugin}{SizeDefault}=)
 
+The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference settings]].
+
+---+++ Skin Extension
+
+This plugin comes with a [[%SYSTEMWEB%.Skins][skin]] extension that adds two options
+(checkboxes) to the upload form, namely
+
+   * an option to activate lossless rotation of JPEG images based on EXIF camera
+     orientation meta data, and
+   * an option to set the attachment upload date to the photo exposure time
+     (from EXIF).
+
+The skin extension comes with two [[%SYSTEMWEB%.SkinTemplates][skin templates]] that
+add the options to the [[%SYSTEMWEB%.PatternSkin][PatternSkin]]'s and the
+[[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]]'s upload
+form.
+
+
+
+
+---
 ---++ Installation
+
+---+++ Plugin
+
 %$INSTALL_INSTRUCTIONS%
 
+This plugin needs the [[https://www.kraxel.org/blog/linux/fbida/][exiftran]]
+utility installed on the system in order to provide the photo rotation feature
+described above. In Linux distributions the package is typically called
+"exiftran" and can be installed through "package managers" or "software
+centres". Try the command =sudo apt-get install exiftran= on Debian and
+derivates.
+
+The [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl module might not
+be available as a system package. It can be downloaded from CPAN and be built and installed
+manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
+
+---+++ Skin Extension
+
+To activate the upload form options described above add (prepend) =photogallery= to the =SKIN=
+list in [[%LOCALSITEPREFS%]]. See [[Skins]] for details.
+
+---+++ Cache
+
+The plugin caches data (EXIF meta data, thumbnails) in the
+=working/work_areas/PhotoSwipePlugin= directory. It will keep the timestamps of
+the used files up-to-date. Standard system tools, such as "tmpreaper" or "cron",
+can be used to remove old files. No harm is done removing them all from time to
+time.
+
+
+
+
+---
 ---++ Dependencies
+
 %$DEPENDENCIES%
 
+---
 ---++ Change History
-%TABLE{columnwidths="7em" tablewidth="100%"}%
-| | |
 
+%TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
+| *Date*        |  *Version*  | *Comment*   |
+|  23 Mar 2016  |     v1.0    | initial version     |
+
+
+
+
+
+%META:FILEATTACHMENT{name="screenshot1.jpg" attachment="screenshot1.jpg" comment="plugin screenshot" date="1456439258" size="45945" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="PhilippeKehl" version="1"}%
 %META:FORM{name="PackageForm"}%
-%META:FIELD{name="Author" title="Author" value="%25$CREATED_AUTHOR%25"}%
+%META:FIELD{name="Author" title="Author" value="Philippe Kehl"}%
 %META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
-%META:FIELD{name="Copyright" value="%25$CREATEDYEAR%25, %25$CREATED_AUTHOR%25, All Rights Reserved"}%
-%META:FIELD{name="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
-%META:FIELD{name="Repository" value="https://github.com/foswiki/%25$ROOTMODULE%25"}%
-%META:FIELD{name="Home" value="http://foswiki.org/Extensions/%25$ROOTMODULE%25"}%
-%META:FIELD{name="Support" value="http://foswiki.org/Support/%25$ROOTMODULE%25"}%
-%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/distro"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/phkehl/PhotoGalleryPlugin"}%
+%META:FIELD{name="Copyright" title="Copyright" value="&copy; 2016 Philippe Kehl, https://oinkzwurgl.org"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Home" title="Home" value="http://foswiki.org/Extensions/%25$ROOTMODULE%25"}%
+%META:FIELD{name="Support" title="Support" value="http://foswiki.org/Support/%25$ROOTMODULE%25"}%

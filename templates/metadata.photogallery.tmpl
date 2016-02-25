@@ -1,0 +1,39 @@
+%{
+
+PhotoGalleryPlugin skin extension for the TopicInteractionPlugin skin.
+
+This overrides the "uploadform::optionsstep" section in the attach.topicinteraction.tmpl.
+
+}%
+%TMPL:INCLUDE{"metadata"}%
+%TMPL:DEF{"uploadform::optionsstep"}%<!-- -->
+<div class="foswikiFormStep">
+  <h3>%MAKETEXT{"Comment"}%:</h3>
+  <input type="text" size="50" class="foswikiInputField jqUploaderComment" name="filecomment" />
+  <div class="foswikiFormDescription">
+    %MAKETEXT{"This comment will be added to every uploaded file."}%
+  </div>
+</div>
+<div class="foswikiFormStep">
+  <h3>%MAKETEXT{"Options"}%:</h3>
+  <div class="foswikiFormOptions">
+    <label>
+      <input type="checkbox" class="foswikiCheckbox jqUploaderCreateLink" name="createlink" %ATTACHLINKBOX% />
+      %MAKETEXT{"Create a <b>link</b> to the attached files at the end of the topic."}%
+    </label> %BR%
+    <label>
+      <input type="checkbox" class="foswikiCheckbox jqUploaderHideFile" name="hidefile" />
+      %MAKETEXT{"<b>Hide</b> the files in the attachment list."}%
+    </label> %BR%
+    <label>
+      <input type="checkbox" checked class="foswikiCheckbox" name="exifrotateimage"/>
+      %MAKETEXT{"Rotate JPEG images based on EXIF tags (using <code>exiftran</code>)."}%
+    </label> %BR%
+    <label>
+      <input type="checkbox" checked class="foswikiCheckbox" name="setexifdate"/>
+      %MAKETEXT{"Set file upload date to EXIF exposure date for JPEG images."}%
+    </label> %BR%
+  </div>
+</div>
+<hr />
+<!-- -->%TMPL:END%

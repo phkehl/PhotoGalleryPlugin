@@ -1,0 +1,13 @@
+*,v
+*,pfv
+*.gz
+/PhotoGalleryPlugin.md5
+/PhotoGalleryPlugin.sha1
+/PhotoGalleryPlugin.tgz
+/PhotoGalleryPlugin.txt
+/PhotoGalleryPlugin.zip
+/PhotoGalleryPlugin_installer
+/PhotoGalleryPlugin_installer.pl
+igp*.png
+*.compressed.js
+*.compressed.css

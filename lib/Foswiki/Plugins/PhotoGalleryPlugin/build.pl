@@ -28,6 +28,9 @@ use Foswiki::Contrib::Build;
 # Create the build object
 my $build = new Foswiki::Contrib::Build('PhotoGalleryPlugin');
 
+# no, thanks
+exit(0) if ($build->{target} eq 'tidy');
+
 # Build the target on the command line, or the default target
 $build->build( $build->{target} );
 

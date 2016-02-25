@@ -1,0 +1,35 @@
+http://foswiki.org/Development/BuildContribCookbook?git=%2Fhome%2Fflip%2Ffoswiki-dev&extname=PhotoGallery&exttype=Plugin
+http://foswiki.org/Extensions/BuildContrib
+http://foswiki.org/Development.HowToStartExtensionDevelopmentInGit
+http://foswiki.org/Development/GitRepository
+http://foswiki.org/Development/GitBasedInstall
+http://foswiki.org/System/DevelopingPlugins
+http://foswiki.org/System/PerlDoc?module=Foswiki::Sandbox
+http://foswiki.org/System/PerlDoc?module=Foswiki::Func
+http://foswiki.org/System/PerlDoc?module=Foswiki::Meta
+http://foswiki.org/System/PerlDoc?module=Foswiki::Time
+http://foswiki.org/Development/HowToUseGit
+
+TML: Foswiki:Extensions/TopicInteractionPlugin
+
+
+test:
+. env.sh
+(cd core && ./pseudo-install.pl -uninstall PhotoGalleryPlugin)
+perl PhotoGalleryPlugin/lib/Foswiki/Plugins/PhotoGalleryPlugin/build.pl release
+cp -v PhotoGalleryPlugin/PhotoGalleryPlugin* core/
+(cd core && perl PhotoGalleryPlugin_installer -r install)
+...
+(cd core && perl PhotoGalleryPlugin_installer -r uninstall)
+(cd core && ./pseudo-install.pl PhotoGalleryPlugin)
+
+
+
+
+
+
+export FOSWIKI_GIT=/home/flip/foswiki-dev
+export FOSWIKI_HOME=$FOSWIKI_GIT/core
+export FOSWIKI_LIBS=$FOSWIKI_HOME/lib:$FOSWIKI_HOME/lib/CPAN/lib
+export PERL5LIB=$FOSWIKI_GIT/BuildContrib/lib
+

@@ -1,0 +1,158 @@
+%META:TOPICINFO{author="ProjectContributor" date="1434650530" format="1.1" version="1"}%
+%META:TOPICPARENT{name="Macros"}%
+---+ PHOTOGALLERY -- render photo gallery from attachments
+
+The =%<nop>PHOTOGALLERY%= variable is handled by the PhotoGalleryPlugin.
+
+
+---++ Parameters
+
+%TABLE{ sort="off" tablerules="all" }%
+| *Parameter*  | *Description*  | *Default*  \
+|
+| ="..."= or%BR% =images=  \
+| Selects the images (attachments) to use for the gallery. \
+Multiple selections can be given by separating them with a comma (=selection1,selection2,...,selectionN=). \
+Each selection can be:%BR% \
+- =/regex/=: a case insensitive [[%SYSTEMWEB%.RegularExpression][regular expression]] enclosed in dashes,%BR% \
+- =name=: an attachment name, or%BR% \
+- =name1..name2=: a range extracted from the alphabetically sorted list of all attachments, or%BR% \
+- =name1--name2=: a range extracted from the list of all attachments ordered by attachment date%BR%  \
+| ="/.jpe?g$/"= %BR%i.e. all attachements%BR%with _.jpg_ or _.jpeg_ %BR%(any case) extension  \
+|
+| =web= and%BR% =topic=  \
+| The web and topic to use the attachments from. The parameters will be normalised, i.e. =topic= can be in the form _web.topic_.  \
+| current web%BR% and topic  \
+|
+| =size=  \
+| Sets the size in pixels for the thumbnails (50..500).  \
+| 150  \
+|
+| =size=  \
+| Sets the thumbnail quality factor (1..100).  \
+| 85  \
+|
+| =sort=  \
+| Selects how to sort attachments (=date=, =name= or =off=).  \
+| =date=  \
+|
+| =remaining=  \
+| Filter-out photos already used by previous galleries (in the same topic) (=on= or =off=).  \
+| =off=  \
+|
+| =quiet=  \
+| Do not complain if no images matched the =images= spec (=on= or =off=).  \
+| =off=  \
+|
+| =unique=  \
+| Remove duplicates due to overlapping selections (=on= or =off=).  \
+| =on=  \
+|
+| =admin=  \
+| Display admin action menu if the user has permissions (=on= or =off=) or is the owner of the attachment (=user=).  \
+| =user=  \
+|
+| =uidelay=  \
+| Time in seconds until the caption and control elements disappear when idle. Set to 0 to disable hiding the user interface. \
+| =4.0=  \
+|
+| =ssdelay=  \
+| Slideshow delay between images in seconds.  \
+| =5.0=  \
+|
+| =caption=  \
+| Caption format specifier, a string with normal variables in the =$var= form and "magic" variables in the form =(pre)$var[fmt](post)=, where:%BR%  \
+- =var= is the variable to expand,%BR%  \
+- =fmt= is an optional formatting/scaling parameter for some variables, and%BR%  \
+- =pre= and =post= are optional strings to prefix and postfix to the expanded variable if it expands to anything.%BR%  \
+%BR%  \
+In a first pass the following normal variables (=$var=) are expanded:%BR%  \
+- =$percent=, =$percnt=, =$p=: Expand to a =%= character (for escaping other macros).%BR%  \
+- =$BR=: Expands to a =%<nop>BR%= macro, which will insert a line break (=&lt;br/&gt;= HTML tag).%BR%  \
+%BR%  \
+Then the following magic variables (=var=) are expanded:%BR%  \
+- =$n= and =$N=: The photo number and the total number of photos.%BR%  \
+- =$name= and =$comment=: The attachment name and comment.%BR%  \
+- =$CreateDate= and =$date=: The exposure time (if available from EXIF data) and the attachment date, respectively. \
+  The optional =fmt= is a [[VarGMTIME][%<nop>GMTIME%]] style format string (with an appropriate default).%BR%  \
+- =$size=: The file size. The =fmt= parameter can be =MB= or =KB= to scale the size to mega and kilo bytes instead of bytes.%BR%  \
+- =$ImageWidth= and =$ImageHeight=: The image dimensions in pixels.%BR%  \
+- =$ImageSize=: An appropriately formatted image dimension string (e.g. "3000x2000 6MP").%BR%  \
+- =$WikiName=: The wiki name of the attachment user.%BR%  \
+- =$ExposureTime=, =$FocalLength=, =$ApertureValue=, =$ISO=: appropriately formatted camera parameters (if available from EXIF data).%BR%  \
+- =$UserComment=, =$Make=, =$Model=: Unmodified EXIF data fields of the same name (if available).%BR% \
+- =$MakeModel=: A sanitised concatenation of the "Make" and "Model" EXIF data fields (if available).%BR%  \
+- =$Lat=, =$Lon=, and =$Alt=: geographic latitude, longitude and altitude in decimal degrees and metres (if available from EXIF data).%BR%  \
+- =$Coords=: An appropriately formatted geographic location (coordinates) (if available from EXIF data).%BR%  \
+%BR%  \
+Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines) will be removed. So you could use \
+=$Comment$BR$CreateDate$BR$Coords= as a format and it would only produce the lines (breaks) neccessary.%BR%  \
+| =$comment($BR&nbsp;)%BR%($n/$N,&nbsp;%BR%$CreateDate(,&nbsp;)%BR%$ExposureTime(,&nbsp;)%BR%$FocalLength(,&nbsp;)%BR%$ApertureValue(,&nbsp;)%BR%$ISO(,&nbsp;)%BR%$Coords(,&nbsp;)%BR%$MakeModel(,&nbsp;)%BR%$WikiName,&nbsp;%BR%$name,&nbsp;%BR%$ImageSize,&nbsp;%BR%$size(MB)[MB])=  \
+|
+| =thumbcap=  \
+| Caption format for thumbails if different from =caption= format.  \
+| see =caption=  \
+|
+| =zoomcap=  \
+| Caption format for zoomed photo view if different from =caption= format.  \
+| see =caption=  \
+|
+
+Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
+
+
+---++ Examples
+
+   * =%<nop>PHOTOGALLERY%=
+     -- renders a gallery with all photos attached to the current topic
+   * =%<nop>PHOTOGALLERY{ "/^IMG_.+\.JPG$/" }%=
+     -- uses all "IMG_*.JPG" photos (also "img_*.jpg" as the match is case insensitive)
+   * =%<nop>PHOTOGALLERY{ topic="SomeWeb.SomeTopic" }%=
+     -- uses all photos from the specified topic
+   * =%<nop>PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%=
+     -- uses the two specifed attachments
+   * =%<nop>PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%=
+     -- uses all photo from number 1265 to number 1323
+   * =%<nop>PHOTOGALLERY{ "IMG_1265.jpg..IMG_1270.jpg,IMG_1280.jpg..IMG_1290.jpg" }%=
+     -- uses all photo from number 1265 to number 1270 and from number 1280 to 1290
+   * =%<nop>PHOTOGALLERY{ "/\.jpe?g/,/\.jpe?g/,/\.jpe?g/" sort="off" unique="off" }%=
+     -- uses all attached photos three times
+   * =%<nop>PHOTOGALLERY{ "doesnotexist" }%=
+     -- outputs an error message instead of a gallery
+   * =%<nop>PHOTOGALLERY{ remaining="on" quiet="on" }%=
+     -- outputs a gallery with all remaining photos (those not shown in previous
+     calls to =%<nop>PHOTOGALLERY%= in the same topic) if there are any
+
+
+%STOPINCLUDE%
+
+See Sandbox.PhotoGalleryPluginTest for some live examples.
+
+
+---++ Admin Actions
+
+Galleries renderd with the option =admin="user"= or =admin="on"= add a tools menu
+to the thumbnails where the user has permissions to change the attachment or is
+the attachment's owner. A gear icon appears in the top right corner of such
+thumbnails when hovering them with the mouse. The admin menu pops up when
+hovering the gear icon. The following admin actions are available from the menu:
+
+   * _rotate left_ and _rotate right_ rotate the photo by 90 degrees to the left
+     and the right respectively. The rotation is lossless.
+   * _edit_ allows editing the attachment comment
+   * _timestamp_ sets the attachment timestamp to the photo exposure time. The
+     menu entry is only shown if the photo has the necessary EXIF data and if
+     the attachment time differs.
+   * _delete_ will delete the photo by moving it to the [[Trash.TrashAttachment]]
+     topic (see also %SYSTEMWEB%.FileAttachment)
+   * _move_ allows moving a photo to another topic. The provided dialog input
+     field uses %SYSTEMWEB%.JQueryUIAutocomplete to suggest topic names as you
+     type. By default it will look for topic names in the current web. If you
+     specify the web sperated by a dot (e.g. "Main.searchtext") it will look in
+     that web. If you prefix the search text with a dot (e.g. ".searchtext") it
+     will look for matching topic names in all webs.
+
+
+---++ Related
+
+PhotoGalleryPlugin, Sandbox.PhotoGalleryPluginTest

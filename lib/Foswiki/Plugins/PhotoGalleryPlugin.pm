@@ -1,1057 +1,1378 @@
-# See bottom of file for default license and copyright information
+####################################################################################################
+#
+# PhotoGalleryPlugin for Foswiki
+#
+# Copyright (c) 2016 Philippe Kehl <phkehl at gmail dot com>
+#
+####################################################################################################
+#
+# This program is free software; you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version. For more details read LICENSE in the root of this
+# distribution.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# As per the GPL, removal of this notice is prohibited.
+#
+####################################################################################################
+
+package Foswiki::Plugins::PhotoGalleryPlugin;
+
+use strict;
+use warnings;
 
 =begin TML
 
 ---+ package Foswiki::Plugins::PhotoGalleryPlugin
 
-Foswiki plugins 'listen' to events happening in the core by registering an
-interest in those events. They do this by declaring 'plugin handlers'. These
-are simply functions with a particular name that, if they exist in your
-plugin, will be called by the core.
+---++ Description
 
-This is an empty Foswiki plugin. It is a fully defined plugin, but is
-disabled by default in a Foswiki installation. Use it as a template
-for your own plugins.
+This module implements the System.PhotoGalleryPlugin. See System.VarPHOTOGALLERY for the user
+API. See source code for developer details.
 
-To interact with Foswiki use ONLY the official APIs
-documented in %SYSTEMWEB%.DevelopingPlugins. <strong>Do not reference any
-packages, functions or variables elsewhere in Foswiki</strong>, as these are
-subject to change without prior warning, and your plugin may suddenly stop
-working.
+---++ Issues, Ideas
 
-Error messages can be output using the =Foswiki::Func= =writeWarning= and
-=writeDebug= functions. These logs can be found in the Foswiki/working/logs
-directory.  You can also =print STDERR=; the output will appear in the
-webserver error log.  The ENVironment setting =$ENV{FOSWIKI_ASSERTS}= setting makes
-Foswiki less tolerant of errors, and it is recommended to set it during
-development.  It can be set by editing =bin/LocalLib.cfg=, (If missing, see =bin/LocalLib.cfg.txt=)
-Most handlers can also throw exceptions (e.g.
-[[%SCRIPTURL{view}%/%SYSTEMWEB%/PerlDoc?module=Foswiki::OopsException][Foswiki::OopsException]])
-
-For increased performance, all handler functions except =initPlugin= are
-commented out below. *To enable a handler* remove the leading =#= from
-each line of the function. For efficiency and clarity, you should
-only uncomment handlers you actually use.
-
-__NOTE:__ When developing a plugin it is important to remember that
-Foswiki is tolerant of plugins that do not compile. In this case,
-the failure will be silent but the plugin will not be available.
-See %SYSTEMWEB%.InstalledPlugins for error messages.
-
-__NOTE:__ Foswiki:Development.StepByStepRenderingOrder helps you decide which
-rendering handler to use. When writing handlers, keep in mind that these may
-be invoked on included topics. For example, if a plugin generates links to the
-current topic, these need to be generated before the =afterCommonTagsHandler=
-is run. After that point in the rendering loop we have lost the information
-that the text had been included from another topic.
-
-__NOTE:__ Not all handlers (and not all parameters passed to handlers) are
-available with all versions of Foswiki. Where a handler has been added
-the POD comment will indicate this with a "Since" line
-e.g. *Since:* Foswiki::Plugins::VERSION 1.1
-
-Deprecated handlers are still available, and can continue to be used to
-maintain compatibility with earlier releases, but will be removed at some
-point in the future. If you do implement deprecated handlers, then you can
-do no harm by simply keeping them in your code, but you are recommended to
-implement the alternative as soon as possible.
-
-See http://foswiki.org/Download/ReleaseDates for a breakdown of release
-versions.
+   * According to Foswiki:Development/HowToIntegrateWithRequestValidation the REST handler should
+     generate a new nonce in each request. It doesn't seem to do that.
+   * Handle (validation) session timeout. Re-authenticate? Display useful warning.
+   * Cleanup and add bulk attachment script.
+   * Create cache cleanup script. Or maybe a REST action?
+   * More Make/Model EXIF cleanup (NIKON CORPORATION / NIKON D4, ...) (maybe Google has a list of common names?)
+   * Add more EXIF tags. Need sample images.
+   * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
+   * Document and assert HTML5 browser requirement.
+   * Create inline JSON data for PSWP items instead of creating them in the browser.
+   * ...
 
 =cut
 
-# change the package name!!!
-package Foswiki::Plugins::PhotoGalleryPlugin;
+####################################################################################################
 
-# Always use strict to enforce variable scoping
-use strict;
-use warnings;
+use Foswiki::Func;
+use Foswiki::Plugins;
+use Foswiki::Sandbox;
+use Foswiki::Time;
 
-use Foswiki::Func    ();    # The plugins API
-use Foswiki::Plugins ();    # For the API version
+use POSIX;
+use JSON;
+use Error ':try';
+use Image::ExifTool;
+use File::Copy;
+use File::Touch;
+use Digest::MD5;
+use Storable;
+use Image::Epeg;
 
-# $VERSION is referred to by Foswiki, and is the only global variable that
-# *must* exist in this package. For best compatibility, the simple quoted decimal
-# version '1.00' is preferred over the triplet form 'v1.0.0'.
 
-# For triplet format, The v prefix is required, along with "use version".
-# These statements MUST be on the same line.
-#  use version; our $VERSION = 'v1.2.3_001';
-# See "perldoc version" for more information on version strings.
-#
-# Note:  Alpha versions compare as numerically lower than the non-alpha version
-# so the versions in ascending order are:
-#   v1.2.1_001 -> v1.2.2 -> v1.2.2_001 -> v1.2.3
-#   1.21_001 -> 1.22 -> 1.22_001 -> 1.23
-#
-our $VERSION = '1.00';
+####################################################################################################
 
-# $RELEASE is used in the "Find More Extensions" automation in configure.
-# It is a manually maintained string used to identify functionality steps.
-# You can use any of the following formats:
-# tuple   - a sequence of integers separated by . e.g. 1.2.3. The numbers
-#           usually refer to major.minor.patch release or similar. You can
-#           use as many numbers as you like e.g. '1' or '1.2.3.4.5'.
-# isodate - a date in ISO8601 format e.g. 2009-08-07
-# date    - a date in 1 Jun 2009 format. Three letter English month names only.
-# Note: it's important that this string is exactly the same in the extension
-# topic - if you use %$RELEASE% with BuildContrib this is done automatically.
-# It is preferred to keep this compatible with $VERSION. At some future
-# date, Foswiki will deprecate RELEASE and use the VERSION string.
-#
-our $RELEASE = '26 Feb 2016';
-
-# One line description of the module
-our $SHORTDESCRIPTION = 'A gallery plugin for JPEG photos from a digital camera.';
-
-# You must set $NO_PREFS_IN_TOPIC to 0 if you want your plugin to use
-# preferences set in the plugin topic. This is required for compatibility
-# with older plugins, but imposes a significant performance penalty, and
-# is not recommended. Instead, leave $NO_PREFS_IN_TOPIC at 1 and use
-# =$Foswiki::cfg= entries, or if you want the users
-# to be able to change settings, then use standard Foswiki preferences that
-# can be defined in your %USERSWEB%.%LOCALSITEPREFS% and overridden at the web
-# and topic level.
-#
-# %SYSTEMWEB%.DevelopingPlugins has details of how to define =$Foswiki::cfg=
-# entries so they can be used with =configure=.
+our $VERSION           = '1.0';
+our $RELEASE           = '05 Apr 2016';
+our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;
+our $CREATED_AUTHOR    = 'Philippe Kehl';
+our $CREATED_YEAR      = '2016';
 
-=begin TML
+####################################################################################################
 
----++ initPlugin($topic, $web, $user) -> $boolean
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$user= - the login name of the user
-   * =$installWeb= - the name of the web the plugin topic is in
-     (usually the same as =$Foswiki::cfg{SystemWebName}=)
+our $DEBUG  = 0;
 
-*REQUIRED*
+# per-request (page rendered) data,
+# used to handle multiple galleries in the same topic, and other features
+# SMELL: Isn't there a Foswiki facility for storing per-request data?
+our $RV;
 
-Called to initialise the plugin. If everything is OK, should return
-a non-zero value. On non-fatal failure, should write a message
-using =Foswiki::Func::writeWarning= and return 0. In this case
-%<nop>FAILEDPLUGINS% will indicate which plugins failed.
 
-In the case of a catastrophic failure that will prevent the whole
-installation from working safely, this handler may use 'die', which
-will be trapped and reported in the browser.
+####################################################################################################
 
-__Note:__ Please align macro names with the Plugin name, e.g. if
-your Plugin is called !FooBarPlugin, name macros FOOBAR and/or
-FOOBARSOMETHING. This avoids namespace issues.
-
-=cut
-
-sub initPlugin {
+sub initPlugin
+{
     my ( $topic, $web, $user, $installWeb ) = @_;
 
-    # check for Plugins.pm versions
-    if ( $Foswiki::Plugins::VERSION < 2.3 ) {
-        Foswiki::Func::writeWarning( 'Version mismatch between ',
-            __PACKAGE__, ' and Plugins.pm' );
+    # reset per-request variables
+    $RV = { };
+
+    # we need version 2.1 or later of the plugins API
+    if ( $Foswiki::Plugins::VERSION < 2.1)
+    {
+        _warning('Too old Plugins.pm version (need 2.1 or later)!');
         return 0;
     }
 
-    # Example code of how to get a preference value, register a macro
-    # handler and register a RESTHandler (remove code you do not need)
+    # debugging helpers
+    if ($DEBUG)
+    {
+        eval "require Time::HiRes; require Data::Dumper";
+        if ($@)
+        {
+            $DEBUG = 0;
+            _warning('Cannot load debug helpers.');
+        }
+        else
+        {
+            $RV->{t0} = Time::HiRes::time();
+        }
+    }
 
-    # Set your per-installation plugin configuration in LocalSite.cfg,
-    # like this:
-    # $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExampleSetting} = 1;
-    # See %SYSTEMWEB%.DevelopingPlugins#ConfigSpec for information
-    # on integrating your plugin configuration with =configure=.
+    # register the "%PHOTOGALLERY%" macro handler
+    Foswiki::Func::registerTagHandler('PHOTOGALLERY', \&doPHOTOGALLERY);
 
-    # Always provide a default in case the setting is not defined in
-    # LocalSite.cfg.
-    # my $setting = $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExampleSetting} || 0;
+    # register the "admin" REST handler (verb)
+    Foswiki::Func::registerRESTHandler('admin', \&doRestAdmin,
+          authenticate => 1, validate => 1, http_allow => 'POST',
+          description => 'System.PhotoGalleryPlugin REST handler for admin actions');
 
-    # Register the _EXAMPLETAG function to handle %EXAMPLETAG{...}%
-    # This will be called whenever %EXAMPLETAG% or %EXAMPLETAG{...}% is
-    # seen in the topic text.
-    Foswiki::Func::registerTagHandler( 'EXAMPLETAG', \&_EXAMPLETAG );
+    # register the "thumb" REST handler (verb)
+    Foswiki::Func::registerRESTHandler('thumb', \&doRestThumb,
+          authenticate => 0, validate => 0, http_allow => 'GET,POST',
+          description => 'System.PhotoGalleryPlugin REST handler for thumbnail generation');
 
-    # Allow a sub to be called from the REST interface
-    # using the provided alias.  This example enables strong
-    # core enforced security for the handler, and is the default configuration
-    # as of Foswiki 1.1.2
-
-    Foswiki::Func::registerRESTHandler(
-        'example', \&restExample,
-        authenticate => 1,  # Set to 0 if handler should be useable by WikiGuest
-        validate     => 1,  # Set to 0 to disable StrikeOne CSRF protection
-        http_allow => 'POST', # Set to 'GET,POST' to allow use HTTP GET and POST
-        description => 'Example handler for Empty Plugin'
-    );
-
-    # Plugin correctly initialized
+    #_debug('init');
     return 1;
 }
 
-# The function used to handle the %EXAMPLETAG{...}% macro
-# You would have one of these for each macro you want to process.
-#sub _EXAMPLETAG {
-#    my($session, $params, $topic, $web, $topicObject) = @_;
-#    # $session  - a reference to the Foswiki session object
-#    #             (you probably won't need it, but documented in Foswiki.pm)
-#    # $params=  - a reference to a Foswiki::Attrs object containing
-#    #             parameters.
-#    #             This can be used as a simple hash that maps parameter names
-#    #             to values, with _DEFAULT being the name for the default
-#    #             (unnamed) parameter.
-#    # $topic    - name of the topic in the query
-#    # $web      - name of the web in the query
-#    # $topicObject - a reference to a Foswiki::Meta object containing the
-#    #             topic the macro is being rendered in (new for foswiki 1.1.x)
-#    # Return: the result of processing the macro. This will replace the
-#    # macro call in the final text.
-#
-#    # For example, %EXAMPLETAG{'hamburger' sideorder="onions"}%
-#    # $params->{_DEFAULT} will be 'hamburger'
-#    # $params->{sideorder} will be 'onions'
-#}
-
-=begin TML
-
----+++ preload($class, $session)
-
-This method is called as early as possible in the processing of a request;
-before =initPlugin= is called, before any preferences are loaded, before
-even the store is loaded, and before the user has been identified.
-
-It is intended for use when there is sufficient information available
-from the request object and the environment to make a decision
-on something. For example, it could be used to check the source IP
-address of a request, and decide whether to service it or not.
-
-=preload= can use the methods of =Foswiki::Func= to access the request,
-but must not access the store, or any user or preference information.
-Caveat emptor! You have been warned!
-
-The best way to terminate the request from =preload= is to throw an
-exception. You can do this using a =die=, which will result in a
-=text/plain= response being sent to the client. More sophisticated
-implementations can use =Foswiki::OopsException= to craft a response.
-
-*Since:* Foswiki 2.0
-
-=cut
-
-# sub preload {
-#     die( "Terminate this session" );
-# }
-
-=begin TML
-
----++ earlyInitPlugin()
-
-This method is called after =preload= but before =initPlugin=. It is
-called after the Foswiki infrastructure has been set up. If it returns
-a non-null error string, the plugin will be disabled. You can also
-terminate the request from this method by throwing one of the
-exceptions handled by =Foswiki::UI= (for example, =Foswiki::OopsException=).
-
-=cut
-
-#sub earlyInitPlugin {
-#    return undef;
-#}
-
-=begin TML
-
----++ initializeUserHandler( $loginName, $url, $pathInfo )
-   * =$loginName= - login name recovered from $ENV{REMOTE_USER}
-   * =$url= - request url
-   * =$path_info= - path_info from the Foswiki::Request
-Allows a plugin to set the username. Normally Foswiki gets the username
-from the login manager. This handler gives you a chance to override the
-login manager.
-
-Return the *login* name.
-
-This handler is called very early, immediately after =earlyInitPlugin=.
-
-*Since:* Foswiki::Plugins::VERSION = '2.0'
-
-=cut
-
-#sub initializeUserHandler {
-#    my ( $loginName, $url, $path_info ) = @_;
-#}
-
-=begin TML
-
----++ finishPlugin()
-
-Called when Foswiki is shutting down, this handler can be used by the plugin
-to release resources - for example, shut down open database connections,
-release allocated memory etc.
-
-Note that it's important to break any cycles in memory allocated by plugins,
-or that memory will be lost when Foswiki is run in a persistent context
-e.g. mod_perl.
-
-=cut
-
-#sub finishPlugin {
-#}
-
-=begin TML
-
----++ validateRegistrationHandler($data)
-   * =$data= - a hashref containing all the formfields POSTed to the registration script
-
-Called when a new user registers with this Foswiki. The handler is called after the
-user data has been validated by the core, but *before* the user is created and *before*
-any validation mail is sent out. The handler will be called on all plugins that implement
-it.
-
-Note that the handler may modify fields in the $data record, but must be aware that
-these fields have already been checked and validated before the handler is called,
-so modifying them is dangerous, and strictly at the plugin author's own risk.
-
-If the handler needs to abort the registration for any reason it can do so by raising
-an exception ( e.g. using =die= )
-
-*Since:* Foswiki::Plugins::VERSION = '2.0'
-
-=cut
-
-#sub validateRegistrationHandler {
-#    my ( $data ) = @_;
-#}
-
-=begin TML
-
----++ registrationHandler($web, $wikiName, $loginName, $data )
-   * =$web= - the name of the web in the current CGI query
-   * =$wikiName= - users wiki name
-   * =$loginName= - users login name
-   * =$data= - a hashref containing all the formfields POSTed to the registration script
-
-Called when a new user registers with this Foswiki.
-
-Note that the handler is *not* called when the user submits the registration
-form if {Register}{NeedVerification} is enabled. In this case it is called when
-the user submits the activation code. The handler is only called once, on the first
-plugin seen that implements it.
-
-*WARNING* The handler is called *after* the user has been created, and is really
-designed for nothing more sophisticated than adding a cookie at registration
-time. For most purposes it is useless, and you really wanted to implement the
-validateRegistrationHandler instead.
-
-*Deprecated in:* Foswiki::Plugins::VERSION 2.3
-
-=cut
-
-#sub registrationHandler {
-#    my ( $web, $wikiName, $loginName, $data ) = @_;
-#}
-
-=begin TML
-
----++ commonTagsHandler($text, $topic, $web, $included, $meta )
-   * =$text= - text to be processed
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$included= - Boolean flag indicating whether the handler is
-     invoked on an included topic
-   * =$meta= - meta-data object for the topic MAY BE =undef=
-This handler is called by the code that expands %<nop>MACROS% syntax in
-the topic body and in form fields. It may be called many times while
-a topic is being rendered.
-
-Only plugins that have to parse the entire topic content should implement
-this function. For expanding macros with trivial syntax it is *far* more
-efficient to use =Foswiki::Func::registerTagHandler= (see =initPlugin=).
-
-Internal Foswiki macros, (and any macros declared using
-=Foswiki::Func::registerTagHandler=) are expanded _before_, and then again
-_after_, this function is called to ensure all %<nop>MACROS% are expanded.
-
-*NOTE:* when this handler is called, &lt;verbatim> blocks have been
-removed from the text (though all other blocks such as &lt;pre> and
-&lt;noautolink> are still present).
-
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler. Use the =$meta= object.
-
-*NOTE:* Read the developer supplement at
-Foswiki:Development.AddToZoneFromPluginHandlers if you are calling
-=addToZone()= from this handler
-
-*Since:* $Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub commonTagsHandler {
-#    my ( $text, $topic, $web, $included, $meta ) = @_;
-#
-#    # If you don't want to be called from nested includes...
-#    #   if( $included ) {
-#    #         # bail out, handler called from an %INCLUDE{}%
-#    #         return;
-#    #   }
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ beforeCommonTagsHandler($text, $topic, $web, $meta )
-   * =$text= - text to be processed
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$meta= - meta-data object for the topic MAY BE =undef=
-This handler is called before Foswiki does any expansion of its own
-internal variables. It is designed for use by cache plugins. Note that
-when this handler is called, &lt;verbatim> blocks are still present
-in the text.
-
-*NOTE*: This handler is called once for each call to
-=commonTagsHandler= i.e. it may be called many times during the
-rendering of a topic.
-
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler.
-
-*NOTE:* This handler is not separately called on included topics.
-
-*NOTE:* Read the developer supplement at
-Foswiki:Development.AddToZoneFromPluginHandlers if you are calling
-=addToZone()= from this handler
-
-=cut
-
-#sub beforeCommonTagsHandler {
-#    my ( $text, $topic, $web, $meta ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ afterCommonTagsHandler($text, $topic, $web, $meta )
-   * =$text= - text to be processed
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$meta= - meta-data object for the topic MAY BE =undef=
-This handler is called after Foswiki has completed expansion of %MACROS%.
-It is designed for use by cache plugins. Note that when this handler
-is called, &lt;verbatim> blocks are present in the text.
-
-*NOTE*: This handler is called once for each call to
-=commonTagsHandler= i.e. it may be called many times during the
-rendering of a topic.
-
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler.
-
-*NOTE:* Read the developer supplement at
-Foswiki:Development.AddToZoneFromPluginHandlers if you are calling
-=addToZone()= from this handler
-
-=cut
-
-#sub afterCommonTagsHandler {
-#    my ( $text, $topic, $web, $meta ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ preRenderingHandler( $text, \%map )
-   * =$text= - text, with the head, verbatim and pre blocks replaced
-     with placeholders
-   * =\%removed= - reference to a hash that maps the placeholders to
-     the removed blocks.
-
-Handler called immediately before Foswiki syntax structures (such as lists) are
-processed, but after all variables have been expanded. Use this handler to
-process special syntax only recognised by your plugin.
-
-Placeholders are text strings constructed using the tag name and a
-sequence number e.g. 'pre1', "verbatim6", "head1" etc. Placeholders are
-inserted into the text inside &lt;!--!marker!--&gt; characters so the
-text will contain &lt;!--!pre1!--&gt; for placeholder pre1.
-
-Each removed block is represented by the block text and the parameters
-passed to the tag (usually empty) e.g. for
-<verbatim>
-<pre class='slobadob'>
-XYZ
-</pre>
-</verbatim>
-the map will contain:
-<pre>
-$removed->{'pre1'}{text}:   XYZ
-$removed->{'pre1'}{params}: class="slobadob"
-</pre>
-Iterating over blocks for a single tag is easy. For example, to prepend a
-line number to every line of every pre block you might use this code:
-<verbatim>
-foreach my $placeholder ( keys %$map ) {
-    if( $placeholder =~ m/^pre/i ) {
-        my $n = 1;
-        $map->{$placeholder}{text} =~ s/^/$n++/gem;
+sub finishPlugin
+{
+    $RV = {};
+
+    return;
+}
+
+
+####################################################################################################
+
+sub doPHOTOGALLERY
+{
+    my ($session, $params, $topic, $web, $topicObject) = @_;
+
+    _initPluginStuff();
+
+    # we render TML (and HTML)
+    my $tml = '';
+
+
+    ##### get and check parameters #################################################################
+
+    $params->{web}       ||= $web;
+    $params->{topic}     ||= $topic;
+    ($params->{web}, $params->{topic})
+                           = Foswiki::Func::normalizeWebTopicName($params->{web}, $params->{topic});
+    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g/';
+    $params->{size}        = _checkRange($params->{size},
+                             $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}, 50, 500);
+    $params->{quality}     = _checkRange($params->{quality},
+                             $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 1, 100);
+    $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
+    $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
+    $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', 'name', 'off');
+    $params->{caption}   ||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
+    $params->{thumbcap}  ||= $params->{caption};
+    $params->{zoomcap}   ||= $params->{caption};
+    $params->{remaining}   = _checkBool($params->{remaining} || 'off');
+    $params->{quiet}       = _checkBool($params->{quiet}     || 'off');
+    $params->{unique}      = _checkBool($params->{unique}    || 'on' );
+    $params->{admin}       = _checkOptions($params->{admin},
+                             $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault}, 'on', 'off', 'user');
+
+    my $wikiName = Foswiki::Func::getWikiName();
+    my $user = Foswiki::Func::getCanonicalUserID($wikiName);
+
+    my $debugStr = "doPHOTOGALLERY($web.$topic)";
+    _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
+           "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
+           "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName", "user=$user");
+
+    # check if all required jquery plugins are available and active
+    if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
+        qw(Debug UI UI::Tooltip UI::Button UI::Autocomplete BlockUI PNotify)))
+    {
+        return _wtf("Disabled %SYSTEMWEB%.JQueryPlugins: <literal>$missing</literal>!");
     }
+
+    if (!Foswiki::Func::topicExists($params->{web}, $params->{topic}))
+    {
+        return _wtf("Topic $params->{web}.$params->{topic} does not exist!");
+    }
+
+    if (!Foswiki::Func::checkAccessPermission('VIEW',
+             $wikiName, undef, $params->{topic}, $params->{web}))
+    {
+        return _wtf("No permissions to view $params->{web}.$params->{topic}!");
+    }
+    my $mayChange = Foswiki::Func::checkAccessPermission('CHANGE',
+             $wikiName, undef, $params->{topic}, $params->{web}) ? 1 : 0;
+
+
+    ##### select images from attachments ###########################################################
+
+    # get list of all attachments, limit to jpeg images
+    my ($meta, $text) = Foswiki::Func::readTopic($params->{web}, $params->{topic});
+    unless ($meta)
+    {
+        return _wtf("Cannot read meta data from topic '$params->{web}.$params->{topic}'!");
+    }
+    my @attachments = grep { $_->{name} =~ m/\.jpe?g/i } $meta->find("FILEATTACHMENT");
+
+    # filter list of attachments...
+    my @selected = ();
+    foreach my $selection (split(/\s*[,\s]+\s*/, $params->{images}))
+    {
+        # ...by "/regex/"
+        if ($selection =~ m{^/(.+)/$})
+        {
+            my $regex = $1;
+            push(@selected, grep { $_->{name} =~ m/$regex/i } @attachments);
+        }
+        # ...by "name..name" (lexical) or "name--name" (date) range
+        elsif ($selection =~ m{^(.+)(\.\.|--)(.+)$})
+        {
+            my ($n1, $s, $n2, $in) = ($1, $2, $3, 0);
+            my @cand = ();
+            if ($s eq '..')
+            {
+                @cand = sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+            }
+            else
+            {
+                @cand = sort { $a->{date} <=> $b->{date} } @attachments;
+            }
+            push(@selected, grep
+            {
+                if    ($_->{name} eq $n1) { $in = 1; }
+                elsif ($_->{name} eq $n2) { $in = 2; }
+                elsif ($in == 2)          { $in = 0; }
+                $in
+            } @cand);
+            #_debug("$debugStr attachments: [$n1] .. [$n2]" . join(' ', map { $_->{name} } @attachments));
+        }
+        # ... an attachment name
+        else
+        {
+            push(@selected, grep { $_->{name} eq $selection } @attachments);
+        }
+    }
+    @attachments = @selected;
+    @selected = ();
+
+    # remove duplicates?
+    if ($params->{unique})
+    {
+        _debug('remove duplicates');
+        my %seen = ();
+        @attachments = grep { my $s = $seen{$_}; $seen{$_}++; !$s } @attachments;
+    }
+
+    # filter-out already shown images?
+    if ($params->{remaining})
+    {
+        @attachments = grep { !$RV->{shown}->{$_->{name}} } @attachments;
+    }
+
+    # resort by date or name?
+    if ($params->{sort} eq 'date')
+    {
+        @attachments = sort { $a->{date} <=> $b->{date} } @attachments;
+    }
+    elsif ($params->{sort} eq 'name')
+    {
+        @attachments = sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+    }
+
+    # any images left?
+    if ($#attachments < 0)
+    {
+        if ($params->{quiet})
+        {
+            return '';
+        }
+        else
+        {
+            return _wtf("No " . ($params->{remaining} ? 'remaining ' : '')
+                       . "attached images found in $params->{web}.$params->{topic} for '$params->{images}'!");
+        }
+    }
+    #_debug($debugStr . ' ' . ($#attachments + 1) . ' attachments selected:', map { $_->{name} } @attachments);
+    #_debug(@attachments);
+
+
+    ##### get image information for the selected attachments #######################################
+
+    my $infoCache = _getInfoCache($params->{web}, $params->{topic});
+    my $nCached = 0;
+
+    my $pubDir = $Foswiki::cfg{PubDir};
+    my @images = ();
+    for (my $ix = 0; $ix <= $#attachments; $ix++)
+    {
+        my $att = $attachments[$ix];
+
+        # debug progress if there are many attachments to process
+        if ( ($#attachments > 20) && ((($ix + 1) % 20) == 0) )
+        {
+            _debug(sprintf('%s getImageInfo %03i/%03i', $debugStr, $ix + 1, $#attachments + 1));
+        }
+
+        # try cached info first
+        my $info;
+        if ($info = $infoCache->{$att->{name}})
+        {
+            $nCached++;
+        }
+        else
+        {
+            my $fh;
+            try { $fh = $meta->openAttachment($att->{name}, '<'); }
+            catch Error::Simple with
+            {
+                $tml .= _wtf("Cannot read $params->{web}.$params->{topic}/$att->{name}!");
+            };
+            if ($fh)
+            {
+                $info = _getImageInfo($fh, $att);
+                $infoCache->{$att->{name}} = $info;
+            }
+        }
+        next unless ($info);
+
+        unless ($info->{ImageWidth} && $info->{ImageHeight})
+        {
+            _warning("No such image in $params->{web}.$params->{topic}: $att->{name}");
+            next;
+        }
+
+        # photo number and total number of photos, not cached
+        $info->{n} = $ix + 1;
+        $info->{N} = $#attachments + 1;
+
+        # calculate thumbnail size
+        my $img = {};
+        my ($tr, $tw, $th) = _getThumbDims($info->{ImageWidth}, $info->{ImageHeight}, $params->{size});
+        $img->{name}      = $att->{name};
+        $img->{imgUrl}    = Foswiki::Func::getPubUrlPath($params->{web}, $params->{topic}, $att->{name});
+        $img->{imgWidth}  = $info->{ImageWidth};
+        $img->{imgHeight} = $info->{ImageHeight};
+        $img->{zoomcap}   = _makeCaption($params->{zoomcap},  $info, $att);
+        $img->{thumbcap}  = _makeCaption($params->{thumbcap}, $info, $att);
+        #$img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('ImagePlugin', 'resize', 'rest',
+        #    topic => "$params->{web}.$params->{topic}", file => $att->{name},
+        #    ($tr < 1 ? 'width' : 'height', $params->{size}));
+        $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
+            topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
+            uid => ($att->{pguid} || 0), width => $tw, height => $th);
+        $img->{thumbWidth}  = $tw;
+        $img->{thumbHeight} = $th;
+        $img->{attTs}     = $att->{date} || 0;
+        $img->{exifTs}    = $info->{CreateDate} || 0;
+        $img->{wikiName}  = $info->{WikiName} || '';
+        push(@images, $img);
+        $RV->{shown}->{$att->{name}}++;
+    }
+
+    # save cache
+    #_debug($infoCache);
+    _setInfoCache($infoCache, $params->{web}, $params->{topic});
+    _debug(sprintf('%s %i/%i (%.2f%%) cache hit', $debugStr, $nCached, $#attachments + 1, $nCached / ($#attachments + 1) * 1e2));
+
+    #_debug("using", \@images);
+    if ($#images < 0)
+    {
+        return wtf("No usable images found in $params->{web}.$params->{topic} for '$params->{images}'!");
+    }
+
+
+    # stuff output only once per request / topic
+    unless ($RV->{jsCss})
+    {
+        # JQueryPlugins CSS and JS
+        $tml .= '%JQREQUIRE{"ui::tooltip,ui::tooltip"}%';
+        my @cssDeps = qw(JQUERYPLUGIN::UI::TOOLTIP);
+        my @jsDeps  = qw(JQUERYPLUGIN::FOSWIKI::PREFERENCES);
+        #if ($DEBUG)
+        #{
+        #    $tml .= '%JQREQUIRE{"debug"}%';
+        #    push(@jsDeps, 'JQUERYPLUGIN::DEBUG');
+        #}
+        if ($params->{admin})
+        {
+            $tml .= '%JQREQUIRE{ "blockui,pnotify,ui::autocomplete,button" }%';
+            push(@jsDeps,  qw(JQUERYPLUGIN::BLOCKUI JQUERYPLUGIN::PNOTIFY
+                              JQUERYPLUGIN::UI::AUTOCOMPLETE JQUERYPLUGIN::BUTTON
+                              JavascriptFiles/strikeone JavascriptFiles/foswikiPref));
+            push(@cssDeps, qw(JQUERYPLUGIN::THEME JQUERYPLUGIN::BLOCKUI JQUERYPLUGIN::PNOTIFY
+                              JQUERYPLUGIN::BUTTON) )
+        }
+
+        # our own CSS and JS
+        my $ext = $DEBUG ? '' : '.compressed';
+        Foswiki::Func::addToZone('head', 'PHOTOSWIPE',
+            '<link rel="stylesheet" href="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/photoswipe' . $ext .'.css" type="text/css" media="all" />' .
+            '<link rel="stylesheet" href="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/default-skin' . $ext .'.css" type="text/css" media="all" />');
+        Foswiki::Func::addToZone('head', 'PHOTOGALLERYPLUGIN',
+            '<link rel="stylesheet" href="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/photogalleryplugin' . $ext .'.css" type="text/css" media="all" />',
+            join(',', @cssDeps, 'PHOTOSWIPE'));
+        Foswiki::Func::addToZone('script', 'PHOTOSWIPE',
+            '<script type="text/javascript" src="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/photoswipe' . $ext .'.js"></script>' .
+            '<script type="text/javascript" src="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/photoswipe-ui-default' . $ext .'.js"/></script>');
+        Foswiki::Func::addToZone('script', 'PHOTOGALLERYPLUGIN',
+            '<script type="text/javascript" src="%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/photogalleryplugin' . $ext .'.js"></script>',
+            join(',', @jsDeps, 'PHOTOSWIPE'));
+
+        # global plugin parameters we need in photogalleryplugin.js, and the validation nonce
+        $tml .= '<dirtyarea><div id="photoGalleryGlobals" data-nonce="?%NONCE%" data-debug="'
+          . ($DEBUG ? 'true' : 'false') . '"></div></dirtyarea>';
+
+        # don't do that again
+        $RV->{jsCss} = 1;
+    }
+
+    # unique id per %PHOTOGALLERY% per topic
+    $RV->{uid}++;
+
+    # wrapper <div>
+    $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" class="photoGallery">',
+                    $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
+
+    # render gallery HTML
+    $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0">';
+    for (my $ix = 0; $ix <= $#images; $ix++)
+    {
+        my $img = $images[$ix];
+        #$tml .= '<div class="frame" style="width: ' . $img->{thumbWidth}. 'px; height: ' . $img->{thumbHeight} . 'px;">';
+        $tml .= '<div class="frame" data-name="' . $img->{name} . '">';
+        $tml .=   '<div class="crop" style="width: ' . $params->{size}. 'px; height: ' . $params->{size} . 'px;">';
+        $tml .=     '<a class="img" data-ix="' . $ix . '" data-w="' . $img->{imgWidth} . '" data-h="' . $img->{imgHeight} . '" href="' . $img->{imgUrl} . '">';
+        $tml .=       '<img class="thumb" src="' . $img->{thumbUrl} . '" width="' . $img->{thumbWidth} . '" height="' . $img->{thumbHeight} . '"/>';
+        $tml .=     '</a>';
+        $tml .=   '</div>'; # crop
+        if ( ( ($params->{admin} eq 'on')   && $mayChange                      ) ||
+             ( ($params->{admin} eq 'user') && ($wikiName eq $img->{wikiName}) ) )
+        {
+            $tml .=   '<a class="admin" data-ix="' . $ix . '" data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false')
+              . '">%ICON{gear}%</a>' if ($params->{admin});
+        }
+        if ($img->{thumbcap})
+        {
+            $tml .=   '<div class="label" style="width: ' . ($params->{size} - 8 - 4 - 4) . 'px;" >';
+            $tml .=     '<span class="caption">' . $img->{thumbcap} . '</span>';
+            $tml .=   '</div>';
+        }
+        if ($img->{thumbcap} ne $img->{zoomcap})
+        {
+            $tml .= '<div class="zoomcap">' . $img->{zoomcap} . '</div>';
+        }
+        $tml .= '</div>'; # frame
+    }
+    $tml .= '</div>';
+
+    # admin actions thingies
+    if ($params->{admin})
+    {
+        # action menu
+        $tml .= '<ul class="pg-admin-menu jqUITooltip" data-delay="100">';
+        $tml .=   '<li class="title">%MAKETEXT{"Actions"}%</li>';
+        if ($Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExifTranPath})
+        {
+            $tml .= '<li class="action rotatel" data-action="rotatel" title="%MAKETEXT{"rotate attachment image 90 degress counter clockwise"}%">'
+                    . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/arrow_rotate_anticlockwise.png" width="16" height="16"/> %MAKETEXT{"rotate left"}%</li>';
+            $tml .= '<li class="action rotater" data-action="rotater" title="%MAKETEXT{"rotate attachment image 90 degrees clockwise"}%">'
+                    . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/arrow_rotate_clockwise.png" width="16" height="16"/> %MAKETEXT{"rotate right"}%</li>';
+        }
+        $tml .=   '<li class="action edit" data-action="edit" title="%MAKETEXT{"edit attachment comment"}%">'
+                  . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/pencil.png" width="16" height="16"/> %MAKETEXT{"edit"}%</li>';
+        $tml .=   '<li class="action timestamp" data-action="timestamp" title="%MAKETEXT{"update attachment timestamp from photo exposure time (EXIF <nop>CreateDate field)"}%">'
+                  . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/clock.png" width="16" height="16"/> %MAKETEXT{"timestamp"}%</li>';
+        $tml .=   '<li class="action move" data-action="move" title="%MAKETEXT{"move attachment image to another topic"}%">'
+                  . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/arrow_right.png" width="16" height="16"/> %MAKETEXT{"move"}%</li>';
+        $tml .=   '<li class="action remove" data-action="remove" title="%MAKETEXT{"delete attachment image (move to <nop>' . $Foswiki::cfg{TrashWebName} . '.TrashAttachment topic)"}%">'
+                  . '<img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/bin.png" width="16" height="16"/> %MAKETEXT{"delete"}%</li>';
+        $tml .= '</ul>';
+        # blocker element to show while actions are being processed
+        $tml .= '<div class="pg-admin-blocker" style="width: ' . ($params->{size} + 10) . 'px; height: ' . ($params->{size} + 10) . 'px;">';
+        $tml .=   '<div class="tint"></div>';
+        $tml .=   '<div class="spinner" style="background-image: url(\'%PUBURLPATH%/%SYSTEMWEB%/DocumentGraphics/processing-32-bg.gif\');"></div>';
+        $tml .= '</div>';
+        # comment edit dialog
+        $tml .= '<div class="photogallery-edit-dialog" data-title="%MAKETEXT{"Edit"}%" data-message-loading="%MAKETEXT{"loading attachment comment..."}%">';
+        $tml .=   '<input type="text" class="foswikiInputField foswikiDefaultText comment" placeholder="%MAKETEXT{"attachment comment"}%" size="50"/><br/>';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"clear"}%"  class="action-clear"  icon="bin" }%';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"save"}%"   class="action-save"   icon="tick" }%';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"cancel"}%" class="action-cancel" icon="cross" }%';
+        $tml .= '</div>';
+        # attachment move dialog
+        $tml .= '<div class="photogallery-move-dialog" data-title="%MAKETEXT{"Move"}%" data-message-moving="%MAKETEXT{"moving attachment..."}%">';
+        $tml .=   '<input type="text" class="foswikiInputField foswikiDefaultText target" placeholder="%MAKETEXT{"target topic"}%" size="50"/><br/>';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"clear"}%"  class="action-clear"  icon="bin" }%';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"move"}%"   class="action-move"   icon="arrow_right" }%';
+        $tml .=   '%BUTTON{ "%MAKETEXT{"cancel"}%" class="action-cancel" icon="cross" }%';
+        $tml .= '</div>';
+    }
+
+    # output Photogallery HTML
+    $tml .= '<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">';
+    $tml .=     '<div class="pswp__bg"></div>';
+    $tml .=     '<div class="pswp__scroll-wrap">';
+    $tml .=         '<div class="pswp__container">';
+    $tml .=             '<div class="pswp__item"></div>';
+    $tml .=             '<div class="pswp__item"></div>';
+    $tml .=             '<div class="pswp__item"></div>';
+    $tml .=         '</div>';
+    $tml .=         '<div class="pswp__ui pswp__ui--hidden">';
+    $tml .=             '<div class="pswp__top-bar">';
+    $tml .=                 '<div class="pswp__counter"></div>';
+    $tml .=                 '<button class="pswp__button pswp__button--close" title="%MAKETEXT{"Close (Esc)"}%"></button>';
+    #$tml .=                 '<button class="pswp__button pswp__button--share" title="%MAKETEXT{"Share"}%"></button>';
+    $tml .=                 '<button class="pswp__button pswp__button--slideshow" title="%MAKETEXT{"Toggle slideshow"}%"></button>';
+    $tml .=                 '<button class="pswp__button pswp__button--fs" title="%MAKETEXT{"Toggle fullscreen"}%"></button>';
+    $tml .=                 '<button class="pswp__button pswp__button--zoom" title="%MAKETEXT{"Zoom in/out"}%"></button>';
+    $tml .=                 '<div class="pswp__preloader">';
+    $tml .=                     '<div class="pswp__preloader__icn">';
+    $tml .=                         '<div class="pswp__preloader__cut">';
+    $tml .=                             '<div class="pswp__preloader__donut"></div>';
+    $tml .=                         '</div>';
+    $tml .=                     '</div>';
+    $tml .=                 '</div>';
+    $tml .=             '</div>';
+    $tml .=             '<div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">';
+    $tml .=                 '<div class="pswp__share-tooltip"></div>';
+    $tml .=             '</div>';
+    $tml .=             '<button class="pswp__button pswp__button--arrow--left" title="%MAKETEXT{"Previous (arrow left key)"}%"></button>';
+    $tml .=             '<button class="pswp__button pswp__button--arrow--right" title="%MAKETEXT{"Next (arrow right key)"}%"></button>';
+    $tml .=             '<div class="pswp__caption">';
+    $tml .=                 '<div class="pswp__caption__center"></div>';
+    $tml .=             '</div>';
+    $tml .=         '</div>';
+    $tml .=     '</div>';
+    $tml .= '</div>';
+
+    # wrapper </dvi>
+    $tml .= '</div>';
+
+    _debug("$debugStr gallery rendered");
+    return $tml;
 }
-</verbatim>
 
-__NOTE__: This handler is called once for each rendered block of text i.e.
-it may be called several times during the rendering of a topic.
 
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler.
+####################################################################################################
 
-*NOTE:* Read the developer supplement at
-Foswiki:Development.AddToZoneFromPluginHandlers if you are calling
-=addToZone()= from this handler
 
-Since Foswiki::Plugins::VERSION = '2.0'
+# SMELL: Does this work as expected? It seems so.
+our $tempFile = '';
 
-=cut
+sub beforeUploadHandler
+{
+    my ($attr, $meta) = @_;
 
-#sub preRenderingHandler {
-#    my( $text, $pMap ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
+    _initPluginStuff();
 
-=begin TML
+    #_debug("beforeUploadHandler($attr->{name})");
+    #_debug("beforeUploadHandler attrs", $attr);
+    #          'comment' => '',
+    #          'name' => 'IMG_1262.jpg',
+    #          'stream' => \*{'Foswiki::Meta::$opts{...}'},
+    #          'attachment' => 'IMG_1262.jpg',
+    #          'user' => 'flip'
 
----++ postRenderingHandler( $text )
-   * =$text= - the text that has just been rendered. May be modified in place.
+    my $q = Foswiki::Func::getRequestObject();
+    my $exifrotateimage = $q->param('exifrotateimage') || '';
 
-*NOTE*: This handler is called once for each rendered block of text i.e. 
-it may be called several times during the rendering of a topic.
+    if ( ($exifrotateimage eq 'on') && ($attr->{attachment} =~ m/\.(jpg|jpeg)/i))
+    {
+        my $info = Image::ExifTool::ImageInfo($attr->{stream}, [ 'Orientation' ]);
+        if ($info && $info->{Orientation})
+        {
+            seek($attr->{stream}, 0, SEEK_SET);
+            my (undef, $tFile) = File::Temp::tempfile(CLEANUP => 1);
+            File::Copy::copy($attr->{stream}, $tFile);
+            my $exiftran = $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExifTranPath} || 'exiftran';
+            _debug("beforeUploadHandler($attr->{attachment}) $exiftran $tFile");
+            # SMELL: Use (the rather weird) Foswiki::Sandbox->sysCommand() instead of system()?
+            system("exiftran -a -i $tFile 2>/dev/null >/dev/null");
+            my $res = $?;
+            if ($res != 0)
+            {
+                _warning("beforeUploadHandler($attr->{attachment}) exiftran failed, res=$res");
+            }
 
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler.
+            #Foswiki::Func::setSessionValue(__PACKAGE__ . '-tfile', $tFile);
+            #$q->param(__PACKAGE__ . '-tfile', $tFile);
+            $tempFile = $tFile;
+            open($attr->{stream}, '+<', $tFile);
+        }
+    }
 
-*NOTE:* Read the developer supplement at
-Foswiki:Development.AddToZoneFromPluginHandlers if you are calling
-=addToZone()= from this handler
-
-Since Foswiki::Plugins::VERSION = '2.0'
-
-=cut
-
-#sub postRenderingHandler {
-#    my $text = shift;
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ beforeEditHandler($text, $topic, $web )
-   * =$text= - text that will be edited
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-This handler is called by the edit script just before presenting the edit text
-in the edit box. It is called once when the =edit= script is run.
-
-*NOTE*: meta-data may be embedded in the text passed to this handler 
-(using %META: tags)
-
-*Since:* Foswiki::Plugins::VERSION = '2.0'
-
-=cut
-
-#sub beforeEditHandler {
-#    my ( $text, $topic, $web ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ afterEditHandler($text, $topic, $web, $meta )
-   * =$text= - text that is being previewed
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$meta= - meta-data for the topic.
-This handler is called by the preview script just before presenting the text.
-It is called once when the =preview= script is run.
-
-*NOTE:* this handler is _not_ called unless the text is previewed.
-
-*NOTE:* meta-data is _not_ embedded in the text passed to this
-handler. Use the =$meta= object.
-
-*Since:* $Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub afterEditHandler {
-#    my ( $text, $topic, $web ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ beforeSaveHandler($text, $topic, $web, $meta )
-   * =$text= - text _with embedded meta-data tags_
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$meta= - the metadata of the topic being saved, represented by a Foswiki::Meta object.
-
-This handler is called each time a topic is saved.
-
-*NOTE:* meta-data is embedded in =$text= (using %META: tags). If you modify
-the =$meta= object, then it will override any changes to the meta-data
-embedded in the text. Modify *either* the META in the text *or* the =$meta=
-object, never both. You are recommended to modify the =$meta= object rather
-than the text, as this approach is proof against changes in the embedded
-text format.
-
-*Since:* Foswiki::Plugins::VERSION = 2.0
-
-=cut
-
-#sub beforeSaveHandler {
-#    my ( $text, $topic, $web ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ afterSaveHandler($text, $topic, $web, $error, $meta )
-   * =$text= - the text of the topic _excluding meta-data tags_
-     (see beforeSaveHandler)
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$error= - any error string returned by the save.
-   * =$meta= - the metadata of the saved topic, represented by a Foswiki::Meta object 
-
-This handler is called each time a topic is saved.
-
-*NOTE:* meta-data is embedded in $text (using %META: tags)
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub afterSaveHandler {
-#    my ( $text, $topic, $web, $error, $meta ) = @_;
-#
-#    # You can work on $text in place by using the special perl
-#    # variable $_[0]. These allow you to operate on $text
-#    # as if it was passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ afterRenameHandler( $oldWeb, $oldTopic, $oldAttachment, $newWeb, $newTopic, $newAttachment )
-
-   * =$oldWeb= - name of old web
-   * =$oldTopic= - name of old topic (empty string if web rename)
-   * =$oldAttachment= - name of old attachment (empty string if web or topic rename)
-   * =$newWeb= - name of new web
-   * =$newTopic= - name of new topic (empty string if web rename)
-   * =$newAttachment= - name of new attachment (empty string if web or topic rename)
-
-This handler is called just after the rename/move/delete action of a web, topic or attachment.
-
-*Since:* Foswiki::Plugins::VERSION = '2.0'
-
-=cut
-
-#sub afterRenameHandler {
-#    my ( $oldWeb, $oldTopic, $oldAttachment,
-#         $newWeb, $newTopic, $newAttachment ) = @_;
-#}
-
-=begin TML
-
----++ beforeUploadHandler(\%attrHash, $meta )
-   * =\%attrHash= - reference to hash of attachment attribute values
-   * =$meta= - the Foswiki::Meta object where the upload will happen
-
-This handler is called once when an attachment is uploaded. When this
-handler is called, the attachment has *not* been recorded in the database.
-
-The attributes hash will include at least the following attributes:
-   * =attachment= => the attachment name - must not be modified
-   * =user= - the user id - must not be modified
-   * =comment= - the comment - may be modified
-   * =stream= - an input stream that will deliver the data for the
-     attachment. The stream can be assumed to be seekable, and the file
-     pointer will be positioned at the start. It is *not* necessary to
-     reset the file pointer to the start of the stream after you are
-     done, nor is it necessary to close the stream.
-
-The handler may wish to replace the original data served by the stream
-with new data. In this case, the handler can set the ={stream}= to a
-new stream.
-
-For example:
-<verbatim>
-sub beforeUploadHandler {
-    my ( $attrs, $meta ) = @_;
-    my $fh = $attrs->{stream};
-    local $/;
-    # read the whole stream
-    my $text = <$fh>;
-    # Modify the content
-    $text =~ s/investment bank/den of thieves/gi;
-    $fh = new File::Temp();
-    print $fh $text;
-    $attrs->{stream} = $fh;
-
+    return;
 }
-</verbatim>
-
-*Since:* Foswiki::Plugins::VERSION = 2.1
-
-=cut
-
-#sub beforeUploadHandler {
-#    my( $attrHashRef, $topic, $web ) = @_;
-#}
-
-=begin TML
-
----++ afterUploadHandler(\%attrHash, $meta )
-   * =\%attrHash= - reference to hash of attachment attribute values
-   * =$meta= - a Foswiki::Meta  object where the upload has happened
-
-This handler is called just after the after the attachment
-meta-data in the topic has been saved. The attributes hash
-will include at least the following attributes, all of which are read-only:
-   * =attachment= => the attachment name
-   * =comment= - the comment
-   * =user= - the user id
-
-*Since:* Foswiki::Plugins::VERSION = 2.1
-
-=cut
-
-#sub afterUploadHandler {
-#    my( $attrHashRef, $meta ) = @_;
-#}
-
-=begin TML
-
----++ mergeHandler( $diff, $old, $new, \%info ) -> $text
-Try to resolve a difference encountered during merge. The =differences= 
-array is an array of hash references, where each hash contains the 
-following fields:
-   * =$diff= => one of the characters '+', '-', 'c' or ' '.
-      * '+' - =new= contains text inserted in the new version
-      * '-' - =old= contains text deleted from the old version
-      * 'c' - =old= contains text from the old version, and =new= text
-        from the version being saved
-      * ' ' - =new= contains text common to both versions, or the change
-        only involved whitespace
-   * =$old= => text from version currently saved
-   * =$new= => text from version being saved
-   * =\%info= is a reference to the form field description { name, title,
-     type, size, value, tooltip, attributes, referenced }. It must _not_
-     be wrtten to. This parameter will be undef when merging the body
-     text of the topic.
-
-Plugins should try to resolve differences and return the merged text. 
-For example, a radio button field where we have 
-={ diff=>'c', old=>'Leafy', new=>'Barky' }= might be resolved as 
-='Treelike'=. If the plugin cannot resolve a difference it should return 
-undef.
-
-The merge handler will be called several times during a save; once for 
-each difference that needs resolution.
-
-If any merges are left unresolved after all plugins have been given a 
-chance to intercede, the following algorithm is used to decide how to 
-merge the data:
-   1 =new= is taken for all =radio=, =checkbox= and =select= fields to 
-     resolve 'c' conflicts
-   1 '+' and '-' text is always included in the the body text and text
-     fields
-   1 =&lt;del>conflict&lt;/del> &lt;ins>markers&lt;/ins>= are used to 
-     mark 'c' merges in text fields
 
-The merge handler is called whenever a topic is saved, and a merge is 
-required to resolve concurrent edits on a topic.
-
-*Since:* Foswiki::Plugins::VERSION = 2.0
-
-=cut
-
-#sub mergeHandler {
-#    my ( $diff, $old, $new, $info ) = @_;
-#}
-
-=begin TML
-
----++ modifyHeaderHandler( \%headers, $query )
-   * =\%headers= - reference to a hash of existing header values
-   * =$query= - reference to CGI query object
-Lets the plugin modify the HTTP headers that will be emitted when a
-page is written to the browser. \%headers= will contain the headers
-proposed by the core, plus any modifications made by other plugins that also
-implement this method that come earlier in the plugins list.
-<verbatim>
-$headers->{expires} = '+1h';
-</verbatim>
-
-Note that this is the HTTP header which is _not_ the same as the HTML
-&lt;HEAD&gt; tag. The contents of the &lt;HEAD&gt; tag may be manipulated
-using the =Foswiki::Func::addToHEAD= method.
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub modifyHeaderHandler {
-#    my ( $headers, $query ) = @_;
-#}
-
-=begin TML
-
----++ renderFormFieldForEditHandler($name, $type, $size, $value, $attributes, $possibleValues) -> $html
-
-This handler is called before built-in types are considered. It generates 
-the HTML text rendering this form field, or false, if the rendering 
-should be done by the built-in type handlers.
-   * =$name= - name of form field
-   * =$type= - type of form field (checkbox, radio etc)
-   * =$size= - size of form field
-   * =$value= - value held in the form field
-   * =$attributes= - attributes of form field 
-   * =$possibleValues= - the values defined as options for form field, if
-     any. May be a scalar (one legal value) or a ref to an array
-     (several legal values)
-
-Return HTML text that renders this field. If false, form rendering
-continues by considering the built-in types.
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-Note that you can also extend the range of available
-types by providing a subclass of =Foswiki::Form::FieldDefinition= to implement
-the new type (see =Foswiki::Extensions.JSCalendarContrib= and
-=Foswiki::Extensions.RatingContrib= for examples). This is the preferred way to
-extend the form field types.
-
-=cut
-
-#sub renderFormFieldForEditHandler {
-#    my ( $name, $type, $size, $value, $attributes, $possibleValues) = @_;
-#}
-
-=begin TML
-
----++ renderWikiWordHandler($linkText, $hasExplicitLinkLabel, $web, $topic) -> $linkText
-   * =$linkText= - the text for the link i.e. for =[<nop>[Link][blah blah]]=
-     it's =blah blah=, for =BlahBlah= it's =BlahBlah=, and for [[Blah Blah]] it's =Blah Blah=.
-   * =$hasExplicitLinkLabel= - true if the link is of the form =[<nop>[Link][blah blah]]= (false if it's ==<nop>[Blah]] or =BlahBlah=)
-   * =$web=, =$topic= - specify the link being rendered
-
-Called during rendering, this handler allows the plugin a chance to change
-the rendering of labels used for links.
-
-Return the new link text.
-
-NOTE: this handler is to allow a plugin to change the link text for a possible link - it may never be used.
-for example, Set ALLOWTOPICVIEW = is a possible ACRONYM link that will not be displayed unless the topic exists
-similarly, this handler is called before the Plurals code has a chance to remove the 's' from WikiWords
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub renderWikiWordHandler {
-#    my( $linkText, $hasExplicitLinkLabel, $web, $topic ) = @_;
-#    return $linkText;
-#}
-
-=begin TML
-
----++ completePageHandler($html, $httpHeaders)
-
-This handler is called on the ingredients of every page that is
-output by the standard CGI scripts. It is designed primarily for use by
-cache and security plugins.
-   * =$html= - the body of the page (normally &lt;html>..$lt;/html>)
-   * =$httpHeaders= - the HTTP headers. Note that the headers do not contain
-     a =Content-length=. That will be computed and added immediately before
-     the page is actually written. This is a string, which must end in \n\n.
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub completePageHandler {
-#    my( $html, $httpHeaders ) = @_;
-#    # modify $_[0] or $_[1] if you must change the HTML or headers
-#    # You can work on $html and $httpHeaders in place by using the
-#    # special perl variables $_[0] and $_[1]. These allow you to operate
-#    # on parameters as if they were passed by reference; for example:
-#    # $_[0] =~ s/SpecialString/my alternative/ge;
-#}
-
-=begin TML
-
----++ restExample($session, $subject, $verb, $response) -> $text
-   * =$session= - The Foswiki object associated with this request.
-   * =$subject= - The invoked subject (may be ignored)
-   * =$verb= - The invoked verb (may be ignored)
-   * =$response= reference to the Foswiki::Response object that is used to compose a reply to the request
-
-If the =redirectto= parameter is not present on the request, then the return
-value from the handler is used to determine the endpoint for the
-request. It can be:
-   * =undef= - causes the core to assume the handler handled the complete
-     request i.e. the core will not generate any response to the request.
-   * =text= - any other non-undef value will be written out as the content
-     of an HTTP 200 response. Only the standard headers in the response are
-     written.
-
-Additional parameters can be recovered via the query object in the $session, for example:
-
-my $query = $session->{request};
-my $web = $query->{param}->{web}[0];
-
-If your rest handler adds or replaces equivalent functionality to a standard script
-provided with Foswiki, it should set the appropriate context in its switchboard entry.
-In addition to the obvous contexts:  =view=, =diff=,  etc. the =static= context is used
-to indicate that the resulting output will be read offline, such as in a PDF,  and 
-dynamic links (edit, sorting, etc) should not be rendered.
-
-A comprehensive list of core context identifiers used by Foswiki is found in
-%SYSTEMWEB%.IfStatements#Context_identifiers. Please be careful not to
-overwrite any of these identifiers!
-
-For more information, check %SYSTEMWEB%.CommandAndCGIScripts#rest
-
-For information about handling error returns from REST handlers, see
-Foswiki:Support.Faq1
-
-*Since:* Foswiki::Plugins::VERSION 2.0
-
-=cut
-
-#sub restExample {
-#   my ( $session, $subject, $verb, $response ) = @_;
-#
-#   # Use return to have foswiki manage the output
-#   return "This is an example of a REST invocation\n\n";
-#
-#   # To completely control the output from the handler:
-#   $response->headers()   - output headers, which must be utf-8 encoded
-#   $response->body()      - output binary data that should not be encoded.
-#   $response->print()     - output unicode text.
-#   # Note that print() and body() may not be combined.  Use one or the other.
-#}
-
-=begin TML
-
----++ Deprecated handlers
-
----+++ redirectCgiQueryHandler($query, $url )
-   * =$query= - the CGI query
-   * =$url= - the URL to redirect to
-
-This handler can be used to replace Foswiki's internal redirect function.
-
-If this handler is defined in more than one plugin, only the handler
-in the earliest plugin in the INSTALLEDPLUGINS list will be called. All
-the others will be ignored.
-
-*Deprecated in:* Foswiki::Plugins::VERSION 2.1
-
-This handler was deprecated because it cannot be guaranteed to work, and
-caused a significant impediment to code improvements in the core.
-
----+++ beforeAttachmentSaveHandler(\%attrHash, $topic, $web )
-
-   * =\%attrHash= - reference to hash of attachment attribute values
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-This handler is called once when an attachment is uploaded. When this
-handler is called, the attachment has *not* been recorded in the database.
-
-The attributes hash will include at least the following attributes:
-   * =attachment= => the attachment name
-   * =comment= - the comment
-   * =user= - the user id
-   * =tmpFilename= - name of a temporary file containing the attachment data
-
-*Deprecated in:* Foswiki::Plugins::VERSION 2.1
-
-The efficiency of this handler (and therefore it's impact on performance)
-is very bad. Please use =beforeUploadHandler()= instead.
-
-=begin TML
-
----+++ afterAttachmentSaveHandler(\%attrHash, $topic, $web )
-
-   * =\%attrHash= - reference to hash of attachment attribute values
-   * =$topic= - the name of the topic in the current CGI query
-   * =$web= - the name of the web in the current CGI query
-   * =$error= - any error string generated during the save process (always
-     undef in 2.1)
-
-This handler is called just after the save action. The attributes hash
-will include at least the following attributes:
-   * =attachment= => the attachment name
-   * =comment= - the comment
-   * =user= - the user id
-
-*Deprecated in:* Foswiki::Plugins::VERSION 2.1
-
-This handler has a number of problems including security and performance
-issues. Please use =afterUploadHandler()= instead.
-
-=cut
-
+sub afterUploadHandler
+{
+    my ($attr, $meta) = @_;
+
+    _initPluginStuff();
+
+    #_debug("afterUploadHandler($attr->{attachment})");
+
+    #_debug("afterUploadHandler", $attr));
+    #          'comment' => '',
+    #          'date' => 1452249355,
+    #          'name' => 'IMG_1262.jpg',
+    #          'user' => 'flip',
+    #          'attachment' => 'IMG_1262.jpg',
+    #          'version' => 6,
+    #          'attr' => '',
+    #          'size' => 170329
+
+    my $q = Foswiki::Func::getRequestObject();
+
+    # cleanup temp file from beforeUploadHandler()
+    #if (my $tFile = Foswiki::Func::getSessionValue(__PACKAGE__ . '-tfile'))
+    #if (my $tFile = $q->param(__PACKAGE__ . '-tfile'))
+    if (my $tFile = $tempFile)
+    {
+        #Foswiki::Func::clearSessionValue(__PACKAGE__ . '-tfile');
+        #$q->delete(__PACKAGE__ . '-tfile');
+        unlink($tFile) if (-f $tFile);
+    }
+
+    my $setexifdate    = $q->param('setexifdate')    || '';
+    #_debug("setexifdate=$setexifdate");
+
+    if ( ( #($exifaddcomment eq 'on') ||
+          ($setexifdate eq 'on') ) &&
+         ($attr->{attachment} =~ m/\.(jpg|jpeg)/i) )
+    {
+        my $fh = $meta->openAttachment($attr->{attachment}, '<');
+        my $info = _getImageInfo($fh);
+        my $data =
+        {
+            nohandlers => 1 # or we'll end up in an endless loop!
+        };
+        if ($setexifdate eq 'on')
+        {
+            $data->{filedate} = $info->{CreateDate};
+        }
+
+        if ($data->{comment} || $data->{filedate})
+        {
+            my $web   = $meta->web();
+            my $topic = $meta->topic();
+            Foswiki::Func::saveAttachment($web, $topic, $attr->{attachment}, $data);
+        }
+    }
+
+    return;
+}
+
+sub doRestAdmin
+{
+    my ($session, $subject, $verb, $response) = @_;
+
+    _initPluginStuff();
+
+    ##### check parameters #########################################################################
+
+    # the request parameters
+    my $query = $session->{request};
+    my $action  = $query->param('action');
+    my $web     = $query->param('att_web');
+    my $topic   = $query->param('att_topic');
+    my $name    = $query->param('att_name');
+    my $comment = $query->param('comment');
+    my $term    = $query->param('term');
+    my $target  = $query->param('target');
+
+    # normalise attachment web/topic
+    if ($web || $topic)
+    {
+        ($web, $topic) = Foswiki::Func::normalizeWebTopicName($web, $topic);
+    }
+
+    # the request response
+    my $respText = ($web || '???') . '/<wbr/>' . ($topic || '???') . '/<wbr/>' . ($name || '???');
+    my $debugText = ($action || '???') . ':' . ($web || '???') . '/' . ($topic || '???') . '/' . ($name || '???');
+    my $resp = { success => 0, message => '', action => $action, web => $web, topic => $topic, name => $name };
+
+    # topic text and meta
+    my ($text, $meta);
+
+    # different actions need different parameters
+    # (name = need attachment $name, change = need change permissions, meta = need $meta,
+    #  term = need $term, target = need $target)
+    my %actions =
+    (
+        rotatel    => { name => 1, change => 1, meta => 1               },
+        rotater    => { name => 1, change => 1, meta => 1               },
+        getcomment => { name => 1,              meta => 1               },
+        update     => { name => 1, change => 1, meta => 1, comment => 1 },
+        timestamp  => { name => 1, change => 1, meta => 1               },
+        listtopics => {                                    term    => 1 },
+        move       => { name => 1, change => 1,            target  => 1 },
+    );
+
+    # we always need these parameters, and a valid action
+    if ( !$action || !$web || !$topic || !$actions{$action} ||
+         ($actions{$action}->{name}    && !$name)   ||
+         ($actions{$action}->{term}    && !$term)   ||
+         ($actions{$action}->{target}  && !$target) ||
+         ($actions{$action}->{comment} && !$comment) )
+    {
+        $resp->{message} = 'Bad or missing parameters!';
+        return _doRestAdminResponse($debugText, $response, $resp);
+    }
+
+    # assert topic permissions
+    if (!Foswiki::Func::checkAccessPermission($actions{$action}->{change} ? 'CHANGE' : 'VIEW',
+             Foswiki::Func::getWikiName(), undef, $topic, $web))
+    {
+        $resp->{message} = "Access to $respText denied!";
+        return _doRestAdminResponse($debugText, $response, $resp);
+    }
+
+    # need $meta?
+    if ($actions{$action}->{meta})
+    {
+        ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+        if (!$meta)
+        {
+            $resp->{message} = "Failed reading $respText!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+    }
+
+    # need $name (existing attachment)
+    if ($actions{$action}->{name} && !Foswiki::Func::attachmentExists($web, $topic, $name))
+    {
+        $resp->{message} = "No such attachment: $respText!";
+        return _doRestAdminResponse($debugText, $response, $resp);
+    }
+
+
+    ##### handle actions ###########################################################################
+
+    # rotate attachment left or right
+    if ( ($action eq 'rotatel') || ($action eq 'rotater') )
+    {
+        my $exiftran = $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExifTranPath};
+        if (!$exiftran)
+        {
+            $resp->{message} = "Missing {Plugins}{PhotoGalleryPlugin}{ExifTranPath} configuration!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+
+        # open attachment for reading, temp file for writing and copy image
+        my $aFh = $meta->openAttachment($name, '<');
+        my ($tFh, $tFile) = File::Temp::tempfile();
+        binmode($tFh);
+        File::Copy::copy($aFh, $tFh);
+        close($tFh);
+        close($aFh);
+
+        # execute exiftran on temporary file
+        my %args = ( rotatel => '-2', rotater => '-9' );
+        # SMELL: Use (the rather weird) Foswiki::Sandbox->sysCommand() instead of system()?
+        my $res = system("$exiftran $args{$action} -i $tFile 2>/dev/null >/dev/null");
+        if ($res != 0)
+        {
+            $resp->{message} = "Failed running $exiftran (res=$res)!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+
+        # copy it back
+        $aFh = $meta->openAttachment($name, '>');
+        open($tFh, '<', $tFile);
+        binmode($tFh);
+        File::Copy::copy($tFh, $aFh);
+
+        # update size meta data
+        my $attachment = $meta->get("FILEATTACHMENT", $name);
+        if ($attachment)
+        {
+            # bump uid so that the thumbnail URL will be new the next time and the thumbnail gets regenerated
+            $attachment->{pguid}++;
+
+            # size may change slightly
+            $attachment->{size} = -s $tFile;
+
+            # store attachment meta data (this will invalidate the page cache, too, it appears)
+            $meta->putKeyed('FILEATTACHMENT', $attachment);
+            $meta->save();
+        }
+
+        # invalidate info cache
+        my $infoCache = _getInfoCache($web, $topic);
+        delete $infoCache->{$name};
+        _setInfoCache($infoCache, $web, $topic);
+
+        $resp->{message} = "Rotated $respText.";
+        $resp->{success} = 1;
+    }
+
+    # move (or delete) attachment
+    elsif ($action eq 'move')
+    {
+        # SMELL: Handle more errors?
+        my ($toWeb, $toTopic);
+        if ($target eq 'TRASH')
+        {
+            $toWeb   = $Foswiki::cfg{TrashWebName};
+            $toTopic = 'TrashAttachment';
+        }
+        else
+        {
+            ($toWeb, $toTopic) = Foswiki::Func::normalizeWebTopicName('', $target);
+        }
+
+        # won't move to myself
+        if (($web eq $toWeb) && ($topic eq $toTopic))
+        {
+            $resp->{message} = "Won't move $respText to itself!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+
+        # assert that the target topic exist
+        if (!Foswiki::Func::topicExists($toWeb, $toTopic))
+        {
+            $resp->{message} = "Cannot move $respText to inexistent $toWeb/<wbr/>$toTopic!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+        # check CHANGE permissions on target topic
+        if (!Foswiki::Func::checkAccessPermission('CHANGE',
+                 Foswiki::Func::getWikiName(), undef, $toTopic, $toWeb))
+        {
+            $resp->{message} = "Not allowed to move $respText to $toWeb/<wbr/>$toTopic!";
+            return _doRestAdminResponse($debugText, $response, $resp);
+        }
+
+        # that should work now..
+        my $from = Foswiki::Meta->load($Foswiki::Plugins::SESSION, $web, $topic);
+        my $to   = Foswiki::Meta->load($Foswiki::Plugins::SESSION, $toWeb, $toTopic);
+        my $toName = $name;
+        my $n = 1;
+        while ($to->hasAttachment($toName))
+        {
+            $toName = $name;
+            $toName =~ s{(\.[^.]+)$}{_$n$1};
+            $n++;
+        }
+
+        my $error;
+        try { $from->moveAttachment($name, $to, new_name => $toName); }
+        catch Error::Simple with { $error = 1; }; #$error = (shift)->{-text}; $error =~ s/\n.*//; };
+
+        if ($error)
+        {
+            $resp->{message} = "Failed moving $respText to $toWeb/<wbr/>$toTopic!";
+        }
+        else
+        {
+            # the TopicInteractionPlugin single-attachment page is useless
+            my $skin = Foswiki::Func::getPreferencesValue('SKIN');
+            $skin =~ s/topicinteraction,?//;
+            my $link = Foswiki::Func::getScriptUrlPath($toWeb, $toTopic, 'attach', filename => $toName, skin => $skin);
+            $resp->{message} = "Moved $respText to $toWeb/<wbr/>$toTopic/<wbr/>$toName.";
+            $resp->{link} = "Moved to <a href=\"$link\">$toWeb/<wbr/>$toTopic/<wbr/>$toName</a>.";
+            $resp->{success} = 1;
+        }
+    }
+
+    # get comment
+    elsif ($action eq 'getcomment')
+    {
+        #my (undef, undef, undef, $comment) = Foswiki::Func::getRevisionInfo($web, $topic, undef, $name);
+        if (my $attachment = $meta->get("FILEATTACHMENT", $name))
+        #if (my ($attachment) = grep { $_->{name} eq $name } $meta->find("FILEATTACHMENT"))
+        {
+            $resp->{comment} = $attachment->{comment};
+            $resp->{message} = $attachment->{comment} ?
+              "Comment of $respText loaded." : "$respText has no comment yet.";
+            $resp->{success} = 1;
+        }
+    }
+
+    # update attachment (set comment)
+    elsif ( ($action eq 'update') && defined $comment)
+    {
+        if (my $attachment = $meta->get("FILEATTACHMENT", $name))
+        {
+            $attachment->{comment} = $comment;
+            $meta->putKeyed('FILEATTACHMENT', $attachment);
+            $meta->save();
+            $resp->{message} = "Comment of $respText updated.";
+            $resp->{success} = 1;
+        }
+    }
+
+    # update attachment timestamp from EXIF data
+    elsif ($action eq 'timestamp')
+    {
+        if (my $attachment = $meta->get("FILEATTACHMENT", $name))
+        {
+            my $fh = $meta->openAttachment($attachment->{name}, '<');
+            my $info = _getImageInfo($fh) if ($fh);
+            if ($info && $info->{CreateDate})
+            {
+                $attachment->{date} = $info->{CreateDate};
+                $meta->putKeyed('FILEATTACHMENT', $attachment);
+                $meta->save();
+                $resp->{message} = "$respText date set to "
+                  . Foswiki::Time::formatTime(
+                        $info->{CreateDate}, $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault});
+                $resp->{success} = 1;
+            }
+            else
+            {
+                $resp->{message} = "$respText has no EXIF CreatedDate!";
+            }
+        }
+    }
+
+    # list topics
+    elsif ($action eq 'listtopics')
+    {
+        # $term is the user input, $web is the topic the gallery is in
+        my $sterm = $term;
+        my $sweb  = $web;
+        if ($term =~ m/^([^.]+)\.(.+)$/)
+        {
+            $sweb  = $1;
+            $sterm = $2;
+        }
+        elsif ($term =~ m/^\.(.+)$/)
+        {
+            $sweb = 'All';
+            $sterm = $1;
+        }
+        $sterm = lc($sterm);
+        my $it = Foswiki::Func::query($sterm, undef,
+            { type => 'word', scope => 'topic', web => $sweb, casesensitive => 0 });
+        my @list = ();
+        while ($it->hasNext())
+        {
+            push(@list, $it->next())
+        }
+        $resp->{list} = \@list;
+        $resp->{success} = -1;
+        $resp->{message} = ($#list + 1) . " topics found that match '$term'.";
+    }
+
+    # send response
+    if (!$resp->{success} && !$resp->{message})
+    {
+        $resp->{message} = 'Unhandled error!';
+    }
+    return _doRestAdminResponse($debugText, $response, $resp);
+}
+
+sub _doRestAdminResponse
+{
+    my ($debugText, $response, $resp) = @_;
+    my $json = JSON::to_json($resp, { pretty => ($DEBUG ? 1 : 0), utf8 => 1 });
+    _debug("admin $debugText " . ($resp->{success} ? ':-)' : $resp->{message}));
+    $response->header('-Content-Type'   => 'text/json',
+                      '-Status'         => ($resp->{success} ? 200 : 400),
+                      '-Content-Length' => length($json),
+                      '-Cache-Control'  => 'no-cache',
+                      '-Expires'        => '0');
+    $response->body($json);
+    # no further processing by Foswiki::writeCompletePage()
+    return undef;
+}
+
+sub doRestThumb
+{
+    my ($session, $subject, $verb, $response) = @_;
+
+    _initPluginStuff();
+
+    my $query = $session->{request};
+    my $topic   = $query->param('topic');
+    my $name    = $query->param('name');
+    my $quality = _checkRange($query->param('quality'),
+                  $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 1, 100);
+    my $width   = $query->param('width');
+    my $height  = $query->param('height');
+    my $refresh = $query->param('refresh') || ''; $refresh = ($refresh =~ m/(on|cache)/i ? 1 : 0);
+    my $uid     = $query->param('uid') || 0;
+    (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
+
+    # need all parameters, works for JPEGs only
+    if (!$web || !$topic || !$name || !$quality || !$width || !$height || ($name !~ m/\.jpe?g$/i))
+    {
+        $response->header(-Status => 400); # bad request
+        return undef;
+    }
+
+    # does the topic exist?
+    if (!Foswiki::Func::topicExists($web, $topic))
+    {
+        $response->header(-Status => 404); # not found
+        return;
+    }
+
+    # may read?
+    #if (!Foswiki::Func::checkAccessPermission('VIEW',
+    #         Foswiki::Func::getWikiName(), undef, $topic, $web))
+    #{
+    #    $response->header(-Status => 403); # forbidden
+    #    return undef;
+    #}
+
+    # read meta (and check if the topic actually exists)
+    my ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+    if (!$meta)
+    {
+        $response->header(-Status => 400); # bad request
+        return undef;
+    }
+
+    # may we read the attachment (the topic)?
+    if (!$meta->testAttachment($name, 'r'))
+    {
+        $response->header(-Status => 403); # forbidden
+        return undef;
+    }
+
+    my $cacheFile = _getCacheFile('thumb', $web, $topic, $name, $quality, $width, $height, $uid);
+
+    # cache thumbnail unless it exists already
+    my $cached = 1;
+    if (! -f $cacheFile || $refresh)
+    {
+        $cached = 0;
+        my $fh = $meta->openAttachment($name, '<');
+        my (undef, $tFile) = File::Temp::tempfile();
+        File::Copy::copy($fh, $tFile);
+        my $epeg = Image::Epeg->new($tFile);
+        $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
+        $epeg->set_quality($quality);
+        $epeg->write_file($cacheFile);
+        unlink($tFile);
+    }
+
+    # read and serve cached thumbnail
+    if (-f $cacheFile)
+    {
+        my $data = Foswiki::Func::readFile($cacheFile);
+        my $dlen = length($data);
+
+        # update cache file timestamp (so that a cronjob can expire old files)
+        File::Touch::touch($cacheFile);
+
+        _debug("thumb $web.$topic/$name $quality ${width}x${height} -> $dlen" . ($cached ? ' cached' : ''));
+
+        $response->header('-Content-Type'   => 'image/jpeg',
+                          '-Content-Length' => $dlen,
+                          '-Cache-Control'  => 'max-age=86400',
+                          '-Expires'        => '+24h');
+        $response->body($data);
+        return undef;
+    }
+
+    # wtf?!
+    $response->header(-Status => 404); # not found
+    return undef;
+}
+
+
+####################################################################################################
+# utility functions
+
+# deferred plugin initialisation and other checks, called by all plugin handlers
+# _initPluginStuff()
+sub _initPluginStuff
+{
+    # debug profiling
+    $RV->{t0} = Time::HiRes::time() if ($DEBUG);
+
+    # initialise per-request variables once
+    unless (defined $RV->{uid})
+    {
+        # unique id for each gallery, used in Photogallery to track multiple galleries
+        $RV->{uid} = 0;
+
+        # output JS and CSS only once per topic
+        $RV->{jsCss} = 0;
+
+        # index of already shown photos, for %PHOTOGALLERY{ remaining="on" }%
+        $RV->{shown} = {};
+
+        # cache directory for image info cache and cached thumbnails
+        $RV->{cacheDir} = Foswiki::Func::getWorkArea('PhotoGalleryPlugin');
+    }
+
+    # check some plugin configuration defaults
+    $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault} ||= '$http';
+    $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}
+      = _checkRange($Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 85, 1, 100);
+    $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}
+      = _checkRange($Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}, 150, 50, 500);
+
+    return;
+}
+
+# writes debug string(s) to debug.log, automatically stringifies (hash, array, ...) references
+# _debug($strOrObj, ...)
+sub _debug
+{
+    return unless ($DEBUG);
+    local $Data::Dumper::Sortkeys = 1;
+    local $Data::Dumper::Terse = 1;
+    my @strs = map { !defined $_ ? 'undef' : (ref($_) ? Data::Dumper::Dumper($_) : $_) } @_;
+    Foswiki::Func::writeDebug(__PACKAGE__, sprintf('%6.3f', Time::HiRes::time() - $RV->{t0}), @strs);
+}
+
+# writes warning string(s) to error.log
+# _warning($str, ...)
+sub _warning
+{
+    Foswiki::Func::writeWarning(__PACKAGE__, @_);
+}
+
+# writes a warning string to the error.log and returns an error to be included in the rendered page
+# $tml = _wtf($str)
+sub _wtf
+{
+    my $msg = shift;
+    _warning($msg);
+    return '<span style="background-color: #faa; padding: 0.15em 0.25em;"><b>[[%SYSTEMWEB%.PhotoGalleryPlugin][PhotoGalleryPlugin]] error:</b> ' . $msg . '</span>';
+}
+
+# check and assert range of a parameter
+# $value = _checkValue($input, $default, $min, $max)
+sub _checkRange
+{
+    my ($val, $def, $min, $max) = @_;
+    if    (!defined $val || ($val eq '') ) { return $def; }
+    if    ($val < $min)                    { return $min; }
+    elsif ($val > $max)                    { return $max; }
+    else                                   { return $val; }
+    #return ($val < $min) || ($val > $max) ? $def : $val;
+}
+
+# check and assert option
+# $value = _checkValue($input, $default, $option, ...)
+sub _checkOptions
+{
+    my ($val, $def, @_opts) = @_;
+    $val ||= '';
+    my %opts = map { $_, 1 } @_opts;
+    return $opts{$val} ? $val : $def;
+}
+
+# check on/off/yes/no option
+# 0 | 1 = _checkOnOff($input)
+sub _checkBool
+{
+    my ($val) = @_;
+    my %true = ( yes => 1, on => 1 );
+    return $true{$val} ? 1 : 0;
+}
+
+# calculate thumbnail dimensions given the original with and height and the desired short edge size
+# of the thumbnail, ratio > 1 --> landscape, ratio < 1 --> portrait
+# ($width, $height, $ratio) = _getThumbDims($width, $height, $size)
+sub _getThumbDims
+{
+    my ($w, $h, $s) = @_;
+    my $tr = $w / $h;
+    my $tw = $tr < 1 ? $s            : int($s * $tr);
+    my $th = $tr < 1 ? int($s / $tr) : $s;
+    return ($tr, $tw, $th);
+}
+
+# get a cache filename (absolute, full path) of a given type (any string) and any number of
+# parameters to generate a unique id
+# $file = _getCacheFile($str, ...)
+sub _getCacheFile
+{
+    my $type = shift;
+    return $RV->{cacheDir} . '/' . $type . '-' . Digest::MD5::md5_hex(@_);
+}
+
+# load getImageInfo() info cache for a given $web and $topic
+# \%info = _getInfoCache($web, $topic)
+sub _getInfoCache
+{
+    my $cacheFile = _getCacheFile('info', $VERSION, $RELEASE, @_);
+    my $res;
+    try { $res = Storable::retrieve($cacheFile); }
+    catch Error::Simple with { $res = {}; };
+    return $res;
+}
+
+# store the getImageInfo() cache for a given $web and $topic
+# 0 | 1 = _setInfoCache(\%info, $web, $topic)
+sub _setInfoCache
+{
+    my $data = shift;
+    my $cacheFile = _getCacheFile('info', $VERSION, $RELEASE, @_);
+    my $res = 1;
+    try { Storable::store($data, $cacheFile); }
+    catch Error::Simple with { $res = 0; };
+    return $res;
+}
+
+# extract EXIF image information from an image file (handle), will at least return w(idth) and h(height)
+# \%info = _getImageInfo($fh)
+sub _getImageInfo
+{
+    my ($fh, $att) = @_;
+    my $info = {};
+    my $_info;
+
+    if ($fh)
+    {
+        seek($fh, 0, SEEK_SET);
+        # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+        my @exifAttrs = qw(CreateDate Make Model FileModifyDate ExposureTime UserComment
+                           ISO FocalLength ApertureValue ImageWidth ImageHeight
+                           GPSLatitude GPSLongitude GPSAltitude);
+        my %exifOpts = ( DateFormat => '%s', CoordFormat => '%.9f');
+        if (my $exif = Image::ExifTool::ImageInfo($fh, \@exifAttrs, \%exifOpts))
+        {
+            $_info->{$_} = $exif->{$_} for grep { $exif->{$_} } keys %{$exif};
+        }
+    }
+
+    if ($_info)
+    {
+        my $make = $_info->{Make} || '';
+        my $model = $_info->{Model} || ''; $model =~ s/$make\s*//;
+        if ($make || $model)
+        {
+            $info->{MakeModel} = $make ? "$make $model" : $model;
+            # cleanup
+            $info->{MakeModel} =~ s/NIKON CORPORATION NIKON/Nikon/;
+        }
+        if ($_info->{ImageWidth} && $_info->{ImageHeight})
+        {
+            $info->{ImageWidth}  = $_info->{ImageWidth};
+            $info->{ImageHeight} = $_info->{ImageHeight};
+            $info->{ImageSize} = sprintf('%ix%i %.1fMP', $info->{ImageWidth}, $info->{ImageHeight},
+                                         $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
+        }
+        foreach my $field (qw(CreateDate UserComment Make Model))
+        {
+            if ($_info->{$field})
+            {
+                $info->{$field} = $_info->{$field};
+            }
+        }
+        if ($_info->{ExposureTime})
+        {
+            $info->{ExposureTime} = $_info->{ExposureTime} . 's';
+        }
+        if ($_info->{FocalLength})
+        {
+            $info->{FocalLength} = $_info->{FocalLength};
+            $info->{FocalLength} =~ s/\s+//g;
+        }
+        if ($_info->{ApertureValue})
+        {
+            $info->{ApertureValue} = 'f/' . $_info->{ApertureValue};
+        }
+        if ($_info->{ISO})
+        {
+            $info->{ISO} = 'ISO-' . $_info->{ISO};
+        }
+        if ($_info->{GPSLatitude} && ($_info->{GPSLatitude} =~ m/^(.+)\s*([NS])$/))
+        {
+            $info->{Lat} = ($2 eq 'N' ? +1 : -1) * $1;
+        }
+        if ($_info->{GPSLongitude} && ($_info->{GPSLongitude} =~ m/^(.+)\s*([EW])$/))
+        {
+            $info->{Lon} = ($2 eq 'W' ? +1 : -1) * $1;
+        }
+        if ($_info->{GPSAltitude} && ($_info->{GPSAltitude} =~ m/^(.+)\s*m.*$/))
+        {
+            $info->{Alt} = 1 * sprintf('%.0f', $1); # ellipsoid or orthometric height?
+        }
+        if ($info->{Lat} && $info->{Lon})
+        {
+            $info->{Coords} = "$info->{Lat}/$info->{Lon}" . ($info->{Alt} ? "/$info->{Alt}" : '');
+        }
+    }
+    if ($att)
+    {
+        $info->{WikiName} = Foswiki::Func::getWikiName($att->{user});
+    }
+
+    return $info;
+}
+
+# make caption text given the format string, the image info and the attachment meta data
+# $str = _makeCaption($format, \%info, \%attachment)
+sub _makeCaption
+{
+    my ($format, $info, $att) = @_;
+    my $caption = '';
+
+    # normal variable expansion
+    $format =~ s{\$percent}{%}g;
+    $format =~ s{\$percnt}{%}g;
+    $format =~ s{\$p}{%}g;
+    $format =~ s{\$BR}{%BR%}g;
+
+    # magic variable expansion
+    while ($format =~ m/
+                           \G
+                           (.*?)                  # stuff before variable
+                           (                      # the thing to interpolate:
+                               (\(([^)\$]*?)\))?  #   prefix: (...)
+                               \$([a-zA-Z]+)      #   the $variable
+                               (\(([^)\$]*?)\))?  #   postfix: (...)
+                               (\[([^]]*?)\])?    #   format: [...]
+                           )
+                       /xcg)
+    {
+        my ($before, $part, undef, $pre, $var, undef, $post, undef, $fmt)
+          = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+        #_debug("[$before] [$part] -->  [$pre] [$var] [$post] [$fmt]");
+        $caption .= $before if ($before);
+
+        my $value = $info->{$var} || $att->{$var};
+        if ($value)
+        {
+            # date formatting
+            if ($var =~ m/^(date|CreateDate)$/)
+            {
+                $fmt ||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault};
+                $value = Foswiki::Time::formatTime($value, $fmt);
+            }
+            # size has scaling options
+            elsif ($var eq 'size')
+            {
+                $fmt ||= 'MB';
+                if    (uc($fmt) eq 'MB') { $value = sprintf('%.1f', $value / 1024 / 1024); }
+                elsif (uc($fmt) eq 'KB') { $value = sprintf('%.0f', $value / 1024); }
+            }
+            # prefix %USERSWEB% to WikiNames so that it renders working links in other webs
+            elsif ($var eq 'WikiName')
+            {
+                $value = '%USERSWEB%.' . $value;
+            }
+            #_debug("--> $value");
+            $caption .= $pre    if ($pre);
+            $caption .= $value;
+            $caption .= $post   if ($post);
+        }
+    }
+    if ($format =~ m/\G(.*)$/)
+    {
+        $caption .= $1;
+    }
+
+    # remove leading and trailing and empty lines
+    $caption =~ s{(%BR%)+}{%BR%}g;
+    $caption =~ s{^%BR%}{};
+    $caption =~ s{%BR%$}{};
+
+    return $caption;
+}
+
+
+
+####################################################################################################
 1;
-
 __END__
-Foswiki - The Free and Open Source Wiki, http://foswiki.org/
-
-Copyright (C) 2008-2013 Foswiki Contributors. Foswiki Contributors
-are listed in the AUTHORS file in the root of this distribution.
-NOTE: Please extend that file, not this notice.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version. For
-more details read LICENSE in the root of this distribution.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-As per the GPL, removal of this notice is prohibited.

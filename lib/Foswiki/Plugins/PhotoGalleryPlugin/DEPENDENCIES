@@ -1,0 +1,12 @@
+JSON,>=0,cpan,Required for REST handler feedback
+Image::ExifTool,=>0,cpan,Required for extracting and displaying photo meta data
+File::Copy,=>0,perl,Required for photo manipulation operations
+Error,=>0,cpan,Required for error handling
+POSIX,=>0,cpan,Required for file operations
+Digest::MD5,>=0,perl,Required for caching
+Storable,=>0,perl,Required for caching
+File::Touch,=>0,perl,Required for caching
+Image::Epeg,=>0.13,cpan,Required for fast thumbnail generation
+Foswiki::Plugins::JQueryPlugin,>=6.32,perl,Required for everything
+Foswiki::Contrib::FamFamFamContrib,>=1.9,perl,Required for action menu items
+Foswiki::Plugins,>=2.1,perl,Required plugin interface

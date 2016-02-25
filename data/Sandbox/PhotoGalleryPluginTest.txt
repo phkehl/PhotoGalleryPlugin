@@ -1,0 +1,79 @@
+%META:TOPICINFO{author="ProjectContributor" date="1297286796" format="1.1" version="1"}%
+---+!! Testing !PhotoGalleryPlugin
+
+Here's some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
+
+---++ Example 1
+
+<verbatim class="tml">
+%PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%
+
+
+---++ Example 2
+
+<verbatim class="tml">
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+
+
+---++ Example 3
+
+<verbatim class="tml">
+%PHOTOGALLERY{ "doesnotexist" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "doesnotexist" }%
+
+
+---++ Example 4
+
+<verbatim class="tml">
+%PHOTOGALLERY{ remaining="on" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ remaining="on" }%
+
+---++ Example 5
+
+<verbatim class="tml">
+%PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" }%
+
+
+
+---++ List of all Galleries
+
+Here's a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Main.WebHome][Main]] web:
+
+<verbatim class="tml">
+%SEARCH{ "%PHOTOGALLERY" web="Main" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+</verbatim>
+
+Produces:
+
+%SEARCH{ "%PHOTOGALLERY" web="Main" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+
+
+%META:FILEATTACHMENT{name="IMG_1262.jpg" attachment="IMG_1262.jpg" comment="The 'Pont du Gard', an old Roman railway bridge." date="1437938315" size="56673" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="IMG_1265.jpg" attachment="IMG_1265.jpg" comment="" date="1437939206" size="97274" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="IMG_1323.jpg" attachment="IMG_1323.jpg" comment="" date="1451846470" size="83204" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="IMG_1324.jpg" attachment="IMG_1324.jpg" comment="" date="1451846474" size="211737" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="IMG_1071.JPG" attachment="IMG_1071.JPG" comment="" date="1456445686" size="91008" user="ProjectContributor" version="1"}%
+
