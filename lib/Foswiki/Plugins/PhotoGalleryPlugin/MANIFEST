@@ -1,0 +1,6 @@
+!noci
+data/System/PhotoGalleryPlugin.txt 0644 Documentation page
+data/System/VarEXAMPLETAG.txt 0644 Tag documentation
+data/Sandbox/PluginTestPhotoGalleryPlugin.txt 0644 Examples
+lib/Foswiki/Plugins/PhotoGalleryPlugin.pm 0444 Perl module
+lib/Foswiki/Plugins/PhotoGalleryPlugin/Config.spec 0444 Configuration

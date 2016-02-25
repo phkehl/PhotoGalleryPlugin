@@ -1,0 +1,3 @@
+# ---+ Extensions
+# ---++ PhotoGalleryPlugin
+1;
