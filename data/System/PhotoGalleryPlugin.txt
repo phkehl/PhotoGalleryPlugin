@@ -7,24 +7,29 @@
 
 ---++ Description
 
-This plugin renders galleries from photos attached to topics. It renders a grid
-of square thumbnails. Clicking on a thumbnail zooms the image to the original
-attached photo. Currently [[http://photoswipe.com][PhotoSwipe]] by Dmitry
-Semenov is used to display the photos. It allows zooming and browsing the image
-gallery with the keyboard, the mouse and finger swipes on touch devices. This
-plugin adds a slideshow functionality not currently present in the original
-<nop>PhotoSwipe gallery. The thumbnails expose a tools menu by hovering over
-their top right corner. Available tools include losslessly rotating the photo
-using [[https://www.kraxel.org/blog/linux/fbida/][exiftran]], editing the
-attachment comment, correcting the attachment timestamp to the photo exposure
-date, moving the attachment to another topic, and deleting the attachment.
+This plugin renders galleries from photos attached to topics. Galleries render
+as a grid of square thumbnails. Thumbnails are created using the
+[[https://github.com/mattes/epeg][Epeg]] library ("insanely fast JPEG thumbnail
+scaling") via the [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl
+module. Clicking on a thumbnail zooms the image to the original attached
+photo. Currently [[http://photoswipe.com][PhotoSwipe]] by Dmitry Semenov is used
+to display the photos. It allows zooming and browsing the image gallery with the
+keyboard, the mouse and finger swipes on touch devices. This plugin adds a
+slideshow functionality not currently present in the original <nop>PhotoSwipe
+gallery. The thumbnails expose a tools menu by hovering over their top right
+corner. Available tools include losslessly rotating the photo using
+[[https://www.kraxel.org/blog/linux/fbida/][exiftran]], editing the attachment
+comment, correcting the attachment timestamp to the photo exposure date, moving
+the attachment to another topic, and deleting the attachment.
 
 This plugin works only with [[Wikipedia:JPEG][JPEG]] images and it works best
 with photos from digital cameras that have [[Wikipedia:EXIF][EXIF]] data
-embedded.
+embedded. It needs a fairly recent browser to support various Javascript and
+image scaling and transition magic.
 
-See %SYSTEMWEB%.VarPHOTOGALLERY on how to use it. See
-[[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
+See %SYSTEMWEB%.VarPHOTOGALLERY on how to use it.
+
+See [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
 for developer details.
 
 
@@ -98,8 +103,8 @@ manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 
 ---+++ Skin Extension
 
-To activate the upload form options described above add (prepend) =photogallery= to the =SKIN=
-list in [[%LOCALSITEPREFS%]]. See [[Skins]] for details.
+To activate the upload form options described above add (prepend) =photogallery=
+to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for details.
 
 ---+++ Cache
 

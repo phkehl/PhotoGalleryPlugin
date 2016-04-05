@@ -42,7 +42,7 @@ API. See source code for developer details.
    * More Make/Model EXIF cleanup (NIKON CORPORATION / NIKON D4, ...) (maybe Google has a list of common names?)
    * Add more EXIF tags. Need sample images.
    * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
-   * Document and assert HTML5 browser requirement.
+   * Document and assert exact HTML5 browser requirement.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
    * ...
 
