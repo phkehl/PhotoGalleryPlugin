@@ -15,7 +15,7 @@ corner. Available tools include losslessly rotating the photo using exiftran
 (https://www.kraxel.org/blog/linux/fbida/), editing the attachment comment,
 correcting the attachment timestamp to the photo exposure date, moving the
 attachment to another topic, and deleting the attachment.
- 
+
 This plugin works only with JPEG images and it works best
 with photos from digital cameras that have EXIF data
 embedded.
