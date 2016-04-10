@@ -2,7 +2,7 @@
 %META:TOPICPARENT{name="Macros"}%
 ---+ PHOTOGALLERY -- render photo gallery from attachments
 
-The =%<nop>PHOTOGALLERY%= variable is handled by the PhotoGalleryPlugin.
+The =%<nop>PHOTOGALLERY%= [[Macros][macro]] is handled by the PhotoGalleryPlugin.
 
 
 ---++ Parameters
