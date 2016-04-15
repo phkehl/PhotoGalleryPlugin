@@ -2,7 +2,7 @@
 %META:TOPICPARENT{name="Macros"}%
 ---+ PHOTOGALLERY -- render photo gallery from attachments
 
-The =%<nop>PHOTOGALLERY%= [[Macros][macro]] is handled by the PhotoGalleryPlugin.
+The =%<nop>PHOTOGALLERY%= [[%SYSTEMWEB%.Macros][macro]] is handled by the PhotoGalleryPlugin.
 
 
 ---++ Parameters
@@ -74,7 +74,7 @@ Then the following magic variables (=var=) are expanded:%BR%  \
 - =$n= and =$N=: The photo number and the total number of photos.%BR%  \
 - =$name= and =$comment=: The attachment name and comment.%BR%  \
 - =$CreateDate= and =$date=: The exposure time (if available from EXIF data) and the attachment date, respectively. \
-  The optional =fmt= is a [[VarGMTIME][%<nop>GMTIME%]] style format string (with an appropriate default).%BR%  \
+  The optional =fmt= is a [[%SYSTEMWEB%.VarGMTIME][%<nop>GMTIME%]] style format string (with an appropriate default).%BR%  \
 - =$size=: The file size. The =fmt= parameter can be =MB= or =KB= to scale the size to mega and kilo bytes instead of bytes.%BR%  \
 - =$ImageWidth= and =$ImageHeight=: The image dimensions in pixels.%BR%  \
 - =$ImageSize=: An appropriately formatted image dimension string (e.g. "3000x2000 6MP").%BR%  \
