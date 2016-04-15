@@ -2,6 +2,10 @@
 %META:TOPICPARENT{name="Plugins"}%
 ---+!! %SPACEOUT{ "%TOPIC%" }%
 %FORMFIELD{"Description"}%
+<!--
+One line description, required for extensions repository catalog.
+   * Set SHORTDESCRIPTION = %25$SHORTDESCRIPTION%25
+-->
 
 %TOC%
 
