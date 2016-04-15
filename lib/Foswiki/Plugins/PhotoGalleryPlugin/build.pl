@@ -21,12 +21,23 @@
 use strict;
 use warnings;
 
+#use Carp;
+#$SIG{__WARN__} = sub { Carp::cluck(@_); };
+
 BEGIN { unshift @INC, split( /:/, $ENV{FOSWIKI_LIBS} ); }
 
 use Foswiki::Contrib::Build;
 
 # Create the build object
 my $build = new Foswiki::Contrib::Build('PhotoGalleryPlugin');
+
+$build->{UPLOADTARGETWEB} = 'Extensions';
+# Full URL of pub directory
+$build->{UPLOADTARGETPUB} = 'https://foswiki.org/pub';
+# Full URL of bin directory
+$build->{UPLOADTARGETSCRIPT} = 'https://foswiki.org/bin';
+# Script extension
+$build->{UPLOADTARGETSUFFIX} = '';
 
 # no, thanks
 exit(0) if ($build->{target} eq 'tidy');

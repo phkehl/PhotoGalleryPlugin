@@ -27,7 +27,7 @@ with photos from digital cameras that have [[Wikipedia:EXIF][EXIF]] data
 embedded. It needs a fairly recent browser to support various Javascript and
 image scaling and transition magic.
 
-See %SYSTEMWEB%.VarPHOTOGALLERY on how to use it.
+See VarPHOTOGALLERY on how to use it.
 
 See [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
 for developer details.
@@ -127,7 +127,7 @@ time.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
-|  23 Mar 2016  |     v1.0    | initial version     |
+|  15 Apr 2016  |     v1.0    | initial version     |
 
 
 
@@ -145,5 +145,5 @@ time.
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/phkehl/PhotoGalleryPlugin"}%
 %META:FIELD{name="Copyright" title="Copyright" value="&copy; 2016 Philippe Kehl, https://oinkzwurgl.org"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
-%META:FIELD{name="Home" title="Home" value="http://foswiki.org/Extensions/%25$ROOTMODULE%25"}%
-%META:FIELD{name="Support" title="Support" value="http://foswiki.org/Support/%25$ROOTMODULE%25"}%
+%META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25$ROOTMODULE%25"}%
+%META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25$ROOTMODULE%25"}%
