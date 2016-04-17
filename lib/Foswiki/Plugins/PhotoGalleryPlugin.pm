@@ -547,7 +547,7 @@ sub doPHOTOGALLERY
     $tml .=     '</div>';
     $tml .= '</div>';
 
-    # wrapper </dvi>
+    # wrapper </div>
     $tml .= '</div>';
 
     _debug("$debugStr gallery rendered");
@@ -1184,7 +1184,7 @@ sub _getThumbDims
 
 # get a cache filename (absolute, full path) of a given type (any string) and any number of
 # parameters to generate a unique id
-# $file = _getCacheFile($str, ...)
+# $file = _getCacheFile($type, $str, ...)
 sub _getCacheFile
 {
     my $type = shift;
@@ -1250,8 +1250,9 @@ sub _getImageInfo
         {
             $info->{ImageWidth}  = $_info->{ImageWidth};
             $info->{ImageHeight} = $_info->{ImageHeight};
-            $info->{ImageSize} = sprintf('%ix%i %.1fMP', $info->{ImageWidth}, $info->{ImageHeight},
-                                         $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
+            $info->{ImageSize} = sprintf('%ix%i %.1fMP',
+                $info->{ImageWidth}, $info->{ImageHeight},
+                $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
         }
         foreach my $field (qw(CreateDate UserComment Make Model))
         {

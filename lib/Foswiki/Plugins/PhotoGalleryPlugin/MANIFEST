@@ -11,6 +11,7 @@ templates/metadata.photogallery.tmpl 0644 Attachment page options for TopicInter
 # plugin documentation
 data/System/PhotoGalleryPlugin.txt 0644 Documentation page
 data/System/VarPHOTOGALLERY.txt 0644 Tag documentation
+pub/System/PhotoGalleryPlugin/screenshot0.jpg 0644 Plugin screenshot
 pub/System/PhotoGalleryPlugin/screenshot1.jpg 0644 Plugin screenshot
 pub/System/PhotoGalleryPlugin/screenshot2.jpg 0644 Plugin screenshot
 pub/System/PhotoGalleryPlugin/screenshot3.jpg 0644 Plugin screenshot

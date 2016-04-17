@@ -43,6 +43,7 @@ for developer details.
 
 Here are a few screenshots of the plugin in action:
 
+%IMAGE{ "screenshot0.jpg" width="621" height="370" type="frame" align="none" caption="example gallery with info tooltip, zoomed image, upload form" }%
 %IMAGE{ "screenshot1.jpg" width="346" height="173" type="frame" align="none" caption="grid of square thumbnails" }%
 %IMAGE{ "screenshot4.jpg" width="313" height="198" type="frame" align="none" caption="image zoomed and shown in !PhotoSwipe gallery, caption composed from attachment comment and EXIF meta data" }%
 %IMAGE{ "screenshot2.jpg" width="283" height="127" type="frame" align="none" caption="action menu pops up when hovering the top right corner of the thumbnail" }%
@@ -137,6 +138,7 @@ time.
 
 
 
+%META:FILEATTACHMENT{name="screenshot0.jpg" attachment="screenshot0.jpg" comment="plugin screenshot" date="1460910771" size="160970" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot1.jpg" attachment="screenshot1.jpg" comment="plugin screenshot" date="1456439258" size="45945" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
