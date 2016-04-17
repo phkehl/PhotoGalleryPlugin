@@ -132,6 +132,7 @@ time.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
+|  xx xxx xxxx  |     v1.1    | cleanup, docu improvements  |
 |  15 Apr 2016  |     v1.0    | initial version     |
 
 

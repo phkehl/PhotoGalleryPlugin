@@ -26,11 +26,11 @@ Each selection can be:%BR% \
 |
 | =size=  \
 | Sets the size in pixels for the thumbnails (50..500).  \
-| 150  \
+| 150 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =size=  \
 | Sets the thumbnail quality factor (1..100).  \
-| 85  \
+| 85 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =sort=  \
 | Selects how to sort attachments (=date=, =name= or =off=).  \
@@ -50,7 +50,7 @@ Each selection can be:%BR% \
 |
 | =admin=  \
 | Display admin action menu if the user has permissions (=on= or =off=) or is the owner of the attachment (=user=).  \
-| =user=  \
+| =user= %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =uidelay=  \
 | Time in seconds until the caption and control elements disappear when idle. Set to 0 to disable hiding the user interface. \
@@ -74,7 +74,7 @@ Then the following magic variables (=var=) are expanded:%BR%  \
 - =$n= and =$N=: The photo number and the total number of photos.%BR%  \
 - =$name= and =$comment=: The attachment name and comment.%BR%  \
 - =$CreateDate= and =$date=: The exposure time (if available from EXIF data) and the attachment date, respectively. \
-  The optional =fmt= is a [[%SYSTEMWEB%.VarGMTIME][%<nop>GMTIME%]] style format string (with an appropriate default).%BR%  \
+  The optional =fmt= is a [[%SYSTEMWEB%.VarGMTIME][%<nop>GMTIME%]] style format string (with an appropriate default %RED%<sup>1</sup>%ENDCOLOR%).%BR%  \
 - =$size=: The file size. The =fmt= parameter can be =MB= or =KB= to scale the size to mega and kilo bytes instead of bytes.%BR%  \
 - =$ImageWidth= and =$ImageHeight=: The image dimensions in pixels.%BR%  \
 - =$ImageSize=: An appropriately formatted image dimension string (e.g. "3000x2000 6MP").%BR%  \
@@ -87,7 +87,7 @@ Then the following magic variables (=var=) are expanded:%BR%  \
 %BR%  \
 Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines) will be removed. So you could use \
 =$Comment$BR$CreateDate$BR$Coords= as a format and it would only produce the lines (breaks) neccessary.%BR%  \
-| =$comment($BR&nbsp;)%BR%($n/$N,&nbsp;%BR%$CreateDate(,&nbsp;)%BR%$ExposureTime(,&nbsp;)%BR%$FocalLength(,&nbsp;)%BR%$ApertureValue(,&nbsp;)%BR%$ISO(,&nbsp;)%BR%$Coords(,&nbsp;)%BR%$MakeModel(,&nbsp;)%BR%$WikiName,&nbsp;%BR%$name,&nbsp;%BR%$ImageSize,&nbsp;%BR%$size(MB)[MB])=  \
+| =$comment($BR&nbsp;)%BR%($n/$N,&nbsp;%BR%$CreateDate(,&nbsp;)%BR%$ExposureTime(,&nbsp;)%BR%$FocalLength(,&nbsp;)%BR%$ApertureValue(,&nbsp;)%BR%$ISO(,&nbsp;)%BR%$Coords(,&nbsp;)%BR%$MakeModel(,&nbsp;)%BR%$WikiName,&nbsp;%BR%$name,&nbsp;%BR%$ImageSize,&nbsp;%BR%$size(MB)[MB])= %RED%<sup>1</sup>%ENDCOLOR%   \
 |
 | =thumbcap=  \
 | Caption format for thumbails if different from =caption= format.  \
@@ -97,6 +97,10 @@ Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines
 | Caption format for zoomed photo view if different from =caption= format.  \
 | see =caption=  \
 |
+
+%RED%<sup>1</sup>%ENDCOLOR% These defaults depend on
+[[PhotoGalleryPlugin#Plugin_Configuration_and_Defaults][plugin configuration defaults]]
+Your administrator may have chosen to change these.
 
 Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
 
