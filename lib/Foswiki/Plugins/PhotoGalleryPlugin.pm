@@ -44,6 +44,7 @@ API. See source code for developer details.
    * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
    * Document and assert exact HTML5 browser requirement.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
+   * Create dedicated upload plugin (dropzone.js?), maybe move rotate-and-timestamp-on-upload there.
    * ...
 
 =cut
