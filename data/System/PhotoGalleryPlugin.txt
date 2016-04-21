@@ -149,7 +149,7 @@ time.
 %META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="PhilippeKehl" version="1"}%
 %META:FORM{name="PackageForm"}%
-%META:FIELD{name="Author" title="Author" value="[[Foswiki::Main/PhilippeKehl][Philippe Kehl]]"}%
+%META:FIELD{name="Author" title="Author" value="[[Foswiki:Main/PhilippeKehl][Philippe Kehl]]"}%
 %META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
