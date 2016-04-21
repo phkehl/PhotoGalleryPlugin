@@ -135,6 +135,7 @@ time.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
+|  xx xxx xxx   |     v1.2    |  |
 |  21 Apr 2016  |     v1.1    | cleanup, improve docu, fix setting EXIF exposure date on upload, add bulk upload script   |
 |  15 Apr 2016  |     v1.0    | initial version     |
 
