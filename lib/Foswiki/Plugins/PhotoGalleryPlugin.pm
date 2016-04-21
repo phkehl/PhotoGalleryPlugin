@@ -642,25 +642,19 @@ sub afterUploadHandler
     if ( ($setexifdate eq 'on') &&
          ($attr->{attachment} =~ m/\.(jpg|jpeg)/i) )
     {
-        my $fh = $meta->openAttachment($attr->{attachment}, '<');
-        my $info = _getImageInfo($fh);
-        my $data =
+        if (my $attachment = $meta->get("FILEATTACHMENT", $attr->{attachment}))
         {
-            nohandlers => 1 # or we'll end up in an endless loop!
-        };
-        if ($setexifdate eq 'on')
-        {
-            $data->{filedate} = $info->{CreateDate};
-        }
-
-        if ($data->{filedate})
-        {
-            _debug("afterUploadHandler($attr->{attachment}) filedate="
-                   . Foswiki::Time::formatTime($data->{filedate},
+            my $fh = $meta->openAttachment($attachment->{name}, '<');
+            my $info = _getImageInfo($fh) if ($fh);
+            if ($info && $info->{CreateDate})
+            {
+                _debug("afterUploadHandler($attr->{attachment}) filedate="
+                   . Foswiki::Time::formatTime($info->{CreateDate},
                        $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}));
-            my $web   = $meta->web();
-            my $topic = $meta->topic();
-            Foswiki::Func::saveAttachment($web, $topic, $attr->{attachment}, $data);
+                $attachment->{date} = $info->{CreateDate};
+                $meta->putKeyed('FILEATTACHMENT', $attachment);
+                $meta->save();
+            }
         }
     }
 
