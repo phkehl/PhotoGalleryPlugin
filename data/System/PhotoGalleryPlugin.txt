@@ -33,6 +33,9 @@ image scaling and transition magic.
 
 See VarPHOTOGALLERY on how to use it.
 
+The plugin ships with a bulk attach script (=tools/photogallerypluginattach.pl=)
+with built-in help.
+
 See [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
 for developer details.
 
@@ -132,7 +135,7 @@ time.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
-|  xx xxx xxxx  |     v1.1    | cleanup, docu improvements, fix setting EXIF exposure date on upload   |
+|  xx xxx xxxx  |     v1.1    | cleanup, improve docu, fix setting EXIF exposure date on upload, add bulk upload script   |
 |  15 Apr 2016  |     v1.0    | initial version     |
 
 

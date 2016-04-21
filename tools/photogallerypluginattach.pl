@@ -36,36 +36,38 @@ www-data or so.
 
 Common flags used by all or some operations:
 
-    photogallerypluginattach.pl [-v] [-d] [-C] [-g] [-t|-T] [-r|-R] [-a|-A]
+    photogallerypluginattach.pl [-v] [-d] [-C] [-g] [-t|-T] [-r|-R] [-a|-A] [-u user]
         Web.Topic [-c comment] file ... [@file]
 
 Where:
 
 =over
 
-=item * C<-v> increases verbosity
+=item * C<-v>: increases verbosity
 
-=item * C<-d> dry run: don't actually do anything but show what would (likely) be done
+=item * C<-d>: dry run: don't actually do anything but show what would (likely) be done
 
-=item * C<-C> creates the topic if it doesn't exist
+=item * C<-C>: creates the topic if it doesn't exist
 
-=item * C<-g> adds the %PHOTOGALLERY% macro to the end of the topic
+=item * C<-g>: adds the %PHOTOGALLERY% macro to the end of the topic
 
-=item * C<-t> (default) and C<-T> set respectively don't set attachment date from EXIF exposure time
+=item * C<-t> (default) and C<-T>: set respectively don't set attachment date from EXIF exposure time
         (where available). This is global for all given files.
 
-=item * C<-r> (default) and C<-R> rotate respectively don't rotate images based on EXIF orientation
+=item * C<-r> (default) and C<-R>: rotate respectively don't rotate images based on EXIF orientation
         info (where available). This is global for all given files.
 
-=item * C<-a> (default) and C<-A> don't attach respectively do attach existing attachments
+=item * C<-a> (default) and C<-A>: don't attach respectively do attach existing attachments
 
-=item * C<Web.Topic> (or C<Web/Topic>) specifies the topic to attach to
+=item * C<-u wikiname>: uses the given user (WikiName, the default is typically "WikiGuest" and won't work)
 
-=item * C<-c comment> sets the attachment comment for all following C<file>s
+=item * C<Web.Topic> (or C<Web/Topic>): specifies the topic to attach to
 
-=item * C<file> is the file to attach
+=item * C<-c comment>: sets the attachment comment for all following C<file>s
 
-=item * C<@file> interpolates each non-empty and non-comment line in the file as a command line
+=item * C<file>: is a file to attach
+
+=item * C<@file>: interpolates each non-empty and non-comment line in the file as a command line
         argument (to overcome maximum command line lengths)
 
 =back
@@ -104,7 +106,7 @@ use warnings;
 
 # find setlib.cfg in ../bin
 use FindBin;
-use lib "$FindBin::RealBin/../bin";
+use lib "$FindBin::Bin/../bin";
 
 BEGIN
 {
@@ -112,15 +114,23 @@ BEGIN
     require 'setlib.cfg';
 }
 
-use Time::HiRes qw(time usleep sleep);
-use Pod::Usage;
+use Time::HiRes      qw(time usleep sleep);
+use Pod::Usage       qw();
+use Data::Dumper     qw();
+$Data::Dumper::Terse = 1;
+$Data::Dumper::Sortkeys = 1;
+use Error            qw(:try);
 
-use Foswiki;
-use Foswiki::Plugins;
+use Foswiki          qw();
+use Foswiki::Plugins qw();
+use Foswiki::Time    qw();
+use Foswiki::Func    qw();
+use Foswiki::AccessControlException qw();
+use Foswiki::Plugins::PhotoGalleryPlugin qw();
 
 if ($Foswiki::Plugins::VERSION < 2.1)
 {
-    print(STDERR "Too old Plugins.pm version (need 2.1 or later, you have $Foswiki::Plugins::VERSION)!\n");
+    ERROR("Too old Plugins.pm version (need 2.1 or later, you have $Foswiki::Plugins::VERSION)!");
     exit(1);
 }
 
@@ -134,24 +144,29 @@ my %control =
     dryrun        => 0,
     createtopic   => 0,
     webtopic      => 0,
+    wikiname      => $Foswiki::cfg{DefaultUserWikiName},
+    user          => '',
     addgallery    => 0,
-    timetag       => 1,
+    timestamp     => 1,
     rotate        => 1,
     forceattach   => 0,
     webtopic      => '',
     files         => [],
+    me            => $0,
 );
 
 do
 {
+    $control{me} =~ s{^.*/}{};
     my $comment = '';
     my $errors = 0;
 
     while (my $arg = shift(@ARGV))
     {
+        TRACE("arg=$arg");
         if ($arg eq '-h')
         {
-            pod2usage( { -exitval => 0, -verbose => 2, output => \*STDERR } );
+            Pod::Usage::pod2usage( { -exitval => 0, -verbose => 2, output => \*STDERR } );
         }
         elsif ($arg eq '-v') { $control{verbosity}    += 1; }
         elsif ($arg eq '-d') { $control{dryrun}        = 1; }
@@ -159,11 +174,13 @@ do
         elsif ($arg eq '-g') { $control{addgallery}    = 1; }
         elsif ($arg eq '-r') { $control{rotate}        = 1; }
         elsif ($arg eq '-R') { $control{rotate}        = 0; }
-        elsif ($arg eq '-t') { $control{timetag}       = 1; }
-        elsif ($arg eq '-T') { $control{timetag}       = 0; }
-        elsif ($arg eq '-a') { $control{forceattach}   = 1; }
-        elsif ($arg eq '-A') { $control{forceattach}   = 0; }
-        elsif ( ($arg =~ m/^(.+)[\/.](.+)$/) && !$control{webtopic} )
+        elsif ($arg eq '-t') { $control{timestamp}     = 1; }
+        elsif ($arg eq '-T') { $control{timestamp}     = 0; }
+        elsif ($arg eq '-a') { $control{forceattach}   = 0; }
+        elsif ($arg eq '-A') { $control{forceattach}   = 1; }
+        elsif ($arg eq '-u') { $control{wikiname}      = shift(@ARGV); }
+        elsif ( ($arg =~ m/^($Foswiki::regex{webNameRegex})[\/.]($Foswiki::regex{topicNameRegex})$/)
+                && !$control{webtopic} )
         {
             $control{webtopic} = $arg;
         }
@@ -175,128 +192,196 @@ do
         {
             push(@{$control{files}}, { file => $arg, comment => $comment });
         }
-        # FIXME: implement @file.txt arguments interpolation
+        elsif ( ($arg =~ m/^@(.+)$/) && -f $1 )
+        {
+            my @a = ();
+            open(F, '<', $1) || die($!);
+            while (my $line = <F>)
+            {
+                next if ($line =~ m/^(\s*#|\s*$)/);
+                $line =~ s/^\s*//;
+                $line =~ s/\s*$//;
+                foreach (grep { $_ !~ m/^\s*$/ } split(/(".*?"|\S+)/, $line)) # yeah, really nice.. :-/
+                {
+                    push(@a, $_);
+                }
+            }
+            close(F);
+            unshift(@ARGV, @a);
+        }
         else
         {
-            print(STDERR "Illegal argument '$arg'!\n");
+            ERROR("Illegal argument '$arg'!");
             $errors++;
         }
     }
 
+    DEBUG("verbosity=$control{verbosity} dryrun=$control{dryrun} createtopic=$control{createtopic} "
+          . "webtopic=$control{webtopic} addgallery=$control{addgallery} timestamp=$control{timestamp} "
+          . "rotate=$control{rotate} forceattach=$control{forceattach} webtopic=$control{webtopic} "
+          . "wikiname=$control{wikiname}")
+      if ($control{verbosity});
+
     if ( $errors || ($#{$control{files}} < 0) || !$control{webtopic})
     {
-        print(STDERR "Try '$0 -h'.\n");
+        PRINT("Try '$0 -h'.");
         exit(1);
+    }
+
+    if ($control{verbosity} > 1)
+    {
+        $Foswiki::Plugins::PhotoGalleryPlugin::DEBUG = 1;
     }
 
 };
 
 
-
-
-__END__
-use strict;
-use warnings;
-
-use FindBin;
-use lib "$FindBin::Bin/bin";
-
-use Ffi::Debug ':all';
-$Ffi::Debug::VERBOSITY += 1;
-$Ffi::Debug::TIMESTAMP = 2;
-
-use File::Temp;
-use File::Copy;
-
-
-
 ###############################################################################
-# get web.topic or web/topic
+# load foswiki engine, check user and login
 
-my ($webTopic, $web, $topic);
-if ( ($webTopic = shift(@ARGV)) && ($webTopic =~ m@^([a-zA-Z]+)[/.]([a-zA-Z0-9]+)$@) )
+my $foswiki = Foswiki->new() || die();
+my $wikiname = $control{wikiname};
+my $user = Foswiki::Func::getCanonicalUserID($wikiname);
+unless ($wikiname && $user)
 {
-    $web = $1; $topic = $2;
+    ERROR("Failed setting user (wikiname=%s, user=%s)!", $wikiname, $user);
+    exit(1);
 }
-else
+DEBUG("wikiname=$wikiname --> user=$user");
+
+# login
+# SMELL: Is this the correct usage of the API?
+$foswiki = Foswiki->new($user) || die();
+unless (Foswiki::Func::getWikiName() eq $wikiname)
 {
-    die("Need a Web.Topic!");
+    ERROR("Failed loggin in as $wikiname/$user!");
+    exit(1);
 }
-DEBUG1("web=$web topic=$topic");
 
 
 ###############################################################################
-# load foswiki engine
+# check target topic, maybe create it
 
-DEBUG1("new (engine=$Foswiki::cfg{Engine})");
-my $foswiki = Foswiki->new('flip');
+my ($web, $topic) = Foswiki::Func::normalizeWebTopicName(undef, $control{webtopic});
+DEBUG("webtopic=%s --> web=%s topic=%s", $control{webtopic}, $web, $topic);
 
-DEBUG1("webExists");
-Foswiki::Func::webExists($web) || die("No such web: $web");
-DEBUG1("topicExists");
-Foswiki::Func::topicExists($web, $topic) || die("No such topic: $web.$topic");
-my ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
-my %have = map { $_->{attachment}, 1 } $meta->find("FILEATTACHMENT");
-
-
-# enable all PhotoSwipePlugin upload magic
-my $q = Foswiki::Func::getRequestObject();
-$q->param('exifrotateimage', 'on');
-#$q->param('exifaddcomment', 'on');
-$q->param('setexifdate', 'on');
-
-
-###############################################################################
-# attach files
-
-my @attachments = ();
-
-foreach my $file (@ARGV)
+if (!Foswiki::Func::webExists($web) ||
+    !Foswiki::Func::topicExists($web, $topic))
 {
-    if (! -f $file)
+    if ($control{createtopic})
     {
-        WARNING("Ignoring missing '$file'!");
-        next;
-    }
-
-    if ($file =~ m@([^/]+)\.([^.]+)$@)
-    {
-        my ($base, $ext) = ($1, $2);
-
-        # force lower-case file extension
-        $ext = lc($ext) unless ($ext eq lc($ext));
-        my $attachment = "$base.$ext";
-        if ($have{$attachment})
+        PRINT("* Creating empty topic $web.$topic.");
+        try { Foswiki::Func::saveTopic($web, $topic, undef, '', {}) }
+        catch Error with
         {
-            PRINT("skipping, already have: $attachment ($file)");
-            next;
-        }
-
-        PRINT("$attachment: $file");
-
-        # copy to temp file
-        (undef, my $tmpf) = File::Temp::tempfile( UNLINK => 1 );
-        File::Copy::copy($file, $tmpf);
-        my @s = stat($file);
-
-        # attach
-        Foswiki::Func::saveAttachment($web, $topic, $attachment,
-            { file => $tmpf, filesize => -s $file,
-              filedate => $s[10] || $s[9] || int(time()) }); # ctime, mtime, now, needs patch in Foswiki::Meta
-
-        push(@attachments, $attachment);
+            ERROR($_[0]->stringify());
+            exit(1);
+        };
     }
     else
     {
-        WARNING("Ignoring fishy '$file'!");
+        ERROR("Topic $web.$topic does not exist!");
+        exit(1);
     }
 }
 
-PRINT("attachments:", "@attachments");
+if (!Foswiki::Func::checkAccessPermission('CHANGE', $wikiname, undef, $topic, $web))
+{
+    ERROR("$wikiname has no permissions to attach to $web.$topic!");
+    exit(1);
+}
 
-#PRINT("movies:", map { '%FLVPLAYER{ "%ATTACHURL%/' . $_ . '" }%' } grep { $_ =~ m/\.flv$/ } @attachments);
+PRINT("* Loading %s.%s.", $topic, $web);
+my ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+unless ($meta && defined $text)
+{
+    ERROR("Failed loading $web.$topic!");
+    exit(1);
+}
+my %have = map { $_->{attachment}, $_ } $meta->find("FILEATTACHMENT");
+DEBUG("$web.$topic has %i attachments.", scalar keys %have);
 
-#PRINT("./makealbum.pl $web/$topic @attachments");
+
+###############################################################################
+# attach
+
+# enable/disable PhotoGalleryPlugin upload handler stuff
+my $q = Foswiki::Func::getRequestObject();
+$q->param('exifrotateimage', $control{rotate} ? 'on' : 'off');
+$q->param('setexifdate', $control{timestamp} ? 'on' : 'off');
+my @attached = ();
+foreach (@{$control{files}})
+{
+    my ($file, $comment) = ($_->{file}, $_->{comment});
+    my $attachment = $file;
+    $attachment =~ s{^.*/}{};
+
+    if ($have{$attachment} && !$control{forceattach})
+    {
+        PRINT("Skipping '%s' ($web.$topic already has $attachment).", $file);
+        next;
+    }
+
+    PRINT("* Attaching '%s' (%s).", $file, $attachment);
+    Foswiki::Func::saveAttachment($web, $topic, $attachment,
+        { file => $file, comment => $comment, filesize => (-s $file) });
+    PRINT("  Done.");
+    push(@attached, $attachment);
+}
+
+# add %PHOTOGALLERY% to topic?
+if ( $control{addgallery} && ($#attached > -1) )
+{
+    PRINT('* Adding %s macro for %i photos.', '%PHOTOGALLERY%', $#attached + 1);
+    ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+    $text .= "\n\n";
+    $text .= "---++ Gallery Created "
+      . Foswiki::Time::formatTime(int(time()),
+            $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}) . "\n\n";
+    $text .= '%PHOTOGALLERY{ "' . join(',', @attached) . '" }%' . "\n";
+    $text .= "\n\n";
+    Foswiki::Func::saveTopic($web, $topic, $meta, $text, { forcenewrevision => 1 });
+}
+
+PRINT("* All done.");
+
+
+################################################################################
+# funky functions
+
+sub DEBUG
+{
+    return unless ($control{verbosity});
+    _PRINT(\*STDERR, 'D', @_);
+}
+sub TRACE
+{
+    return unless ($control{verbosity} > 1);
+    _PRINT(\*STDERR, 'T', @_);
+}
+sub ERROR
+{
+    _PRINT(\*STDERR, 'E', @_);
+}
+sub PRINT
+{
+    _PRINT(\*STDOUT, 'P', @_);
+}
+
+sub _PRINT
+{
+    my ($h, $l, $f, @a) = @_;
+    my %p = ( 'E' => 'ERROR', 'D' => 'DEBUG', 'T' => 'TRACE' );
+    my $pp = $p{$l} ? "$control{me}($p{$l}): " : '';
+    if (ref($f) || (index($f, '%') < 0))
+    {
+        unshift(@a, $f);
+        $f = '%s';
+    }
+    @a = map { !defined $_ ? 'undef' : (ref($_) ? Data::Dumper::Dumper($_) : $_) } @a;
+    print($h sprintf("$pp$f\n", @a));
+}
+
 
 1;
 __END__
