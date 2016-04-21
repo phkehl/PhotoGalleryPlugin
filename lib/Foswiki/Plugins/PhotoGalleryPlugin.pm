@@ -639,8 +639,7 @@ sub afterUploadHandler
     my $setexifdate    = $q->param('setexifdate')    || '';
     #_debug("setexifdate=$setexifdate");
 
-    if ( ( #($exifaddcomment eq 'on') ||
-          ($setexifdate eq 'on') ) &&
+    if ( ($setexifdate eq 'on') &&
          ($attr->{attachment} =~ m/\.(jpg|jpeg)/i) )
     {
         my $fh = $meta->openAttachment($attr->{attachment}, '<');
@@ -654,8 +653,11 @@ sub afterUploadHandler
             $data->{filedate} = $info->{CreateDate};
         }
 
-        if ($data->{comment} || $data->{filedate})
+        if ($data->{filedate})
         {
+            _debug("afterUploadHandler($attr->{attachment}) filedate="
+                   . Foswiki::Time::formatTime($data->{filedate},
+                       $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}));
             my $web   = $meta->web();
             my $topic = $meta->topic();
             Foswiki::Func::saveAttachment($web, $topic, $attr->{attachment}, $data);
