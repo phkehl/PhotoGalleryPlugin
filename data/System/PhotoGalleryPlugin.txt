@@ -118,9 +118,12 @@ to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for details.
 
 The plugin caches data (EXIF meta data, thumbnails) in the
 =working/work_areas/PhotoSwipePlugin= directory. It will keep the timestamps of
-the used files up-to-date. Standard system tools, such as "tmpreaper" or "cron",
-can be used to remove old files. No harm is done removing them all from time to
-time.
+the used files up-to-date. The plugin ships with a script to clean up the cache
+by removing old files from the cache directory. It is suggested to install a
+cronjob to run the script on a regular basis. Run
+=tools/photogalleryplugincleanup.pl -h= to see the built-in help for more
+details. Alternatively, standard system tools, such as "tmpreaper", can be used
+to remove old files. No harm is done removing them all from time to time.
 
 
 
