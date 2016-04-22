@@ -19,3 +19,5 @@ attachment to another topic, and deleting the attachment.
 This plugin works only with JPEG images and it works best
 with photos from digital cameras that have EXIF data
 embedded.
+
+![PhotoGalleryPlugin Screenshot](https://raw.githubusercontent.com/phkehl/PhotoGalleryPlugin/master/pub/System/PhotoGalleryPlugin/screenshot0.jpg "PhotoGalleryPlugin Screenshot")
