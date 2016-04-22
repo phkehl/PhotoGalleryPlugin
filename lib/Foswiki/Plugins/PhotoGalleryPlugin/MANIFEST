@@ -11,6 +11,9 @@ templates/metadata.photogallery.tmpl 0644 Attachment page options for TopicInter
 # bulk attachment script
 tools/photogallerypluginattach.pl 0755 Bulk attachment script
 
+# cache cleanup script
+tools/photogalleryplugincacheclean.pl 0755 Cache cleanup script
+
 # plugin documentation
 data/System/PhotoGalleryPlugin.txt 0644 Documentation page
 data/System/VarPHOTOGALLERY.txt 0644 Tag documentation
