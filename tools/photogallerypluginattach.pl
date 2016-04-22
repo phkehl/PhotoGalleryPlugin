@@ -34,8 +34,6 @@ www-data or so.
 
 =head2 Usage
 
-Common flags used by all or some operations:
-
     photogallerypluginattach.pl [-v] [-d] [-C] [-g] [-t|-T] [-r|-R] [-a|-A] [-u user]
         Web.Topic [-c comment] file ... [@file]
 
