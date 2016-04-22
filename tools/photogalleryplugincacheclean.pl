@@ -82,6 +82,7 @@ use Data::Dumper     qw();
 $Data::Dumper::Terse = 1;
 $Data::Dumper::Sortkeys = 1;
 use Foswiki          qw();
+use Foswiki::Func    qw();
 
 
 ################################################################################
@@ -132,15 +133,72 @@ do
 ###############################################################################
 # check plugin cache dir
 
-my $workingDir = $Foswiki::cfg{WorkingDir};
-unless ($workingDir)
+my $foswiki = Foswiki->new() || die();
+my $workArea = Foswiki::Func::getWorkArea('PhotoGalleryPlugin');
+DEBUG('workArea=%s', $workArea);
+unless ($workArea && -d $workArea)
 {
-    ERROR("Cannot determine Foswiki WorkingDir config!");
+    ERROR('Cannot determine Foswiki work area for PhotoGalleryPlugin!');
     exit(1);
 }
 
-DEBUG("workingDir=$workingDir");
-PRINT("* All done.");
+my $scriptUser = getpwuid($<);
+my $workAreaUser = getpwuid((stat($workArea))[4]);
+DEBUG('scriptUser=%s workAreaUser=%s', $scriptUser, $workAreaUser);
+if ($scriptUser ne $workAreaUser)
+{
+    ERROR('%s belongs to user %s, but script runs as %s.',
+          $workArea, $workAreaUser, $scriptUser);
+    exit(1);
+}
+
+
+################################################################################
+# find candiate files
+
+PRINT("Scanning %s.", $workArea);
+my @files = grep { -f $_ } glob("$workArea/*");
+my $nFiles = $#files + 1;
+if (!$nFiles)
+{
+    PRINT("No cache files. Nothing to do.");
+    exit(0);
+}
+PRINT("Processing %i files.", $nFiles);
+
+
+################################################################################
+# delete old files
+
+my @agesKeep = ();
+my @agesDeleted = ();
+foreach my $file (@files)
+{
+    my $age = -M $file;
+    if ($age > $control{maxage})
+    {
+        unlink($file);
+        push(@agesDeleted, $age);
+    }
+    else
+    {
+        push(@agesKeep, $age);
+    }
+}
+
+my $nDeleted = $#agesDeleted + 1;
+if ($nDeleted)
+{
+    PRINT('Deleted %i/%i files (%.1f%%, average age %.1fd).',
+          $nDeleted, $nFiles, $nDeleted / $nFiles * 1e2,
+          _avg(@agesDeleted));
+}
+else
+{
+    PRINT('No files deleted.');
+}
+
+PRINT('Average cache age is now %.1fd.', _avg(@agesKeep));
 
 
 ################################################################################
@@ -180,6 +238,12 @@ sub _PRINT
     print($h sprintf("$pp$f\n", @a));
 }
 
+sub _avg
+{
+    my $s = 0;
+    $s += $_ for (@_);
+    return $#_ < 0 ? 0 : ($s / ($#_ + 1));
+}
 
 1;
 __END__

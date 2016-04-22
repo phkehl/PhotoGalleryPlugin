@@ -37,7 +37,6 @@ API. See source code for developer details.
    * According to Foswiki:Development/HowToIntegrateWithRequestValidation the REST handler should
      generate a new nonce in each request. It doesn't seem to do that.
    * Handle (validation) session timeout. Re-authenticate? Display useful warning.
-   * Create cache cleanup script. Or maybe a REST action?
    * More Make/Model EXIF cleanup (NIKON CORPORATION / NIKON D4, ...) (maybe Google has a list of common names?)
    * Add more EXIF tags. Need sample images.
    * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
