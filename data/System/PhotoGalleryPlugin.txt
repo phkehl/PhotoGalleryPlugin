@@ -126,6 +126,29 @@ details. Alternatively, standard system tools, such as "tmpreaper", can be used
 to remove old files. No harm is done removing them all from time to time.
 
 
+---+++ Bulk Upload
+
+The standard Foswiki file upload mechnism is not exactly suitable to upload many
+photos. There are a number of alternatives:
+
+   * Use the bulk attach script shipped with this plugin
+     (=tools/photogallerypluginattach.pl=). The script must be executed on the
+     server where Foswiki is running. It can then attach any number of photos to
+     a topic. The image files must reside on the server, too. Note that the
+     script must be executed as the server Foswiki (or the web server) is
+     running as.
+   * The [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]]
+     replaces the standard upload form with a multi-file upload mechanism (plus
+     some more attachment manipulation features). If you do not like its
+     "interaction stuff" it adds to the view template you can disable that by
+     removing =templates/view.topicinteraction.tmpl=.
+   * A number of other plugins used to be available
+     ([[Foswiki:Extensions/UploadPlugin][UploadPlugin]],
+     [[Foswiki:Extensions/BatchUploadPlugin][BatchUploadPlugin]], maybe more)
+     but I think they no longer work in today's Foswiki.
+
+
+
 
 
 ---
