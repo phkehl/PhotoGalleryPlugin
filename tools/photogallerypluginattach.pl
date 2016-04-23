@@ -308,40 +308,52 @@ my $q = Foswiki::Func::getRequestObject();
 $q->param('exifrotateimage', $control{rotate} ? 'on' : 'off');
 $q->param('setexifdate', $control{timestamp} ? 'on' : 'off');
 my @attached = ();
-foreach (@{$control{files}})
+do
 {
-    my ($file, $comment) = ($_->{file}, $_->{comment});
-    my $attachment = $file;
-    $attachment =~ s{^.*/}{};
+    # catch user hitting C-c and abort nicely
+    # (it may leave the topic in a weird state that can crash Foswiki (DBCacheContrib?) when it
+    #  tries to render it)
+    my $abort = 0;
+    local $SIG{INT} = sub { ERROR('Caught C-c. Aborting ASAP.'); $abort = 1; };
 
-    if ($have{$attachment} && !$control{forceattach})
+    my $nFiles = $#{$control{files}} + 1;
+    for (my $ix = 0; $ix < $nFiles; $ix++)
     {
-        PRINT("Skipping '%s' ($web.$topic already has $attachment).", $file);
-        next;
+        my ($file, $comment) = ($control{files}->[$ix]->{file}, $control{files}->[$ix]->{comment});
+        my $attachment = $file;
+        $attachment =~ s{^.*/}{};
+
+        if ($have{$attachment} && !$control{forceattach})
+        {
+            PRINT("Skipping %i/%i: %s ($web.$topic already has $attachment).",
+                  $ix + 1, $nFiles, $file);
+            next;
+        }
+
+        PRINT("* Attaching %i/%i: %s (%s).",
+              $ix + 1, $nFiles, $file, $attachment);
+        Foswiki::Func::saveAttachment($web, $topic, $attachment,
+            { file => $file, comment => $comment, filesize => (-s $file) });
+        push(@attached, $attachment);
+        last if ($abort);
     }
 
-    PRINT("* Attaching '%s' (%s).", $file, $attachment);
-    Foswiki::Func::saveAttachment($web, $topic, $attachment,
-        { file => $file, comment => $comment, filesize => (-s $file) });
-    PRINT("  Done.");
-    push(@attached, $attachment);
-}
+    # add %PHOTOGALLERY% to topic?
+    if ( $control{addgallery} && ($#attached > -1) )
+    {
+        PRINT('* Adding %s macro for %i photos.', '%PHOTOGALLERY%', $#attached + 1);
+        # load topic again, as $meta and $text have changed when we attached files above
+        ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+        $text .= "\n\n";
+        $text .= "---++ Gallery Created "
+          . Foswiki::Time::formatTime(int(time()),
+                                      $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}) . "\n\n";
+        $text .= '%PHOTOGALLERY{ "' . join(',', @attached) . '" }%' . "\n";
+        $text .= "\n\n";
+        Foswiki::Func::saveTopic($web, $topic, $meta, $text, { forcenewrevision => 1 });
+    }
 
-# add %PHOTOGALLERY% to topic?
-if ( $control{addgallery} && ($#attached > -1) )
-{
-    PRINT('* Adding %s macro for %i photos.', '%PHOTOGALLERY%', $#attached + 1);
-    # load topic again, as $meta and $text have changed when we attached files above
-    ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
-    $text .= "\n\n";
-    $text .= "---++ Gallery Created "
-      . Foswiki::Time::formatTime(int(time()),
-            $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}) . "\n\n";
-    $text .= '%PHOTOGALLERY{ "' . join(',', @attached) . '" }%' . "\n";
-    $text .= "\n\n";
-    Foswiki::Func::saveTopic($web, $topic, $meta, $text, { forcenewrevision => 1 });
-}
-
+};
 PRINT("* All done.");
 
 
