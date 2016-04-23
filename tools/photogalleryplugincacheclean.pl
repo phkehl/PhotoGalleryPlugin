@@ -33,7 +33,7 @@ format depends on the plugin version), when attachments or topics are moved, ren
 
 =head2 Usage
 
-    photogalleryplugincleanup.pl [-q] [-v] [-m #days]
+    photogalleryplugincacheclean.pl [-q] [-v] [-m #days]
 
 Where:
 
@@ -55,11 +55,11 @@ user.
 
 Expire old cache files:
 
-    photogalleryplugincleanup.pl
+    photogalleryplugincacheclean.pl
 
 A possibly suitable system crontab entry:
 
-    0 4 * * * www-data /path/to/foswiki/tools/photogalleryplugincleanup.pl -q
+    0 4 * * * www-data /path/to/foswiki/tools/photogalleryplugincacheclean.pl -q
 
 =cut
 
@@ -133,7 +133,7 @@ do
 ###############################################################################
 # check plugin cache dir
 
-my $foswiki = Foswiki->new() || die();
+my $foswiki = Foswiki->new($Foswiki::cfg{AdminUserLogin}) || die();
 my $workArea = Foswiki::Func::getWorkArea('PhotoGalleryPlugin');
 DEBUG('workArea=%s', $workArea);
 unless ($workArea && -d $workArea)
@@ -187,18 +187,14 @@ foreach my $file (@files)
 }
 
 my $nDeleted = $#agesDeleted + 1;
-if ($nDeleted)
-{
-    PRINT('Deleted %i/%i files (%.1f%%, average age %.1fd).',
-          $nDeleted, $nFiles, $nDeleted / $nFiles * 1e2,
-          _avg(@agesDeleted));
-}
-else
-{
-    PRINT('No files deleted.');
-}
+my $pDeleted = $nDeleted ? $nDeleted / $nFiles * 1e2 : 0;
+my $aDeleted = _avg(@agesDeleted);
+my $aKeep = _avg(@agesKeep);
+PRINT('Deleted %i/%i files (%.1f%%, average age %.1fd). Average age is now %.1fd.',
+      $nDeleted, $nFiles, $pDeleted, $aDeleted, $aKeep);
 
-PRINT('Average cache age is now %.1fd.', _avg(@agesKeep));
+Foswiki::Func::writeEvent('photogalleryplugincacheclean',
+    sprintf('del %i/%i (%.1f%%), %.1fd', $nDeleted, $nFiles, $pDeleted, $aKeep));
 
 
 ################################################################################
