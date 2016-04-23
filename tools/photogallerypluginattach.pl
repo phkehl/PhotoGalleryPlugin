@@ -331,6 +331,7 @@ foreach (@{$control{files}})
 if ( $control{addgallery} && ($#attached > -1) )
 {
     PRINT('* Adding %s macro for %i photos.', '%PHOTOGALLERY%', $#attached + 1);
+    # load topic again, as $meta and $text have changed when we attached files above
     ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
     $text .= "\n\n";
     $text .= "---++ Gallery Created "
