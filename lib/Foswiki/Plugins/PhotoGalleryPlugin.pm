@@ -76,7 +76,7 @@ our $CREATED_YEAR      = '2016';
 
 ####################################################################################################
 
-our $DEBUG  = 0;
+our $DEBUG = 0;
 
 # per-request (page rendered) data,
 # used to handle multiple galleries in the same topic, and other features
@@ -306,7 +306,6 @@ sub doPHOTOGALLERY
     for (my $ix = 0; $ix <= $#attachments; $ix++)
     {
         my $att = $attachments[$ix];
-
         # debug progress if there are many attachments to process
         if ( ($#attachments > 20) && ((($ix + 1) % 20) == 0) )
         {
@@ -316,6 +315,13 @@ sub doPHOTOGALLERY
         # try cached info first
         my $info;
         if ($info = $infoCache->{$att->{name}})
+        {
+            if (!$info || ($info->{version} != $att->{version}))
+            {
+                $info = undef;
+            }
+        }
+        if ($info)
         {
             $nCached++;
         }
@@ -359,7 +365,7 @@ sub doPHOTOGALLERY
         #    ($tr < 1 ? 'width' : 'height', $params->{size}));
         $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
             topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
-            uid => ($att->{pguid} || 0), width => $tw, height => $th);
+            uid => ($att->{pguid} || 0), ver => $info->{version}, width => $tw, height => $th);
         $img->{thumbWidth}  = $tw;
         $img->{thumbHeight} = $th;
         $img->{attTs}     = $att->{date} || 0;
@@ -988,6 +994,7 @@ sub doRestThumb
     my $width   = $query->param('width');
     my $height  = $query->param('height');
     my $refresh = $query->param('refresh') || ''; $refresh = ($refresh =~ m/(on|cache)/i ? 1 : 0);
+    my $ver     = $query->param('ver') || 0;
     my $uid     = $query->param('uid') || 0;
     (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
 
@@ -1028,7 +1035,7 @@ sub doRestThumb
         return undef;
     }
 
-    my $cacheFile = _getCacheFile('thumb', $web, $topic, $name, $quality, $width, $height, $uid);
+    my $cacheFile = _getCacheFile('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
 
     # cache thumbnail unless it exists already
     my $cached = 1;
@@ -1289,9 +1296,14 @@ sub _getImageInfo
             $info->{Coords} = "$info->{Lat}/$info->{Lon}" . ($info->{Alt} ? "/$info->{Alt}" : '');
         }
     }
+
+    # only use stuff that doesn't change or that changes the version, too
+    # (e.g. don't use comment here, as that will not change the version
+    #  and we won't notice the need to refresh the cache)
     if ($att)
     {
         $info->{WikiName} = Foswiki::Func::getWikiName($att->{user});
+        $info->{version} = $att->{version};
     }
 
     return $info;
