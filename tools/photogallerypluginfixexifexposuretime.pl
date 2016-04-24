@@ -63,9 +63,6 @@ foreach my $att ($meta->find("FILEATTACHMENT"))
 {
     next unless ($att->{attachment} =~ m/jpe?g$/i);
 
-
-    next unless ($att->{attachment} =~ m/(IMG_20141101_194238.jpg|IMG_20141025_203704.jpg|IMG_20141025_203700.jpg|IMG_20141025_203700.jpg|IMG_20141025_203656.jpg|DSC00999.JPG)/);
-
     my $aFh = $meta->openAttachment($att->{attachment}, '<');
     my $exif = Image::ExifTool::ImageInfo($aFh, [ 'CreateDate' ], { DateFormat => '%s' });
     if (!$exif->{CreateDate})
