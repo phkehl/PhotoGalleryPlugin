@@ -718,7 +718,7 @@ sub doRestAdmin
          ($actions{$action}->{name}    && !$name)   ||
          ($actions{$action}->{term}    && !$term)   ||
          ($actions{$action}->{target}  && !$target) ||
-         ($actions{$action}->{comment} && !$comment) )
+         ($actions{$action}->{comment} && !defined $comment) )
     {
         $resp->{message} = 'Bad or missing parameters!';
         return _doRestAdminResponse($debugText, $response, $resp);
