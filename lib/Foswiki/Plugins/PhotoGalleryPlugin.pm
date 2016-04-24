@@ -599,6 +599,8 @@ sub beforeUploadHandler
             {
                 _warning("beforeUploadHandler($attr->{attachment}) exiftran failed, res=$res");
             }
+            # SMELL: exiftran changes the filesize, but Foswiki::Meta::attach() doesn't recalculate
+            # the (file)size attribute after calling the handler
 
             #Foswiki::Func::setSessionValue(__PACKAGE__ . '-tfile', $tFile);
             #$q->param(__PACKAGE__ . '-tfile', $tFile);
@@ -640,7 +642,7 @@ sub afterUploadHandler
         unlink($tFile) if (-f $tFile);
     }
 
-    my $setexifdate    = $q->param('setexifdate')    || '';
+    my $setexifdate = $q->param('setexifdate') || '';
     #_debug("setexifdate=$setexifdate");
 
     if ( ($setexifdate eq 'on') &&
