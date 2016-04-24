@@ -76,7 +76,7 @@ our $CREATED_YEAR      = '2016';
 
 ####################################################################################################
 
-our $DEBUG = 0;
+our $DEBUG = ($VERSION =~ m/-dev/ ? 1 : 0);
 
 # per-request (page rendered) data,
 # used to handle multiple galleries in the same topic, and other features
