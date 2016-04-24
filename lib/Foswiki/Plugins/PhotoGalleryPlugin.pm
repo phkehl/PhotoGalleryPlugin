@@ -178,7 +178,10 @@ sub doPHOTOGALLERY
     my $wikiName = Foswiki::Func::getWikiName();
     my $user = Foswiki::Func::getCanonicalUserID($wikiName);
 
-    my $debugStr = "doPHOTOGALLERY($web.$topic)";
+    # unique id per %PHOTOGALLERY% per topic
+    $RV->{uid}++;
+
+    my $debugStr = "doPHOTOGALLERY($web.$topic/$RV->{uid})";
     _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
            "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
            "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName", "user=$user");
@@ -258,7 +261,7 @@ sub doPHOTOGALLERY
     # remove duplicates?
     if ($params->{unique})
     {
-        _debug('remove duplicates');
+        _debug("$debugStr remove duplicates");
         my %seen = ();
         @attachments = grep { my $s = $seen{$_}; $seen{$_}++; !$s } @attachments;
     }
@@ -431,9 +434,6 @@ sub doPHOTOGALLERY
         # don't do that again
         $RV->{jsCss} = 1;
     }
-
-    # unique id per %PHOTOGALLERY% per topic
-    $RV->{uid}++;
 
     # wrapper <div>
     $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" class="photoGallery">',
