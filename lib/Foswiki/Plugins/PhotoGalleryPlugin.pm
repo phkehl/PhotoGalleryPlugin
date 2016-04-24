@@ -383,7 +383,7 @@ sub doPHOTOGALLERY
     #_debug("using", \@images);
     if ($#images < 0)
     {
-        return wtf("No usable images found in $params->{web}.$params->{topic} for '$params->{images}'!");
+        return _wtf("No usable images found in $params->{web}.$params->{topic} for '$params->{images}'!");
     }
 
 

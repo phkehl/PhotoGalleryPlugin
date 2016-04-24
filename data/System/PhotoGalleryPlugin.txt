@@ -164,7 +164,8 @@ photos. There are a number of alternatives:
 |  xx xxx xxx   |     v1.2    | \
 add cache cleanup script, \
 improve bulk upload script, \
-force meta data and thumbnail cache update when attachment version changes  |
+force meta data and thumbnail cache update when attachment version changes, \
+fix plugin crash when all attachments are unreadable (file gone, but FILEATTACHMENT still there)  |
 |  21 Apr 2016  |     v1.1    | \
 cleanup, improve docu, \
 fix setting EXIF exposure date on upload, \
