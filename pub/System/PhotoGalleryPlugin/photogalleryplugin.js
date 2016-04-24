@@ -187,7 +187,7 @@ jQuery(function($)
                 adminMenuEnterTo = setTimeout(function ()
                 {
                     var ix = icon.data('ix');
-                    helper.adminMenu.find('li.timestamp').toggle(eval($(this).data('tsaction')));
+                    helper.adminMenu.find('li.timestamp').toggle(eval(icon.data('tsaction')));
                     helper.adminMenu.fadeIn().position({ my: 'right top', at: 'right top', of: icon });
                     helper.adminMenu.find('li').data('ix', ix);;
                 }, 300);

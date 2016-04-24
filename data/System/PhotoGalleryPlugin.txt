@@ -165,7 +165,8 @@ photos. There are a number of alternatives:
 add cache cleanup script, \
 improve bulk upload script, \
 force meta data and thumbnail cache update when attachment version changes, \
-fix plugin crash when all attachments are unreadable (file gone, but FILEATTACHMENT still there)  |
+fix plugin crash when all attachments are unreadable (file gone, but FILEATTACHMENT still there), \
+fix display of timestamp admin menu entry  |
 |  21 Apr 2016  |     v1.1    | \
 cleanup, improve docu, \
 fix setting EXIF exposure date on upload, \
