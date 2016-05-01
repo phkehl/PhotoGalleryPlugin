@@ -261,9 +261,11 @@ sub doPHOTOGALLERY
     # remove duplicates?
     if ($params->{unique})
     {
-        _debug("$debugStr remove duplicates");
         my %seen = ();
+        my $nAtt = $#attachments + 1;
         @attachments = grep { my $s = $seen{$_}; $seen{$_}++; !$s } @attachments;
+
+        _debug("$debugStr remove " . ($#attachments + 1 - $nAtt) . " duplicates");
     }
 
     # filter-out already shown images?
@@ -397,11 +399,6 @@ sub doPHOTOGALLERY
         $tml .= '%JQREQUIRE{"ui::tooltip,ui::tooltip"}%';
         my @cssDeps = qw(JQUERYPLUGIN::UI::TOOLTIP);
         my @jsDeps  = qw(JQUERYPLUGIN::FOSWIKI::PREFERENCES);
-        #if ($DEBUG)
-        #{
-        #    $tml .= '%JQREQUIRE{"debug"}%';
-        #    push(@jsDeps, 'JQUERYPLUGIN::DEBUG');
-        #}
         if ($params->{admin})
         {
             $tml .= '%JQREQUIRE{ "blockui,pnotify,ui::autocomplete,button" }%';
