@@ -148,7 +148,10 @@ photos. There are a number of alternatives:
      but I think they no longer work in today's Foswiki.
 
 
+---+++ Upgrading
 
+If you have page caching enabled you may need to clear the page cache after
+upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 
 ---
@@ -163,6 +166,7 @@ photos. There are a number of alternatives:
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.3    | \
 - fix some typos in documentation%BR% \
+- add plugin upgrading notes regarding page caching%BR%
 - ... |
 |  1 May 2016   |     v1.2    | \
 - add cache cleanup script%BR% \
