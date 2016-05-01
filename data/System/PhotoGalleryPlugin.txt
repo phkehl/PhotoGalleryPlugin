@@ -162,6 +162,7 @@ photos. There are a number of alternatives:
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.3    | \
+- fix some typos in documentation%BR% \
 - ... |
 |  1 May 2016   |     v1.2    | \
 - add cache cleanup script%BR% \

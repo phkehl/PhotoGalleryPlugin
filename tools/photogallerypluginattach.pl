@@ -82,7 +82,7 @@ Set same comment for all photos:
 
 Set individual comments:
 
-    photogallerypluginattach.pl Main.MyPhotos -c "sunset" IMG_0001.JPG -c "sunrise" IMG_0002.JPG"
+    photogallerypluginattach.pl Main.MyPhotos -c "sunset" IMG_0001.JPG -c "sunrise" IMG_0002.JPG
 
 Read (some) command line arguments from file:
 
