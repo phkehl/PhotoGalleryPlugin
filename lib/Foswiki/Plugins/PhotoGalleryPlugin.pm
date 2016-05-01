@@ -68,8 +68,8 @@ use Image::Epeg;
 
 ####################################################################################################
 
-our $VERSION           = '1.2';
-our $RELEASE           = '1 May 2016';
+our $VERSION           = '1.3-dev';
+our $RELEASE           = 'x xxx xxxx';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
