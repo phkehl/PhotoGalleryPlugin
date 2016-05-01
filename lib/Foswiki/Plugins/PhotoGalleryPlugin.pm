@@ -42,6 +42,7 @@ API. See source code for developer details.
    * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
    * Document and assert exact HTML5 browser requirement.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
+     How much does it really save? Does it work with the livequery stuff?
    * Create dedicated upload plugin (dropzone.js?), maybe move rotate-and-timestamp-on-upload there.
    * ...
 
@@ -454,6 +455,9 @@ sub doPHOTOGALLERY
             $tml .=   '<a class="admin" data-ix="' . $ix . '" data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false')
               . '">%ICON{gear}%</a>' if ($params->{admin});
         }
+        # thumbnail captions, and the captions shown in PhotoSwipe
+        # (We put these here into the HTML so that Foswiki can expand possible macros (e.g. the WikiNames).
+        #  The captions for PhotoSwipe are loaded into the PhotoSwipe items array run-time in JS.)
         if ($img->{thumbcap})
         {
             $tml .=   '<div class="label" style="width: ' . ($params->{size} - 8 - 4 - 4) . 'px;" >';
@@ -467,6 +471,24 @@ sub doPHOTOGALLERY
         $tml .= '</div>'; # frame
     }
     $tml .= '</div>';
+
+    # build items array for PhotoSwipe, and add JSON to the output
+    #my @pswpItems = ();
+    #for (my $ix = 0; $ix <= $#images; $ix++)
+    #{
+    #    my $img = $images[$ix];
+    #    push(@pswpItems,
+    #       {
+    #           w    => $img->{imgWidth},
+    #           h    => $img->{imgHeight},
+    #           src  => $img->{imgUrl},
+    #           msrc => $img->{thumbUrl},
+    #       });
+    #}
+    #$tml .= '<literal><script class="pswpItemsArray" type="text/javascript">';
+    #$tml .= 'console.log(document.currentScript); document.currentScript.dataset.items = ' # Nope! :-(
+    #      . JSON::to_json(\@pswpItems, { pretty => ($DEBUG ? 1 : 0), utf8 => 1 }) . ';';
+    #$tml .= '</script></literal>';
 
     # admin actions thingies
     if ($params->{admin})

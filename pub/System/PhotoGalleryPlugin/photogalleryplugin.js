@@ -11,12 +11,14 @@ jQuery(function($)
 
     $('div.photoGallery:not(.photoGalleryInited').livequery(function()
     {
+        var t0 = +(new Date);
         $(this).addClass('photoGalleryInited');
 
         var pgGlobalsDiv = $('#photoGalleryGlobals');
         DEBUG = pgGlobalsDiv.data('debug');
         pgSetup(
         {
+            t0:           t0,
             pgDiv:        $(this),
             pgGlobalsDiv: pgGlobalsDiv,
             pgUid:        $(this).data('uid'),
@@ -259,6 +261,14 @@ jQuery(function($)
                 actions[action].call(helper.adminMenu, action, ix, helper);
             }
         });
+
+        if (DEBUG)
+        {
+            var dt = ( +(new Date) - helper.t0 ) * 1e-3;
+            var sp = helper.items.length / dt;
+            pgDebug('done ' + helper.pgUid + ': ' +
+                helper.items.length + ' in ' + dt.toFixed(3) + 's, ' + sp.toFixed(0) + '/s' );
+        }
     }
 
 

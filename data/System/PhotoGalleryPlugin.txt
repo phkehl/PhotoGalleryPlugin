@@ -162,18 +162,19 @@ photos. There are a number of alternatives:
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxx   |     v1.2    | \
-add cache cleanup script, \
-improve bulk upload script, \
-force meta data and thumbnail cache update when attachment version changes, \
-fix plugin crash when all attachments are unreadable (file gone, but FILEATTACHMENT still there), \
-fix display of timestamp admin menu entry, \
-allow saving empty comment  |
+- add cache cleanup script%BR% \
+- improve bulk upload script%BR% \
+- force meta data and thumbnail cache update when attachment version changes%BR% \
+- fix plugin crash when all attachments are unreadable (file gone, but FILEATTACHMENT still there)%BR% \
+- fix display of timestamp admin menu entry%BR% \
+- allow saving empty comment%BR% \
+- improved various bits in the plugin code  |
 |  21 Apr 2016  |     v1.1    | \
-cleanup, improve docu, \
-fix setting EXIF exposure date on upload, \
-add bulk upload script   |
+- cleanup and improve docu%BR% \
+- fix setting EXIF exposure date on upload%BR% \
+- add bulk upload script   |
 |  15 Apr 2016  |     v1.0    | \
-initial version     |
+- initial released version     |
 
 
 
