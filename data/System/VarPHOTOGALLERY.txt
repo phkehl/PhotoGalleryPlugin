@@ -135,9 +135,9 @@ See Sandbox.PhotoGalleryPluginTest for some live examples.
 
 ---++ Admin Actions
 
-Galleries renderd with the option =admin="user"= or =admin="on"= add a tools menu
-to the thumbnails where the user has permissions to change the attachment or is
-the attachment's owner. A gear icon appears in the top right corner of such
+Galleries renderd with the option =admin="user"= or =admin="on"= add a tools
+menu to the thumbnails, if the user has permissions to change the attachment or
+is the attachment's owner. A gear icon appears in the top right corner of such
 thumbnails when hovering them with the mouse. The admin menu pops up when
 hovering the gear icon. The following admin actions are available from the menu:
 
