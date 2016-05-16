@@ -164,9 +164,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
-|  xx xxx xxxx  |     v1.3    | \
-- fix some typos in documentation%BR% \
-- add plugin upgrading notes regarding page caching%BR%
+|  xx xxx xxxx  |     v1.3-dev  | \
+- Add possibility to automatically split galleries into individual days by injecting customisable headings. %BR% \
 - ... |
 |  1 May 2016   |     v1.2    | \
 - add cache cleanup script%BR% \

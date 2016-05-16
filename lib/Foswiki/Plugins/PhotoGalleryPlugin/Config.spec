@@ -16,6 +16,10 @@ $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault} = 85;
 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault} = '$wday $day $month $year $hours:$minutes';
 
 # **STRING**
+# Default <code>dayheadingfmt</code> parameter for <a href="view/System/VarPHOTOGALLERY"><code>%PHOTOGALLERY%</code></a> (<a href="view/">GMTIME</a> style).
+$Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault} = '$n---++ $wday $day $month $year$n';
+
+# **STRING**
 # Default <code>caption</code> parameter for <a href="view/System/VarPHOTOGALLERY"><code>%PHOTOGALLERY%</code></a>.
 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault} = '$comment($BR )($n/$N, $CreateDate(, )$ExposureTime(, )$FocalLength(, )$ApertureValue(, )$ISO(, )$Coords(, )$MakeModel(, )$WikiName, $name, $ImageSize, $size(MB)[MB])';
 

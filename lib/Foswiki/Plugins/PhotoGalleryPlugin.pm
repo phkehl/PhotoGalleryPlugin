@@ -44,6 +44,8 @@ API. See source code for developer details.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
      How much does it really save? Does it work with the livequery stuff?
    * Create dedicated upload plugin (dropzone.js?), maybe move rotate-and-timestamp-on-upload there.
+   * Sort out timezone mess. Foswiki::Time::formatTime() isn't going to help.
+   * Honour refresh=cache/on in %PHOTOGALLERY% (?). Be careful with PageCaching enabled.
    * ...
 
 =cut
@@ -175,6 +177,8 @@ sub doPHOTOGALLERY
     $params->{unique}      = _checkBool($params->{unique}    || 'on' );
     $params->{admin}       = _checkOptions($params->{admin},
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault}, 'on', 'off', 'user');
+    $params->{dayheading}  = _checkOffOrRange($params->{dayheading}, '', 0, 0, 24);
+    $params->{headingfmt}||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault};
 
     my $wikiName = Foswiki::Func::getWikiName();
     my $user = Foswiki::Func::getCanonicalUserID($wikiName);
@@ -185,7 +189,8 @@ sub doPHOTOGALLERY
     my $debugStr = "doPHOTOGALLERY($web.$topic/$RV->{uid})";
     _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
            "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
-           "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName", "user=$user");
+           "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName",
+           "user=$user", "dayheading=$params->{dayheading}");
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
@@ -377,6 +382,27 @@ sub doPHOTOGALLERY
         $img->{attTs}     = $att->{date} || 0;
         $img->{exifTs}    = $info->{CreateDate} || 0;
         $img->{wikiName}  = $info->{WikiName} || '';
+
+        # calculate the day this photo belongs to
+        $img->{day} = 0;
+        my $timestamp = $info->{CreateDate} || $att->{date} || 0;
+        if ( ($params->{dayheading} ne '') && ($timestamp > 86400) )
+        {
+            my ($hour, $minute);
+            if ($Foswiki::cfg{DisplayTimeValues} eq 'servertime')
+            {
+                ($hour, $minute) = (localtime($timestamp))[2,1];
+            }
+            else
+            {
+                ($hour, $minute) = (gmtime($timestamp))[2,1];
+            }
+            my $hourMinute = $hour + ($minute / 60);
+            $img->{day} = $hourMinute < $params->{dayheading} ? $timestamp - 86400 : $timestamp;
+            $img->{day} = (int($img->{day} / 86400) * 86400) + 43200;
+        }
+
+        # add to list of images to render into the gallery, remember which images we've seen
         push(@images, $img);
         $RV->{shown}->{$att->{name}}++;
     }
@@ -438,10 +464,21 @@ sub doPHOTOGALLERY
                     $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
 
     # render gallery HTML
+    my $prevDayheading = 0;
     $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0">';
     for (my $ix = 0; $ix <= $#images; $ix++)
     {
         my $img = $images[$ix];
+
+        # add headings if enabled
+        if ( ($params->{dayheading} ne '') && ($img->{day} > $prevDayheading) )
+        {
+            $prevDayheading = $img->{day};
+            my $h = Foswiki::Time::formatTime($img->{day}, $params->{headingfmt});
+            $h =~ s{\$n}{\n}g;
+            $tml .= $h;
+        }
+
         #$tml .= '<div class="frame" style="width: ' . $img->{thumbWidth}. 'px; height: ' . $img->{thumbHeight} . 'px;">';
         $tml .= '<div class="frame" data-name="' . $img->{name} . '">';
         $tml .=   '<div class="crop" style="width: ' . $params->{size}. 'px; height: ' . $params->{size} . 'px;">';
@@ -1190,6 +1227,28 @@ sub _checkBool
     my ($val) = @_;
     my %true = ( yes => 1, on => 1 );
     return $true{$val} ? 1 : 0;
+}
+
+# check and assert range of a parameter
+# $value = _checkValue($input, $default, $min, $max)
+sub _checkRange
+{
+    my ($val, $def, $min, $max) = @_;
+    if    (!defined $val || ($val eq '') ) { return $def; }
+    if    ($val < $min)                    { return $min; }
+    elsif ($val > $max)                    { return $max; }
+    else                                   { return $val; }
+    #return ($val < $min) || ($val > $max) ? $def : $val;
+}
+
+# check "off" or range of a parameter
+# $value | '' = _checkOffOrRange($input, $defaultOff, $defaultOn, $min, $max)
+sub _checkOffOrRange
+{
+    my ($val, $defOff, $defOn, $min, $max) = @_;
+    if    (!defined $val || ($val eq '') || ($val eq 'off') ) { return $defOff; }
+    elsif ($val eq 'on') { return $defOn; }
+    else { return _checkRange($val, $defOn, $min, $max); }
 }
 
 # calculate thumbnail dimensions given the original with and height and the desired short edge size

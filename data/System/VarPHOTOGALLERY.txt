@@ -97,6 +97,19 @@ Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines
 | Caption format for zoomed photo view if different from =caption= format.  \
 | see =caption=  \
 |
+| =dayheading=  \
+| Split gallery into sections by adding headings between different days.  \
+Use =off= to disable inserting headings. Use a numerical, decimal hour of day  \
+value to specify when a new day starts. E.g. =0= (or =on=) will consider  \
+midnight and =3.5= will consider =03.30h= (half past three in the night) as the start of a new day. \
+| =off=  \
+|
+| =headingfmt=  \
+| A [[%SYSTEMWEB%.VarGMTIME][%<nop>GMTIME%]] style format string to format the  \
+headings inserted by =dayheading=. It also expands the standard  \
+%SYSTEMWEB%.FormatTokens (=$n= etc.)  \
+| =$n---++ $wday $day $month $year$n= %RED%<sup>1</sup>%ENDCOLOR%  \
+|
 
 %RED%<sup>1</sup>%ENDCOLOR% These defaults depend on
 [[PhotoGalleryPlugin#Plugin_Configuration_and_Defaults][plugin configuration defaults]]
