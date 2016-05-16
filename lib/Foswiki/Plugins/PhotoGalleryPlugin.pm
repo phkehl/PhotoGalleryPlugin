@@ -475,7 +475,7 @@ sub doPHOTOGALLERY
         {
             $prevDayheading = $img->{day};
             my $h = Foswiki::Time::formatTime($img->{day}, $params->{headingfmt});
-            $h =~ s{\$n}{\n}g;
+            $h = Foswiki::expandStandardEscapes($h);
             $tml .= $h;
         }
 
