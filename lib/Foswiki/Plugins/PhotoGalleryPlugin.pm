@@ -1229,18 +1229,6 @@ sub _checkBool
     return $true{$val} ? 1 : 0;
 }
 
-# check and assert range of a parameter
-# $value = _checkValue($input, $default, $min, $max)
-sub _checkRange
-{
-    my ($val, $def, $min, $max) = @_;
-    if    (!defined $val || ($val eq '') ) { return $def; }
-    if    ($val < $min)                    { return $min; }
-    elsif ($val > $max)                    { return $max; }
-    else                                   { return $val; }
-    #return ($val < $min) || ($val > $max) ? $def : $val;
-}
-
 # check "off" or range of a parameter
 # $value | '' = _checkOffOrRange($input, $defaultOff, $defaultOn, $min, $max)
 sub _checkOffOrRange
