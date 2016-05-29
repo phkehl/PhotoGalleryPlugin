@@ -167,7 +167,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  xx xxx xxxx  |     v1.5-dev  | \
 - ... |
 |  29 May 2016  |     v1.4    | \
-- minor cleanup (rmove duplicate function, fix dependency file)  |
+- minor cleanup (remove duplicate function, fix dependency file)  |
 |  16 May 2016  |     v1.3    | \
 - add possibility to automatically split galleries into individual days by injecting customisable headings %BR% \
 - minor documentation improvements  |
