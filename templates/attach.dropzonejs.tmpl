@@ -1,0 +1,24 @@
+%{
+
+PhotoGalleryPlugin's DropzoneJS skin extension for the PatternSkin.
+
+This adds a DropzoneJS upload form to allow for batch uploads of many files.
+
+}%
+%TMPL:INCLUDE{"attach"}%
+%TMPL:DEF{"dropzonejs"}%%JQREQUIRE{"ui::tooltip"}%%ADDTOZONE{
+    "script" id="dropzonejs-js" requires="JQUERYPLUGIN"
+    text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.js\"></script>"
+}%%ADDTOZONE{
+    "script" id="dropzonejsskin-js" requires="dropzonejs-js,JavascriptFiles/strikeone"
+    text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.js\"></script>"
+}%%ADDTOZONE{
+    "head" id="dropzonejs-css" requires="JQUERYPLUGIN::THEME"
+    text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.css\"/>"
+}%%ADDTOZONE{
+    "head" id="dropzonejsskin-css" requires="dropzonejs-css"
+    text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.css\"/>"
+}%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
+%MAKETEXT{"Drop files here or click top open a file selection dialog:"}%
+<div class="foswikiInputField dropZoneFiles"></div>
+</div>%TMPL:END%%TMPL:P{"dropzonejs"}%

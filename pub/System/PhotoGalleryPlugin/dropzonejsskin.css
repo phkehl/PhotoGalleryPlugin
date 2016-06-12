@@ -1,0 +1,43 @@
+/* PhotoGalleryPlugin DropzoneJS Foswiki integration stylesheet */
+
+div.dropZoneContainer { min-width: 30em; overflow: auto; }
+div.dropZoneFiles { height: 20em; overflow-y: scroll; }
+
+.dropzone .dz-preview {
+    display: block; width: 100%; height: 1.4em; box-sizing: content-box;
+    margin: 0.2em 0; overflow: hidden; line-height: 1.0em; }
+.dropzone .dz-preview .dz-image { display: none; }
+
+.dropzone .dz-preview .dz-filename,
+.dropzone .dz-preview .dz-size,
+.dropzone .dz-preview .dz-progress,
+.dropzone .dz-preview.dz-success .dz-success-mark,
+.dropzone .dz-preview.dz-error   .dz-error-mark,
+.dropzone .dz-preview .dz-remove {
+    display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    line-height: 1.2em; margin: 0.1em 0; }
+
+.dropzone .dz-preview .dz-filename { width: calc(100% - 13.6em - 16px - 16px); padding: 0 0.25em; }
+.dropzone .dz-preview .dz-size     { width:  5em; padding: 0 0.25em; text-align: right; }
+.dropzone .dz-preview .dz-progress { width:  8em; height: 1.0em; margin: 0.2em 0.1em; }
+.dropzone .dz-preview .dz-remove,
+.dropzone .dz-preview .dz-error-mark,
+.dropzone .dz-preview .dz-success-mark { width: 16px; height: 16px; margin-left: 0.1em; height: 1.2em; }
+
+.dropzone .dz-preview .dz-error-mark,
+.dropzone .dz-preview .dz-success-mark { top: unset; left: unset; position: unset; margin-left: 0.1em; }
+
+.dropzone .dz-preview:hover            { background-color: hsl(  0,  0%, 80%); }
+.dropzone .dz-preview.dz-success       { background-color: hsl(125, 60%, 75%); }
+.dropzone .dz-preview.dz-success:hover { background-color: hsl(125, 60%, 65%); }
+.dropzone .dz-preview.dz-error         { background-color: hsl(  0, 60%, 75%); }
+.dropzone .dz-preview.dz-error:hover   { background-color: hsl(  0, 60%, 65%); }
+
+.dropzone .dz-preview .dz-size strong { font-weight: normal; }
+
+.dropzone .dz-preview .dz-remove       { background-image: url('../FamFamFamSilkIcons/cancel.png'); }
+.dropzone .dz-preview .dz-success-mark { background-image: url('../FamFamFamSilkIcons/accept.png'); }
+.dropzone .dz-preview .dz-error-mark   { background-image: url('../FamFamFamSilkIcons/exclamation.png'); }
+
+
+/* eof */

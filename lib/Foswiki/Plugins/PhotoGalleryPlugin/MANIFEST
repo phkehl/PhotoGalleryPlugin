@@ -45,3 +45,12 @@ pub/Sandbox/PhotoGalleryPluginTest/IMG_1323.jpg 0644 Plugin test photo
 pub/Sandbox/PhotoGalleryPluginTest/IMG_1324.jpg 0644 Plugin test photo
 pub/Sandbox/PhotoGalleryPluginTest/IMG_1071.JPG 0644 Plugin test photo
 
+# dropzone.js
+pub/System/PhotoGalleryPlugin/dropzone.compressed.css        0644 DropzoneJS stylesheet
+pub/System/PhotoGalleryPlugin/dropzonebasic.compressed.css   0644 DropzoneJS stylesheet
+pub/System/PhotoGalleryPlugin/dropzone.compressed.js         0644 DropzoneJS javascript code
+pub/System/PhotoGalleryPlugin/dropzonejsskin.compressed.css  0644 DropzoneJS Foswiki integration stylesheet
+pub/System/PhotoGalleryPlugin/dropzonejsskin.compressed.js   0644 DropzoneJS Foswiki integration javascript code
+templates/attach.dropzonejs.tmpl                             0644 DropzoneJS attach page integration
+
+# eof

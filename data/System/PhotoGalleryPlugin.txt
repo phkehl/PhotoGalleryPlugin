@@ -112,7 +112,7 @@ manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 ---+++ Skin Extension
 
 To activate the upload form options described above add (prepend) =photogallery=
-to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for details.
+to the =SKIN= list in [[%LOCALSITEPREFS%]]. To activate the  See [[Skins]] for details.
 
 ---+++ Cache
 
