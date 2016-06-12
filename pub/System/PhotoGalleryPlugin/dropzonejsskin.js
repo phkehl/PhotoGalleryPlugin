@@ -62,7 +62,7 @@ jQuery(function($)
             addRemoveLinks:         true,
             parallelUploads:        1,
             createImageThumbnails:  false,
-            maxFiles:               2, // TODO
+            maxFiles:               100,
             uploadMultiple:         false,
             paramName:              'filepath',
             //dictDefaultMessage: 'drop here',

@@ -34,7 +34,10 @@ image scaling and transition magic.
 See VarPHOTOGALLERY on how to use it.
 
 The plugin ships with a bulk attach script (=tools/photogallerypluginattach.pl=)
-with built-in help.
+with built-in help. Optionally a skin extension to allow bulk uploading of
+images (or any file, even without activating or using this plugin) via the
+normal attach action is included. Currently [[http://www.dropzonejs.com][DropzoneJS]]
+by Matias Meno is used to support bulk uploading.
 
 See [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
 for developer details.
@@ -73,21 +76,20 @@ interface:
 
 The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference settings]].
 
----+++ Skin Extension
+---+++ Skin Extensions
 
-This plugin comes with a [[%SYSTEMWEB%.Skins][skin]] extension that adds two options
-(checkboxes) to the upload form, namely
+This plugin comes with a two skin extensions to the [[%SYSTEMWEB%.PatternSkin][PatternSkin]].
 
-   * an option to activate lossless rotation of JPEG images based on EXIF camera
-     orientation meta data, and
-   * an option to set the attachment upload date to the photo exposure time
-     (from EXIF).
+The first adds two options (checkboxes) to the upload form, namely an option to
+activate lossless rotation of JPEG images based on EXIF camera orientation meta
+data, and an option to set the attachment upload date to the photo exposure time
+(from EXIF).
 
-The skin extension comes with two [[%SYSTEMWEB%.SkinTemplates][skin templates]] that
-add the options to the [[%SYSTEMWEB%.PatternSkin][PatternSkin]]'s and the
-[[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]]'s upload
-form.
+The second replaces (parts of) the upload form with bulk upload form that allows
+uploading multiple files.
 
+The skin extension comes in the form of a [[%SYSTEMWEB%.SkinTemplates][skin
+templates]]. See the _Installation_ section below.
 
 
 
@@ -109,10 +111,13 @@ The [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl module might not
 be available as a system package. It can be downloaded from CPAN and be built and installed
 manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 
----+++ Skin Extension
+---+++ Skin Extensions
 
 To activate the upload form options described above add (prepend) =photogallery=
-to the =SKIN= list in [[%LOCALSITEPREFS%]]. To activate the  See [[Skins]] for details.
+(for JPEG rotation and timestamp options) and/or =dropzonejs= (for bulk
+uploading) to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for
+details. The =dropzonejs= skin extension also works without activating this
+plugin.
 
 ---+++ Cache
 
@@ -124,28 +129,6 @@ cronjob to run the script on a regular basis. Run
 =tools/photogalleryplugincleanup.pl -h= to see the built-in help for more
 details. Alternatively, standard system tools, such as "tmpreaper", can be used
 to remove old files. No harm is done removing them all from time to time.
-
-
----+++ Bulk Upload
-
-The standard Foswiki file upload mechnism is not exactly suitable to upload many
-photos. There are a number of alternatives:
-
-   * Use the bulk attach script shipped with this plugin
-     (=tools/photogallerypluginattach.pl=). The script must be executed on the
-     server where Foswiki is running. It can then attach any number of photos to
-     a topic. The image files must reside on the server, too. Note that the
-     script must be executed as the server Foswiki (or the web server) is
-     running as.
-   * The [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]]
-     replaces the standard upload form with a multi-file upload mechanism (plus
-     some more attachment manipulation features). If you do not like its
-     "interaction stuff" it adds to the view template you can disable that by
-     removing =templates/view.topicinteraction.tmpl=.
-   * A number of other plugins used to be available
-     ([[Foswiki:Extensions/UploadPlugin][UploadPlugin]],
-     [[Foswiki:Extensions/BatchUploadPlugin][BatchUploadPlugin]], maybe more)
-     but I think they no longer work in today's Foswiki.
 
 
 ---+++ Upgrading
@@ -165,6 +148,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.5-dev  | \
+- add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page%BR% \
 - ... |
 |  29 May 2016  |     v1.4    | \
 - minor cleanup (remove duplicate function, fix dependency file)  |
