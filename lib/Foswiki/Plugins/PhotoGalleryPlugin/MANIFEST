@@ -6,7 +6,6 @@ lib/Foswiki/Plugins/PhotoGalleryPlugin/Config.spec 0444 Configuration
 
 # upload form extension templates
 templates/attach.photogallery.tmpl 0644 Attachment page options for Pattern skin
-templates/metadata.photogallery.tmpl 0644 Attachment page options for TopicInteractionPlugin skin
 
 # bulk attachment script
 tools/photogallerypluginattach.pl 0755 Bulk attachment script
