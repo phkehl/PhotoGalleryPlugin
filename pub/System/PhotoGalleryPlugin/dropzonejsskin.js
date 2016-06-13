@@ -4,15 +4,18 @@ jQuery(function($)
 {
     "use strict";
 
-    var DEBUG = true;
+    // add "debug=1" to the query string to enable debugging
+    var DEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
 
     $(document).ready(function()
     {
-        // get normal upload form elements and data that we'll need, abort if incomplete
+        // check for and get the normal upload form elements and data that we'll
+        // need, abort if incomplete
         var uplFileSel   = $('input[name=filepath]');
         var uplForm      = $('form');
         var dzCont       = $('div.dropZoneContainer');
         var dzFiles      = $('div.dropZoneFiles');
+        var dzFilesResize= $('div.dropZoneFilesResize');
         var formAction   = uplForm.attr('action');
         var submitButton = uplForm.find('input[type=submit]');
         var filecommentInput   = uplForm.find('input[name=filecomment]');
@@ -26,30 +29,20 @@ jQuery(function($)
         {
             return;
         }
-        //dzDebug('uplFileSel', uplFileSel);
-        //dzDebug('uplForm', uplForm);
-        //dzDebug('submitButton', submitButton);
-        //dzDebug('dzCont', dzCont);
-        //dzDebug('dzFiles', dzFiles);
-        //dzDebug('filecommentInput', filecommentInput);
-        //dzDebug('validationkeyInput', validationkeyInput);
-        //dzDebug('propertiesCheckboxes', propertiesCheckboxes);
+        dzDebug('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
+            submitButton: submitButton, dzCont: dzCont, dzFiles: dzFiles,
+            filecommentInput: filecommentInput, validationkeyInput: validationkeyInput,
+            propertiesCheckboxes: propertiesCheckboxes });
 
-        var tooltipDefaults =
-        {
-            arrow: 1, position: { my: 'center top+5', at: 'center bottom' },
-            delay: 150, duration: 0, tooltipClass: 'help arrow'
-        };
+        // the current CSRF key, will be updated after every upload
+        // (see https://foswiki.org/Development/HowToIntegrateWithRequestValidation)
         var nonce = validationkeyInput.val();
-
-        //var iconPath = foswiki.getPreference('PUBURLPATH') + '/' +
-        //    foswiki.getPreference('SYSTEMWEB') + '/FamFamFamSilkIcons';
 
         // put dropzone div in place of the upload file selector
         dzCont.insertAfter(uplFileSel);
         uplFileSel.hide();
 
-        // initialise DropzoneJS
+        // DropzoneJS options
         Dropzone.autoDiscover = false
         Dropzone.options.dropzoneUpload = false; // what is this for?
         var dzOpts =
@@ -65,12 +58,9 @@ jQuery(function($)
             maxFiles:               100,
             uploadMultiple:         false,
             paramName:              'filepath',
-            //dictDefaultMessage: 'drop here',
-            //dictCancelUpload:   'cancel',
-            //dictRemoveFile:     'remove',
-            //dictRemoveFile: '<img title="remove file" src="' + iconPath + '/cancel.png"/>',
             dictRemoveFile: ' ',
-            //forceFallback: true,
+            // fall-back to original upload form if the browser isn't supported
+            //forceFallback: true, // for testing
             previewTemplate:        '' +
                 '<div class="dz-preview dz-file-preview">' +
                 '<div class="dz-filename"><span data-dz-name></span></div>' +
@@ -78,47 +68,58 @@ jQuery(function($)
                 '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
                 '<div class="dz-success-mark">&nbsp;</div>' +
                 '</div>',
-            fallback: function () { dzDebug('fallback'); uplFileSel.show(); dzCont.remove(); }
+            fallback: function () { uplFileSel.show(); dzCont.remove(); }
         };
         dzDebug('dzOpts', dzOpts);
 
+        // initialise the DropzoneJS...
         var dzInst = new Dropzone(dzFiles.get(0), dzOpts);
         if (!dzInst)
         {
             return;
         }
+
+        // ...and style and show it
         dzFiles.addClass('dropzone');
         dzCont.show();
         dzDebug('instance', dzInst);
 
+        // on error, add a tooltip to the file entry with the error message
         dzInst.on('error', function (file, msg, xhr)
         {
             dzDebug('error file: ' + msg, [ file, xhr ]);
-            $(file.previewElement).attr('title', msg)
-                .tooltip($.extend({}, tooltipDefaults, { tooltipClass: 'error arrow' }));
-
+            addTooltip(file.previewElement, msg, { tooltipClass: 'error' });
         });
 
+        // when a file is dropped or added...
         dzInst.on('addedfile', function (file)
         {
-            dzDebug('addedfile file', { file: file, nonce: nonce } );
-            $(file._removeLink).attr('title', 'click to remove file from list')
-                .tooltip($.extend({}, tooltipDefaults))
-                .on('click', function () { $(this).tooltip('destroy'); });
+            dzDebug('addedfile file', { file: file } );
 
-            // store form parameters
+            // ...add a tooltip to the remove icon
+            addTooltip(file._removeLink, 'click to remove file from list');
+            $(file._removeLink).on('click', function () { $(this).tooltip('destroy'); });
+
+            // ...store form parameters
+            var tooltip = '';
             file._dzParam = {};
-            file._dzParam.filecomment    = filecommentInput.val();
+            file._dzParam.filecomment = filecommentInput.val();
+            tooltip += '<em>comment:</em> ' + (file._dzParam.filecomment || 'no comment set');
             propertiesCheckboxes.each(function ()
             {
                 if ($(this).attr('checked'))
                 {
-                    file._dzParam[ $(this).attr('name') ] = 'on';
+                    var name = $(this).attr('name');
+                    file._dzParam[name] = 'on';
+                    tooltip += '<br/><em>' + name + ':</em> on';
                 }
             });
 
+            // ...add an info tooltip with the form parameters
+            addTooltip(file.previewElement, tooltip, { tooltipClass: 'info' });
         });
 
+        // override the default submit ("Uplaod file") button to start the DropzoneJS uploads
         submitButton.on('click', function (e)
         {
             dzDebug('submit', { e: e });
@@ -127,15 +128,15 @@ jQuery(function($)
             e.stopImmediatePropagation();
             e.preventDefault();
         });
-
         dzInst.on('queuecomplete', function ()
         {
             dzInst.options.autoProcessQueue = false;
         });
 
+        // add form parameters to the POST request (the upload)
         dzInst.on('sending', function (file, xhr, form)
         {
-            dzDebug('sending file', { file: file, xhr: xhr, form: form });
+            dzDebug('sending file', { file: file, xhr: xhr, form: form, nonce: nonce });
             file._dzParam.noredirect = 1;
             if (nonce.charAt(0) == '?')
             {
@@ -149,23 +150,30 @@ jQuery(function($)
             {
                 form.append(k, file._dzParam[k]);
             });
+
+            dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });
         });
 
-        //dzInst.on('complete', function (file, msg, xhr)
-        //{
-        //    dzDebug('complete file', file); dzDebug('complete msg', msg); dzDebug('complete xhr', xhr);
-        //});
-        dzInst.on('success', function (file, xhr)
+        // update nonce if we got a new one in Foswiki's response
+        dzInst.on('complete', function (file)
         {
+            dzDebug('complete file', { file: file});
             var newNonce = file.xhr.getResponseHeader('X-Foswiki-Validation');
-            dzDebug('success file', { file: file, xhr: xhr, newNonce: newNonce });
+            dzDebug('success file', { file: file, newNonce: newNonce });
             if (newNonce)
             {
                 nonce = '?' + newNonce;
             }
+        });
+
+        // allow one more file on success
+        dzInst.on('success', function (file)
+        {
             dzInst.options.maxFiles++;
         });
 
+        // make the dropzone resizable in height (but not width)
+        dzFilesResize.resizable({ handles: 's' });
 
     });
 
@@ -190,6 +198,19 @@ jQuery(function($)
                 console.log('dz: ' + strOrObj);
             }
         }
+    }
+
+    // add a (HTML) tooltip to the element
+    function addTooltip(el, tooltip, params = {})
+    {
+        var tooltipDefaults =
+        {
+            arrow: 1, position: { my: 'center top+5', at: 'center bottom' },
+            delay: 150, duration: 0, tooltipClass: 'help'
+        };
+        var p = $.extend(tooltipDefaults, { content: tooltip }, params);
+        //dzDebug('addTooltip()', { el: el, p: p });
+        $(el).attr('title', '').tooltip(p);
     }
 
 });
