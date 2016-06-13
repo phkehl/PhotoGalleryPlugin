@@ -97,7 +97,7 @@ jQuery(function($)
             dzDebug('addedfile file', { file: file } );
 
             // ...add a tooltip to the remove icon
-            addTooltip(file._removeLink, 'click to remove file from list');
+            addTooltip(file._removeLink, 'click to remove file from list', {});
             $(file._removeLink).on('click', function () { $(this).tooltip('destroy'); });
 
             // ...store form parameters
@@ -201,7 +201,7 @@ jQuery(function($)
     }
 
     // add a (HTML) tooltip to the element
-    function addTooltip(el, tooltip, params = {})
+    function addTooltip(el, tooltip, params)
     {
         var tooltipDefaults =
         {
