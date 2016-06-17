@@ -19,8 +19,7 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
     "head" id="dropzonejsskin-css" requires="dropzonejs-css"
     text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.compressed.css\"/>"
 }%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
-%MAKETEXT{"Drop files here or click top open a file selection dialog:"}%
+%MAKETEXT{"Drop files in the box below or click it to open a file selection dialog. Set comment and properties before dropping or adding files. They will be set for every file as they are when the files are dropped or added."}%
 <div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"></div></div>
 <div class="dropZoneUploadProgress"><div class="dropZoneUploadProgressLabel"></div></div>
-%MAKETEXT{"Set comment and properties before dropping or adding files. They will be set for every file as they are when the files are dropped or added."}%
 </div>%TMPL:END%%TMPL:P{"dropzonejs"}%
