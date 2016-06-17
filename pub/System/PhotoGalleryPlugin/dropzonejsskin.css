@@ -39,7 +39,8 @@ div.dropZoneFilesResize { height: 10em; }
 .dropzone .dz-preview .dz-size strong { font-weight: normal; }
 
 .dropzone .dz-preview               .dz-remove,
-.dropzone .dz-preview.dz-complete   .dz-remove { background-image: url('../FamFamFamSilkIcons/delete.png'); }
+.dropzone .dz-preview.dz-complete.dz-success    .dz-remove,
+.dropzone .dz-preview.dz-complete.dz-error      .dz-remove { background-image: url('../FamFamFamSilkIcons/delete.png'); }
 .dropzone .dz-preview.dz-processing .dz-remove { background-image: url('../FamFamFamSilkIcons/cancel.png'); }
 .dropzone .dz-preview .dz-success-mark { background-image: url('../FamFamFamSilkIcons/accept.png'); }
 .dropzone .dz-preview .dz-error-mark   { background-image: url('../FamFamFamSilkIcons/exclamation.png'); }
