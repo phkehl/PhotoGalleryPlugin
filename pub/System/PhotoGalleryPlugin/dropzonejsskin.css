@@ -1,6 +1,6 @@
 /* PhotoGalleryPlugin DropzoneJS Foswiki integration stylesheet */
 
-div.dropZoneContainer { min-width: 30em; overflow: hidden; }
+div.dropZoneContainer { min-width: 40em; overflow: hidden; }
 div.dropZoneFiles { height: 100%; overflow-y: scroll; }
 div.dropZoneFilesResize { height: 10em; }
 
@@ -20,9 +20,9 @@ div.dropZoneFilesResize { height: 10em; }
 .dropzone .dz-preview .dz-remove { color: transparent; }
 .dropzone .dz-preview .dz-remove:hover { text-decoration: none; }
 
-.dropzone .dz-preview .dz-filename { width: calc(100% - 13.6em - 16px - 16px); padding: 0 0.25em; }
+.dropzone .dz-preview .dz-filename { width: calc(100% - 20.6em - 16px - 16px); padding: 0 0.25em; }
 .dropzone .dz-preview .dz-size     { width:  5em; padding: 0 0.25em; text-align: right; }
-.dropzone .dz-preview .dz-progress { width:  8em; height: 1.0em; margin: 0.2em 0.1em; }
+.dropzone .dz-preview .dz-progress { width: 15em; height: 1.0em; margin: 0.2em 0.1em; }
 .dropzone .dz-preview .dz-remove,
 .dropzone .dz-preview .dz-error-mark,
 .dropzone .dz-preview .dz-success-mark { width: 16px; height: 16px; margin-left: 0.1em; height: 1.2em; }
