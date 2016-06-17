@@ -91,6 +91,12 @@ jQuery(function($)
             addTooltip(file.previewElement, msg, 'error');
         });
 
+        // display a message while DropzoneJS is processing dropped/added files
+        dzInst.on('drop', function (e)
+        {
+            dzFiles.block({ message: 'Processing files&hellip;' });
+        });
+
         // when a file is dropped or added...
         dzInst.on('addedfile', function (file)
         {
@@ -98,7 +104,10 @@ jQuery(function($)
 
             // ...add a tooltip to the remove icon
             addTooltip(file._removeLink, 'click to remove file from list', 'help');
-            $(file._removeLink).on('click', function () { $(this).tooltip('destroy'); });
+            $(file._removeLink).on('click', function ()
+            {
+                $(this).tooltip('destroy').parent().tooltip('destroy');
+            });
 
             // ...store form parameters
             var tooltip = '';
@@ -117,7 +126,17 @@ jQuery(function($)
 
             // ...add an info tooltip with the form parameters
             addTooltip(file.previewElement, tooltip, 'info');
+
+            this.updateTotalUploadProgress();
+
+            // (mostly) done processing files
+            dzFiles.unblock();
         });
+
+        // show overall upload progress
+        var progBar = $('div.dropZoneUploadProgress');
+        var progLabel = $('div.dropZoneUploadProgressLabel');
+        progBar.progressbar({ disabled: true, max: 100.0 });
 
         // override the default submit ("Uplaod file") button to start the DropzoneJS uploads
         submitButton.on('click', function (e)
@@ -125,13 +144,35 @@ jQuery(function($)
             dzDebug('submit', { e: e });
             dzInst.processQueue();
             dzInst.options.autoProcessQueue = true;
+            progBar.progressbar('value', undefined);
+            progBar.progressbar('enable');
             e.stopImmediatePropagation();
             e.preventDefault();
         });
         dzInst.on('queuecomplete', function ()
         {
             dzInst.options.autoProcessQueue = false;
+            progBar.progressbar('disable');
         });
+        dzInst.on('totaluploadprogress', function (uploadProgress, totalBytes, totalBytesSent)
+        {
+            //dzDebug('uploadprogress', [ this, uploadProgress, totalBytes, totalBytesSent ]);
+            // need to recalculate these because DropzoneJS calculates rubbish
+            uploadProgress = totalBytes = totalBytesSent = 0;
+            this.files.forEach(function (f)
+            {
+                if (f.upload)
+                {
+                    totalBytes += f.upload.total || 0;
+                    totalBytesSent += f.upload.bytesSent || 0;
+                }
+            });
+            uploadProgress = totalBytes ? (totalBytesSent / totalBytes * 1e2) : 0;
+            progBar.progressbar('value', uploadProgress);
+            progLabel.html('Uploaded: ' + this.filesize(totalBytesSent) + ' / ' + this.filesize(totalBytes)
+                           + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%)': ''));
+        });
+        dzInst.updateTotalUploadProgress();
 
         // add form parameters to the POST request (the upload)
         dzInst.on('sending', function (file, xhr, form)
