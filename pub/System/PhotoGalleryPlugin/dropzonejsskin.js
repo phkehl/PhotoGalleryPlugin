@@ -88,7 +88,7 @@ jQuery(function($)
         dzInst.on('error', function (file, msg, xhr)
         {
             dzDebug('error file: ' + msg, [ file, xhr ]);
-            addTooltip(file.previewElement, msg, { tooltipClass: 'error' });
+            addTooltip(file.previewElement, msg, 'error');
         });
 
         // when a file is dropped or added...
@@ -97,7 +97,7 @@ jQuery(function($)
             dzDebug('addedfile file', { file: file } );
 
             // ...add a tooltip to the remove icon
-            addTooltip(file._removeLink, 'click to remove file from list', {});
+            addTooltip(file._removeLink, 'click to remove file from list', 'help');
             $(file._removeLink).on('click', function () { $(this).tooltip('destroy'); });
 
             // ...store form parameters
@@ -116,7 +116,7 @@ jQuery(function($)
             });
 
             // ...add an info tooltip with the form parameters
-            addTooltip(file.previewElement, tooltip, { tooltipClass: 'info' });
+            addTooltip(file.previewElement, tooltip, 'info');
         });
 
         // override the default submit ("Uplaod file") button to start the DropzoneJS uploads
@@ -201,18 +201,14 @@ jQuery(function($)
     }
 
     // add a (HTML) tooltip to the element
-    function addTooltip(el, tooltip, params)
+    function addTooltip(el, tooltip, type)
     {
-        var tooltipDefaults =
+        $(el).data(
         {
-            arrow: 1, position: { my: 'center top+5', at: 'center bottom' },
-            delay: 150, duration: 0, tooltipClass: 'help'
-        };
-        var p = $.extend(tooltipDefaults, { content: tooltip }, params);
-        //dzDebug('addTooltip()', { el: el, p: p });
-        $(el).attr('title', '').tooltip(p);
+            position: 'bottom', delay: 150, arrow: true, duration: 200, items: el,
+            content: tooltip, tooltipClass: (type || 'default')
+        }).addClass('jqUITooltip');
     }
-
 });
 
 // eof
