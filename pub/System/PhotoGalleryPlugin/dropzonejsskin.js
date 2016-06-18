@@ -9,56 +9,77 @@ jQuery(function($)
 
     $(document).ready(function()
     {
-        // check for and get the normal upload form elements and data that we'll
-        // need, abort if incomplete
+        /* ***** prepare ************************************************************************* */
+
+        // sanity check that we're on the right page
         var uplFileSel   = $('input[name=filepath]');
         var uplForm      = $('form');
         var dzCont       = $('div.dropZoneContainer');
-        var dzFiles      = $('div.dropZoneFiles');
-        var dzFilesResize= $('div.dropZoneFilesResize');
-        var formAction   = uplForm.attr('action');
-        var submitButton = uplForm.find('input[type=submit]');
-        var filecommentInput   = uplForm.find('input[name=filecomment]');
-        var validationkeyInput = uplForm.find('input[name=validation_key]');
-        var propertiesCheckboxes = uplForm.find('input[type=checkbox]');
+        var uploadAction = uplForm.attr('action');
         if ( (uplFileSel.length !== 1) || (dzCont.length !== 1) ||
-             (uplForm.length !== 1) || (submitButton.length !== 1) ||
-             !formAction || (dzFiles.length !== 1) || (typeof Dropzone === 'undefined') ||
-             (filecommentInput.length !== 1) || (validationkeyInput.length !== 1)
-           )
+             (uplForm.length !== 1) || !uploadAction ||
+             (typeof Dropzone === 'undefined') )
         {
             return;
         }
-        dzDebug('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
-            submitButton: submitButton, dzCont: dzCont, dzFiles: dzFiles,
-            filecommentInput: filecommentInput, validationkeyInput: validationkeyInput,
-            propertiesCheckboxes: propertiesCheckboxes });
+
+        // more HTML elements that we'll need
+        var dzFiles            = $('div.dropZoneFiles');
+        var dzFilesResize      = $('div.dropZoneFilesResize');
+        var submitButton       = uplForm.find('input[type=submit]');
+        var filecommentInput   = uplForm.find('input[name=filecomment]');
+        var validationkeyInput = uplForm.find('input[name=validation_key]');
+        var propsCheckboxes    = uplForm.find('input[type=checkbox]');
+        var origActionButtons  = uplForm.find('.patternActionButtons');
+        var addButton          = dzCont.find('.dropZoneActionAdd');
+        var clearButton        = dzCont.find('.dropZoneActionClear');
+        var uploadButton       = dzCont.find('.dropZoneActionUpload');
+        var cancelButton       = dzCont.find('.dropZoneActionCancel');
+        var progBar            = dzCont.find('.dropZoneUploadProgress');
+        var progLabel          = dzCont.find('.dropZoneUploadProgressLabel');
+        var dictFileTooBig     = dzCont.find('.dropZoneDictFileTooBig').html();
+        var dictRemoveFile     = dzCont.find('.dropZoneDictRemoveFile').html();
 
         // the current CSRF key, will be updated after every upload
         // (see https://foswiki.org/Development/HowToIntegrateWithRequestValidation)
         var nonce = validationkeyInput.val();
 
+        dzDebug('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
+            dzCont: dzCont, uploadAction: uploadAction, dzFiles: dzFiles,
+            dzFilesResize: dzFilesResize, filecommentInput: filecommentInput,
+            validationkeyInput: validationkeyInput, propsCheckboxes: propsCheckboxes,
+            origActionButtons: origActionButtons, nonce: nonce,
+            addButton: addButton, clearButton: clearButton,
+            uploadButton: uploadButton, cancelButton: cancelButton,
+            progBar: progBar, progLabel: progLabel});
+
+
+        /* ***** initialise the DropzoneJS thingy ************************************************ */
+
         // put dropzone div in place of the upload file selector
         dzCont.insertAfter(uplFileSel);
         uplFileSel.hide();
+        origActionButtons.hide();
 
         // DropzoneJS options
         Dropzone.autoDiscover = false
+        var maxFileSize = parseInt(dzCont.data('filesizelimit')) * 1024;
         Dropzone.options.dropzoneUpload = false; // what is this for?
         var dzOpts =
         {
-            url:                    formAction,
+            url:                    uploadAction,
             filesizeBase:           1024,
-            maxFilesize:            (dzCont.data('filesizelimit') / 1024).toFixed(2),
+            maxFilesize:            (maxFileSize / 1024 / 1024).toFixed(2),
             uploadMultiple:         false,
             autoProcessQueue:       false,
             addRemoveLinks:         true,
             parallelUploads:        1,
             createImageThumbnails:  false,
             maxFiles:               100,
-            uploadMultiple:         false,
+            clickable:              $('<div/>').appendTo(dzCont).get(0), // dummy
             paramName:              'filepath',
-            dictRemoveFile: ' ',
+            dictRemoveFile:         ' ',
+            dictFileTooBig:         dictFileTooBig,
             // fall-back to original upload form if the browser isn't supported
             //forceFallback: true, // for testing
             previewTemplate:        '' +
@@ -68,7 +89,8 @@ jQuery(function($)
                 '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
                 '<div class="dz-success-mark">&nbsp;</div>' +
                 '</div>',
-            fallback: function () { uplFileSel.show(); dzCont.remove(); }
+            // restore original upload form if DropzoneJS is not supported by the browser
+            fallback: function () { uplFileSel.show(); origActionButtons.show(); dzCont.remove(); }
         };
         dzDebug('dzOpts', dzOpts);
 
@@ -78,11 +100,18 @@ jQuery(function($)
         {
             return;
         }
-
         // ...and style and show it
         dzFiles.addClass('dropzone');
         dzCont.show();
         dzDebug('instance', dzInst);
+        var msg = dzCont.find('.dropZoneDictDefaultMessage');
+        msg.html( msg.html().replace('{{maxfilesize}}', dzInst.filesize(maxFileSize) ) );
+
+        // make the dropzone resizable in height (but not width)
+        dzFilesResize.resizable({ handles: 's' });
+
+
+        /* ***** arm the DropzoneJS interactions ************************************************* */
 
         // on error, add a tooltip to the file entry with the error message
         dzInst.on('error', function (file, msg, xhr)
@@ -97,63 +126,92 @@ jQuery(function($)
             dzFiles.block({ message: 'Processing files&hellip;' });
         });
 
-        // when a file is dropped or added...
-        dzInst.on('addedfile', function (file)
+        // arm buttons tooltips
+        [ addButton, clearButton, uploadButton, cancelButton ].forEach(function (el)
         {
-            dzDebug('addedfile file', { file: file } );
-
-            // ...add a tooltip to the remove icon
-            addTooltip(file._removeLink, 'click to remove file from list', 'help');
-            $(file._removeLink).on('click', function ()
-            {
-                $(this).tooltip('destroy').parent().tooltip('destroy');
-            });
-
-            // ...store form parameters
-            var tooltip = '';
-            file._dzParam = {};
-            file._dzParam.filecomment = filecommentInput.val();
-            tooltip += '<em>comment:</em> ' + (file._dzParam.filecomment || 'no comment set');
-            propertiesCheckboxes.each(function ()
-            {
-                if ($(this).attr('checked'))
-                {
-                    var name = $(this).attr('name');
-                    file._dzParam[name] = 'on';
-                    tooltip += '<br/><em>' + name + ':</em> on';
-                }
-            });
-
-            // ...add an info tooltip with the form parameters
-            addTooltip(file.previewElement, tooltip, 'info');
-
-            this.updateTotalUploadProgress();
-
-            // (mostly) done processing files
-            dzFiles.unblock();
+            addTooltip(el, el.attr('title'), 'help');
         });
 
-        // show overall upload progress
-        var progBar = $('div.dropZoneUploadProgress');
-        var progLabel = $('div.dropZoneUploadProgressLabel');
-        progBar.progressbar({ disabled: true, max: 100.0 });
-
-        // override the default submit ("Uplaod file") button to start the DropzoneJS uploads
-        submitButton.on('click', function (e)
+        // open file selection dialog (see also dzOpts.clickable)
+        addButton.on('click', function (e)
         {
-            dzDebug('submit', { e: e });
+            e.preventDefault();
+            if ($(this).hasClass('dropZoneActionDisabled'))
+            {
+                dzDebug('hasclass', $(this));
+                return;
+            }
+            dzInst.hiddenFileInput.click();
+        });
+
+        // clear queue
+        clearButton.on('click', function (e)
+        {
+            e.preventDefault();
+            if ($(this).hasClass('dropZoneActionDisabled'))
+            {
+                return;
+            }
+            dzInst.removeAllFiles();
+            uploadButton.addClass('dropZoneActionDisabled');
+        });
+
+        // start upload
+        uploadButton.on('click', function (e)
+        {
+            e.preventDefault();
+            if ($(this).hasClass('dropZoneActionDisabled'))
+            {
+                return;
+            }
+            dzDebug('upload', { e: e });
             dzInst.processQueue();
             dzInst.options.autoProcessQueue = true;
             progBar.progressbar('value', undefined);
             progBar.progressbar('enable');
-            e.stopImmediatePropagation();
-            e.preventDefault();
+            uploadButton.hide();
+            cancelButton.show();
+            addButton.addClass('dropZoneActionDisabled');
+            clearButton.addClass('dropZoneActionDisabled');
         });
+        uploadButton.addClass('dropZoneActionDisabled');
+
+        // cancel pending uploads
+        cancelButton.on('click', function (e)
+        {
+            e.preventDefault();
+            if ($(this).hasClass('dropZoneActionDisabled'))
+            {
+                return;
+            }
+            dzInst.options.autoProcessQueue = false;
+            $(this).addClass('dropZoneActionDisabled');
+        }).hide();
+
+        // uploading finished
         dzInst.on('queuecomplete', function ()
         {
             dzInst.options.autoProcessQueue = false;
             progBar.progressbar('disable');
+            uploadButton.show();
+            cancelButton.hide();
+            addButton.removeClass('dropZoneActionDisabled');
+            clearButton.removeClass('dropZoneActionDisabled');
+            uploadButton.addClass('dropZoneActionDisabled');
         });
+
+        dzInst.on('removedfile', function (file)
+        {
+            //dzDebug('removedfile', [ this, file ]);
+            if (!this.files.length)
+            {
+                uploadButton.addClass('dropZoneActionDisabled');
+            }
+        });
+
+        // overall upload progress bar
+        progBar.progressbar({ disabled: true, max: 100.0 });
+        progBar.progressbar('disable');
         dzInst.on('totaluploadprogress', function (uploadProgress, totalBytes, totalBytesSent)
         {
             //dzDebug('uploadprogress', [ this, uploadProgress, totalBytes, totalBytesSent ]);
@@ -173,6 +231,45 @@ jQuery(function($)
                            + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%)': ''));
         });
         dzInst.updateTotalUploadProgress();
+
+        // when a file is dropped or added...
+        dzInst.on('addedfile', function (file)
+        {
+            dzDebug('addedfile file', { file: file } );
+
+            // ...add a tooltip to the remove icon
+            addTooltip(file._removeLink, dictRemoveFile, 'help');
+            $(file._removeLink).on('click', function ()
+            {
+                $(this).tooltip('destroy').parent().tooltip('destroy');
+            });
+
+            // ...store form parameters
+            var tooltip = '';
+            file._dzParam = {};
+            file._dzParam.filecomment = filecommentInput.val();
+            tooltip += '<em>comment:</em> ' + (file._dzParam.filecomment || 'no comment set');
+            propsCheckboxes.each(function ()
+            {
+                if ($(this).attr('checked'))
+                {
+                    var name = $(this).attr('name');
+                    file._dzParam[name] = 'on';
+                    tooltip += '<br/><em>' + name + ':</em> on';
+                }
+            });
+
+            // ...add an info tooltip with the form parameters
+            addTooltip(file.previewElement, tooltip, 'info');
+
+            // ...update progress bar info
+            this.updateTotalUploadProgress();
+
+            uploadButton.removeClass('dropZoneActionDisabled');
+
+            // (mostly) done processing files
+            dzFiles.unblock();
+        });
 
         // add form parameters to the POST request (the upload)
         dzInst.on('sending', function (file, xhr, form)
@@ -199,22 +296,32 @@ jQuery(function($)
         dzInst.on('complete', function (file)
         {
             dzDebug('complete file', { file: file});
-            var newNonce = file.xhr.getResponseHeader('X-Foswiki-Validation');
-            dzDebug('success file', { file: file, newNonce: newNonce });
-            if (newNonce)
+            if (file && file.xhr)
             {
-                nonce = '?' + newNonce;
+                var newNonce = file.xhr.getResponseHeader('X-Foswiki-Validation');
+                dzDebug('success file', { file: file, newNonce: newNonce });
+                if (newNonce)
+                {
+                    nonce = '?' + newNonce;
+                }
+            }
+
+            // file done after cancelling
+            if (!dzInst.options.autoProcessQueue)
+            {
+                progBar.progressbar('disable');
+                uploadButton.show();
+                cancelButton.removeClass('dropZoneActionDisabled').hide();
+                addButton.removeClass('dropZoneActionDisabled');
+                clearButton.removeClass('dropZoneActionDisabled');
             }
         });
 
         // allow one more file on success
-        dzInst.on('success', function (file)
-        {
-            dzInst.options.maxFiles++;
-        });
-
-        // make the dropzone resizable in height (but not width)
-        dzFilesResize.resizable({ handles: 's' });
+        //dzInst.on('success', function (file)
+        //{
+        //    dzInst.options.maxFiles++;
+        //});
 
     });
 
@@ -247,7 +354,7 @@ jQuery(function($)
         $(el).data(
         {
             position: 'bottom', delay: 150, arrow: true, duration: 200, items: el,
-            content: tooltip, tooltipClass: (type || 'default')
+            content: tooltip, tooltipClass: ((type || 'default') + ' dropZoneTooltip')
         }).addClass('jqUITooltip');
     }
 });

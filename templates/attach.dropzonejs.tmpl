@@ -19,7 +19,17 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
     "head" id="dropzonejsskin-css" requires="dropzonejs-css"
     text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.compressed.css\"/>"
 }%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
-%MAKETEXT{"Drop files in the box below or click it to open a file selection dialog. Set comment and properties before dropping or adding files. They will be set for every file as they are when the files are dropped or added."}%
-<div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"></div></div>
-<div class="dropZoneUploadProgress"><div class="dropZoneUploadProgressLabel"></div></div>
+<div class="dropZoneDict dropZoneDictFileTooBig">%MAKETEXT{"File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB."}%</div>
+<div class="dropZoneDict dropZoneDictRemoveFile">%MAKETEXT{"Remove from queue."}%</div>
+<div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"><div class="dz-message"><span class="dropZoneDictDefaultMessage">%MAKETEXT{"Drop up to 100 files here (up to {{maxfilesize}} each)."}%</span></div></div></div>
+<div class="dropZoneActions">%BUTTON{
+    "%MAKETEXT{"Add"}%"     icon="add"    class="dropZoneActionAdd"    title="%MAKETEXT{"Add files to the upload queue."}%"
+}%%BUTTON{
+    "%MAKETEXT{"Clear"}%"   icon="delete" class="dropZoneActionClear"  title="%MAKETEXT{"Clear upload queue."}%"
+}%%BUTTON{
+    "%MAKETEXT{"Upload"}%"  icon="tick"   class="dropZoneActionUpload" title="%MAKETEXT{"Start uploading all files in the queue."}%"
+}%%BUTTON{
+    "%MAKETEXT{"Cancel"}%"  icon="cross"  class="dropZoneActionCancel" title="%MAKETEXT{"Cancel pending uploads."}%"
+}%<div class="dropZoneUploadProgress"><div class="dropZoneUploadProgressLabel"></div></div>
+</div>
 </div>%TMPL:END%%TMPL:P{"dropzonejs"}%
