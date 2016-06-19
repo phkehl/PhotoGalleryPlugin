@@ -495,7 +495,7 @@ jQuery(function($)
         {
             method: 'GET', timeout: 20000,
             url: foswiki.getScriptUrlPath('rest') + '/RenderPlugin/template',
-            data: { name: 'attach', expand: 'existingattachmentsx', 'render' : 'on',
+            data: { name: 'attach', expand: 'existingattachments', 'render' : 'on',
                     topic: foswiki.preferences.WEB + '/' + foswiki.preferences.TOPIC },
             complete:  function (jqXHR, textStatus)
             {
