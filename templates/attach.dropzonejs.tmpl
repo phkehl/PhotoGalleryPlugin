@@ -21,7 +21,7 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
 }%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
 <div class="dropZoneDict dropZoneDictFileTooBig">%MAKETEXT{"File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB."}%</div>
 <div class="dropZoneDict dropZoneDictRemoveFile">%MAKETEXT{"Remove from queue."}%</div>
-<div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"><div class="dz-message"><span class="dropZoneDictDefaultMessage">%MAKETEXT{"Drop up to 100 files here (up to {{maxfilesize}} each)."}%</span></div></div></div>
+<div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"><div class="dz-message"><span class="dropZoneDictDefaultMessage">%MAKETEXT{"Drop up to {{maxnumfiles}} files here (up to {{maxfilesize}} each)."}%</span></div></div></div>
 <div class="dropZoneActions">%BUTTON{
     "%MAKETEXT{"Add"}%"     icon="add"    class="dropZoneActionAdd"    title="%MAKETEXT{"Add files to the upload queue."}%"
 }%%BUTTON{

@@ -51,6 +51,8 @@ jQuery(function($)
             uploadButton: uploadButton, cancelButton: cancelButton,
             progBar: progBar, progLabel: progLabel});
 
+        // maximum number of file we allow to upload in one go FIXME: reasonable?
+        var maxNumFiles = 100;
 
         /* ***** initialise the DropzoneJS thingy ************************************************ */
 
@@ -73,7 +75,7 @@ jQuery(function($)
             addRemoveLinks:         true,
             parallelUploads:        1,
             createImageThumbnails:  false,
-            maxFiles:               100,
+            maxFiles:               maxNumFiles,
             clickable:              $('<div/>').appendTo(dzCont).get(0), // dummy
             paramName:              'filepath',
             dictRemoveFile:         ' ',
@@ -103,7 +105,9 @@ jQuery(function($)
         dzCont.show();
         dzDebug('instance', dzInst);
         var msg = dzCont.find('.dropZoneDictDefaultMessage');
-        msg.html( msg.html().replace('{{maxfilesize}}', dzInst.filesize(maxFileSize) ) );
+        msg.html( msg.html()
+                  .replace('{{maxfilesize}}', dzInst.filesize(maxFileSize))
+                  .replace('{{maxnumfiles}}', maxNumFiles) );
 
         // make the dropzone resizable in height (but not width)
         dzFilesResize.resizable({ handles: 's' });
@@ -253,7 +257,7 @@ jQuery(function($)
             // destroy tooltip object or we'll end up with a stray tooltip sticking on the page
             $(file._removeLink).on('click', function ()
             {
-                if ($(this).hasClass('jqTooltipInited'))
+                if ($(this).hasClass('jqInitedTooltip'))
                 {
                     $(this).tooltip('destroy');
                 }
