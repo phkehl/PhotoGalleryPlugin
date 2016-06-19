@@ -10,3 +10,4 @@ Image::Epeg,>=0.13,cpan,Required for fast thumbnail generation
 Foswiki::Plugins::JQueryPlugin,>=6.32,perl,Required for everything
 Foswiki::Contrib::FamFamFamContrib,>=1.9,perl,Required for action menu items
 Foswiki::Plugins,>=2.1,perl,Required plugin interface
+Foswiki::Plugins::RenderPlugin,>=4.10,Optional for the bulk upload skin extension

@@ -4,8 +4,6 @@ jQuery(function($)
 {
     "use strict";
 
-    // TODO: reload attachments table after upload (is it possible?)
-
     // add "debug=1" to the query string to enable debugging
     var DEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
 
@@ -57,7 +55,7 @@ jQuery(function($)
             filePropsInputs: filePropsInputs, origActionButtons: origActionButtons,
             nonce: nonce, addButton: addButton, clearButton: clearButton,
             uploadButton: uploadButton, cancelButton: cancelButton,
-            progBar: progBar, progLabel: progLabel});
+            progBar: progBar, progLabel: progLabel });
 
         // maximum number of file we allow to upload in one go FIXME: reasonable?
         var maxNumFiles = 100;
@@ -221,6 +219,7 @@ jQuery(function($)
             addButton.removeClass('dropZoneActionDisabled');
             clearButton.removeClass('dropZoneActionDisabled');
             uploadButton.addClass('dropZoneActionDisabled');
+            updateAttachmentsTable();
         });
 
         dzInst.on('removedfile', function (file)
@@ -324,7 +323,8 @@ jQuery(function($)
                 }
             }
 
-            // file done after cancelling
+            // file done after cancelling, do stuff we otherwise would do in the
+            // "queuecomplete" handler
             if (!dzInst.options.autoProcessQueue)
             {
                 progBar.progressbar('disable');
@@ -332,6 +332,7 @@ jQuery(function($)
                 cancelButton.removeClass('dropZoneActionDisabled').hide();
                 addButton.removeClass('dropZoneActionDisabled');
                 clearButton.removeClass('dropZoneActionDisabled');
+                updateAttachmentsTable();
             }
         });
 
@@ -403,6 +404,10 @@ jQuery(function($)
                 }
             }, 250);
         });
+    $('<a/>').appendTo(dzCont).text('bla').on('click', function (e)
+    {
+        updateAttachmentsTable();
+    });
 
     });
 
@@ -477,6 +482,47 @@ jQuery(function($)
             else
             {
                 inp.val(data[name]);
+            }
+        });
+    }
+
+    function updateAttachmentsTable()
+    {
+        dzDebug('updateAttachmentsTable');
+        var orig = $('div.foswikiAttachments');
+        orig.block({ message: 'Refreshing&hellip;' });
+        $.ajax(
+        {
+            method: 'GET', timeout: 20000,
+            url: foswiki.getScriptUrlPath('rest') + '/RenderPlugin/template',
+            data: { name: 'attach', expand: 'existingattachmentsx', 'render' : 'on',
+                    topic: foswiki.preferences.WEB + '/' + foswiki.preferences.TOPIC },
+            complete:  function (jqXHR, textStatus)
+            {
+                orig.unblock();
+            },
+            success: function (data, textStatus, jqXHR)
+            {
+                // abort if it doesn't seem to contain the table
+                if (data.indexOf('foswikiAttachments' < 0))
+                {
+                    return;
+                }
+                // add table if there are no previous attachments
+                if (!orig.length)
+                {
+                    $('div.foswikiTopic').append(data);
+                }
+                // replace table
+                else
+                {
+                    var table = $('<div>').html(data);
+                    orig.html(table.find('div.foswikiAttachments'));
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                // whatever.. perhaps the RenderPlugin is not installed
             }
         });
     }

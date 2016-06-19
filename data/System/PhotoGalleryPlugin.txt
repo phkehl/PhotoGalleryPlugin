@@ -118,8 +118,11 @@ manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 To activate the upload form options described above add (prepend) =photogallery=
 (for JPEG rotation and timestamp options) and/or =bulkupload= (for bulk
 uploading) to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for
-details. The =bulkupload= skin extension also works without activating this
-plugin.
+details.
+
+The =bulkupload= skin extension also works without activating this plugin.
+Installing the [[Foswiki:Extensions/RenderPlugin][RenderPlugin]] is recommended
+with this skin extension (see _Dependencies_ below).
 
 ---+++ Cache
 
@@ -150,7 +153,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.5-dev  | \
-- add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page%BR% \
+- add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
 - remove [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]] skin extension%BR% \
 - make the whole thumbnail area clickable while the thumbnail image is being loaded%BR% \
 - various cleanup and small improvements |
