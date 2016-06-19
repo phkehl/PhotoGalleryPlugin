@@ -154,6 +154,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
+|  xx xxx xxxx  |     v1.6-dev  |\
+- ... |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
 - remove [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]] skin extension%BR% \
