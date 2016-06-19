@@ -503,8 +503,9 @@ jQuery(function($)
             },
             success: function (data, textStatus, jqXHR)
             {
+                dzDebug('data', data);
                 // abort if it doesn't seem to contain the table
-                if (data.indexOf('foswikiAttachments' < 0))
+                if (data.indexOf('foswikiAttachments') < 0)
                 {
                     return;
                 }
