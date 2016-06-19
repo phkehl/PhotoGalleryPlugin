@@ -43,8 +43,7 @@ API. See source code for developer details.
    * Document and assert exact HTML5 browser requirement.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
      How much does it really save? Does it work with the livequery stuff?
-   * Create dedicated upload plugin (dropzone.js?), maybe move rotate-and-timestamp-on-upload there.
-   * Sort out timezone mess. Foswiki::Time::formatTime() isn't going to help.
+   * Sort out the timezone mess. Foswiki::Time::formatTime() isn't going to help.
    * Honour refresh=cache/on in %PHOTOGALLERY% (?). Be careful with PageCaching enabled.
    * ...
 
@@ -483,7 +482,8 @@ sub doPHOTOGALLERY
         $tml .= '<div class="frame" data-name="' . $img->{name} . '">';
         $tml .=   '<div class="crop" style="width: ' . $params->{size}. 'px; height: ' . $params->{size} . 'px;">';
         $tml .=     '<a class="img" data-ix="' . $ix . '" data-w="' . $img->{imgWidth} . '" data-h="' . $img->{imgHeight} . '" href="' . $img->{imgUrl} . '">';
-        $tml .=       '<img class="thumb" src="' . $img->{thumbUrl} . '" width="' . $img->{thumbWidth} . '" height="' . $img->{thumbHeight} . '"/>';
+        $tml .=       '<img class="thumb" src="' . $img->{thumbUrl} . '" width="' . $img->{thumbWidth} . '" height="' . $img->{thumbHeight} . '" '
+                     . 'style="min-width: ' . $params->{size}. 'px; min-height: ' . $params->{size} . 'px;"/>';
         $tml .=     '</a>';
         $tml .=   '</div>'; # crop
         if ( ( ($params->{admin} eq 'on')   && $mayChange                      ) ||
