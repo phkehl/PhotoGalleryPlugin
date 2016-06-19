@@ -8,15 +8,16 @@ div.dropZoneFiles {
     height: 100%; overflow-y: auto; padding: 0.15em 0.25em; }
 div.dropZoneUploadProgress {
     position: relative; height: 1.4em; line-height: 1.4em; display: inline-block;
-    width: calc(100% - (3 * 6em)); float: right; }
+    width: calc(100% - (3 * 7em)); float: right; }
 div.dropZoneUploadProgressLabel {
     position: absolute; width: 100%; text-align: center;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 div.dropZoneActions {
     margin-top: 0.25em; }
 .dropZoneActionAdd, .dropZoneActionClear, .dropZoneActionUpload, .dropZoneActionCancel {
-    width: 5em; overflow: hidden; text-overflow: ellipsis; margin: 0 0.25em 0 0;
-    padding: 0.05em 0.25em; line-height: 1.4em; height: 1.4em; display: inline-block; }
+    width: 6em; overflow: hidden; text-overflow: ellipsis; margin: 0 0.25em 0 0;
+    padding: 0.05em 0.25em; line-height: 1.4em; height: 1.4em; display: inline-block;
+    text-align: center; }
 .dropZoneActionDisabled { opacity: 0.5; }
 
 .dropZoneTooltip/*.error*/ { max-width: 30em; }
