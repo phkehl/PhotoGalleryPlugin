@@ -54,7 +54,8 @@ Here are a few screenshots of the plugin in action:
 %IMAGE{ "screenshot4.jpg" width="313" height="198" type="frame" align="none" caption="image zoomed and shown in !PhotoSwipe gallery, caption composed from attachment comment and EXIF meta data" }%
 %IMAGE{ "screenshot2.jpg" width="283" height="127" type="frame" align="none" caption="action menu pops up when hovering the top right corner of the thumbnail" }%
 %IMAGE{ "screenshot3.jpg" width="264" height="144" type="frame" align="none" caption="edit attachment comment dialog" }%
-%IMAGE{ "screenshot5.jpg" width="368" height="384" type="frame" align="none" caption="bulk upload and properties skin extensions" }%
+%IMAGE{ "screenshot5.jpg" width="427" height="367" type="frame" align="none" caption="bulk upload skin extension" }%
+%IMAGE{ "screenshot6.jpg" width="427" height="367" type="frame" align="none" caption="bulk upload skin extension" }%
 
 
 
@@ -180,7 +181,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1465842105" size="51781" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1466343179" size="49627" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot6.jpg" attachment="screenshot6.jpg" comment="plugin screenshot" date="1466343179" size="61113" user="PhilippeKehl" version="1"}%
 %META:FORM{name="PackageForm"}%
 %META:FIELD{name="Author" title="Author" value="[[Foswiki:Main/PhilippeKehl][Philippe Kehl]]"}%
 %META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%

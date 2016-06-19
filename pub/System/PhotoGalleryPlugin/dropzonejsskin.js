@@ -242,7 +242,7 @@ jQuery(function($)
             });
             uploadProgress = totalBytes ? (totalBytesSent / totalBytes * 1e2) : 0;
             progBar.progressbar('value', uploadProgress);
-            progLabel.html('Uploaded: ' + this.filesize(totalBytesSent) + ' / ' + this.filesize(totalBytes)
+            progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
                            + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%)': ''));
         });
         dzInst.updateTotalUploadProgress();
