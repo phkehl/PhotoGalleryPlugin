@@ -335,6 +335,7 @@ jQuery(function($)
         var selectedFile = undefined;
         var formDefaults = $('<div/>').appendTo(dzCont);
         formToData(formDefaults, filePropsInputs);
+        // clicking the filename with select/deselect the file
         dzFiles.on('click', '.dropZoneFileName', function (e)
         {
             //dzDebug('click', $(this));
@@ -356,14 +357,16 @@ jQuery(function($)
             dataToForm($(this).parents('.dz-preview'), filePropsInputs);
 
         });
+        // clicking outside will deselct the currently selected file (if any)
         dzFiles.on('click', function (e)
         {
-            dzDebug('click', $(this));
+            //dzDebug('click', $(this));
             if (selectedFile)
             {
                 selectedFile.trigger('click');
             }
         });
+        // update the saved file upload props when the form inputs change
         filePropsInputs.on('change', function (e)
         {
             //dzDebug('change', $(this));
@@ -372,7 +375,7 @@ jQuery(function($)
                 formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
             }
         });
-        var inpKeyupTo;
+        var inpKeyupTo; // debounce
         filePropsInputs.on('keyup', function (e)
         {
             if (inpKeyupTo)
