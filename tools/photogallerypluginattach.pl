@@ -30,7 +30,7 @@
 This command line tool attaches photos to topics. It is a companion script to the
 System.PhotoGalleryPlugin. It can attach an number of photos (or, in fact, any file) to topics. It
 needs to run on the server where Foswiki is installed as the user Foswiki is running as (typically,
-www-data or so.
+www-data or so).
 
 =head2 Usage
 

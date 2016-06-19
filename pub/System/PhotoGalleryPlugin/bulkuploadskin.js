@@ -4,6 +4,8 @@ jQuery(function($)
 {
     "use strict";
 
+    // TODO: reload attachments table after upload (is it possible?)
+
     // add "debug=1" to the query string to enable debugging
     var DEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
 

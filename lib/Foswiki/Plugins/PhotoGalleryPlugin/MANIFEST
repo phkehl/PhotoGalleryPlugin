@@ -1,55 +1,60 @@
 !noci
 
 # plugin code and configuration specs
-lib/Foswiki/Plugins/PhotoGalleryPlugin.pm 0444 Perl module
-lib/Foswiki/Plugins/PhotoGalleryPlugin/Config.spec 0444 Configuration
+lib/Foswiki/Plugins/PhotoGalleryPlugin.pm                           0444 Plugin Perl module
+lib/Foswiki/Plugins/PhotoGalleryPlugin/Config.spec                  0444 Plugin configuration spec
 
 # upload form extension templates
-templates/attach.photogallery.tmpl 0644 Attachment page options for Pattern skin
+templates/attach.photogallery.tmpl                                  0644 Attachment page options for Pattern skin
 
 # bulk attachment script
-tools/photogallerypluginattach.pl 0755 Bulk attachment script
+tools/photogallerypluginattach.pl                                   0755 Bulk attachment script
 
 # cache cleanup script
-tools/photogalleryplugincacheclean.pl 0755 Cache cleanup script
+tools/photogalleryplugincacheclean.pl                               0755 Cache cleanup script
 
 # plugin documentation
-data/System/PhotoGalleryPlugin.txt 0644 Documentation page
-data/System/VarPHOTOGALLERY.txt 0644 Tag documentation
-pub/System/PhotoGalleryPlugin/screenshot0.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/screenshot1.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/screenshot2.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/screenshot3.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/screenshot4.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/screenshot5.jpg 0644 Plugin screenshot
-pub/System/PhotoGalleryPlugin/photogalleryplugin.js 0644 Plugin Javascript code
-pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.js 0644 Plugin Javascript code
-pub/System/PhotoGalleryPlugin/photogalleryplugin.css 0644 Plugin stylesheet
-pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.css 0644 Plugin stylesheet
-pub/System/PhotoGalleryPlugin/default-skin.css 0644 PhotoSwipe skin styles
-pub/System/PhotoGalleryPlugin/default-skin.compressed.css 0644 PhotoSwipe skin styles
-pub/System/PhotoGalleryPlugin/default-skin.png 0644 PhotoSwipe skin data
-pub/System/PhotoGalleryPlugin/default-skin.svg 0644 PhotoSwipe skin data
-pub/System/PhotoGalleryPlugin/photoswipe-ui-default.js 0644 PhotoSwipe UI javascript code
-pub/System/PhotoGalleryPlugin/photoswipe-ui-default.compressed.js 0644 PhotoSwipe UI javascript code
-pub/System/PhotoGalleryPlugin/photoswipe.css 0644 PhotoSwipe stylesheet
-pub/System/PhotoGalleryPlugin/photoswipe.compressed.css 0644 PhotoSwipe stylesheet
-pub/System/PhotoGalleryPlugin/photoswipe.js 0644 PhotoSwipe javascript code
-pub/System/PhotoGalleryPlugin/photoswipe.compressed.js 0644 PhotoSwipe javascript code
+data/System/PhotoGalleryPlugin.txt                                  0644 Documentation page
+data/System/VarPHOTOGALLERY.txt                                     0644 Tag documentation
+pub/System/PhotoGalleryPlugin/screenshot0.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot1.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot2.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot3.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot4.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot5.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/screenshot6.jpg                       0644 Plugin screenshot
+pub/System/PhotoGalleryPlugin/photogalleryplugin.js                 0644 Plugin Javascript code
+pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.js      0644 Plugin Javascript code
+pub/System/PhotoGalleryPlugin/photogalleryplugin.css                0644 Plugin stylesheet
+pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.css     0644 Plugin stylesheet
+pub/System/PhotoGalleryPlugin/default-skin.css                      0644 PhotoSwipe skin styles
+pub/System/PhotoGalleryPlugin/default-skin.compressed.css           0644 PhotoSwipe skin styles
+pub/System/PhotoGalleryPlugin/default-skin.png                      0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/default-skin.svg                      0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/photoswipe-ui-default.js              0644 PhotoSwipe UI javascript code
+pub/System/PhotoGalleryPlugin/photoswipe-ui-default.compressed.js   0644 PhotoSwipe UI javascript code
+pub/System/PhotoGalleryPlugin/photoswipe.css                        0644 PhotoSwipe stylesheet
+pub/System/PhotoGalleryPlugin/photoswipe.compressed.css             0644 PhotoSwipe stylesheet
+pub/System/PhotoGalleryPlugin/photoswipe.js                         0644 PhotoSwipe javascript code
+pub/System/PhotoGalleryPlugin/photoswipe.compressed.js              0644 PhotoSwipe javascript code
 
 # test topic
 data/Sandbox/PhotoGalleryPluginTest.txt
-pub/Sandbox/PhotoGalleryPluginTest/IMG_1262.jpg 0644 Plugin test photo
-pub/Sandbox/PhotoGalleryPluginTest/IMG_1265.jpg 0644 Plugin test photo
-pub/Sandbox/PhotoGalleryPluginTest/IMG_1323.jpg 0644 Plugin test photo
-pub/Sandbox/PhotoGalleryPluginTest/IMG_1324.jpg 0644 Plugin test photo
-pub/Sandbox/PhotoGalleryPluginTest/IMG_1071.JPG 0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1262.jpg                     0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1265.jpg                     0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1323.jpg                     0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1324.jpg                     0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/IMG_1071.JPG                     0644 Plugin test photo
 
-# dropzone.js
-pub/System/PhotoGalleryPlugin/dropzone.compressed.css        0644 DropzoneJS stylesheet
-pub/System/PhotoGalleryPlugin/dropzone.compressed.js         0644 DropzoneJS javascript code
-pub/System/PhotoGalleryPlugin/dropzonejsskin.compressed.css  0644 DropzoneJS Foswiki integration stylesheet
-pub/System/PhotoGalleryPlugin/dropzonejsskin.compressed.js   0644 DropzoneJS Foswiki integration javascript code
-templates/attach.dropzonejs.tmpl                             0644 DropzoneJS attach page integration
+# bulk upload skin extension templates, styles and JavaScript code
+pub/System/PhotoGalleryPlugin/dropzone.compressed.css               0644 DropzoneJS stylesheet
+pub/System/PhotoGalleryPlugin/dropzone.css                          0644 DropzoneJS stylesheet
+pub/System/PhotoGalleryPlugin/dropzone.compressed.js                0644 DropzoneJS javascript code
+pub/System/PhotoGalleryPlugin/dropzone.js                           0644 DropzoneJS javascript code
+pub/System/PhotoGalleryPlugin/bulkuploadskin.compressed.css         0644 Bulk upload Foswiki integration stylesheet
+pub/System/PhotoGalleryPlugin/bulkuploadskin.css                    0644 Bulk upload Foswiki integration stylesheet
+pub/System/PhotoGalleryPlugin/bulkuploadskin.compressed.js          0644 Bulk upload Foswiki integration javascript code
+pub/System/PhotoGalleryPlugin/bulkuploadskin.js                     0644 Bulk upload Foswiki integration javascript code
+templates/attach.bulkupload.tmpl                                    0644 Bulk upload attach page integration templates
 
 # eof

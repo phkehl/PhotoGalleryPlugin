@@ -1,23 +1,23 @@
 %{
 
-PhotoGalleryPlugin's DropzoneJS skin extension for the PatternSkin.
+PhotoGalleryPlugin's bulk upload skin extension for the PatternSkin.
 
 This adds a DropzoneJS upload form to allow for batch uploads of many files.
 
 }%
 %TMPL:INCLUDE{"attach"}%
-%TMPL:DEF{"dropzonejs"}%%JQREQUIRE{"ui::tooltip,ui::resizable,ui::progressbar,scrollto,blockui"}%%ADDTOZONE{
+%TMPL:DEF{"bulkupload"}%%JQREQUIRE{"ui::tooltip,ui::resizable,ui::progressbar,scrollto,blockui"}%%ADDTOZONE{
     "script" id="dropzonejs-js" requires="JQUERYPLUGIN"
     text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.compressed.js\"></script>"
 }%%ADDTOZONE{
-    "script" id="dropzonejsskin-js" requires="dropzonejs-js,JavascriptFiles/strikeone"
-    text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.compressed.js\"></script>"
+    "script" id="bulkuploadskin-js" requires="dropzonejs-js,JavascriptFiles/strikeone"
+    text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/bulkuploadskin.compressed.js\"></script>"
 }%%ADDTOZONE{
     "head" id="dropzonejs-css" requires="JQUERYPLUGIN::THEME"
     text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.compressed.css\"/>"
 }%%ADDTOZONE{
-    "head" id="dropzonejsskin-css" requires="dropzonejs-css"
-    text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzonejsskin.compressed.css\"/>"
+    "head" id="bulkuploadskin-css" requires="dropzonejs-css"
+    text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/bulkuploadskin.compressed.css\"/>"
 }%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
 <div class="dropZoneDict dropZoneDictFileTooBig">%MAKETEXT{"File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB."}%</div>
 <div class="dropZoneDict dropZoneDictRemoveFile">%MAKETEXT{"Remove from queue."}%</div>
@@ -32,4 +32,4 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
     "%MAKETEXT{"Cancel"}%"  icon="cross"  class="dropZoneActionCancel" title="%MAKETEXT{"Cancel pending uploads."}%"
 }%<div class="dropZoneUploadProgress"><div class="dropZoneUploadProgressLabel"></div></div>
 </div>
-</div>%TMPL:END%%TMPL:P{"dropzonejs"}%
+</div>%TMPL:END%%TMPL:P{"bulkupload"}%

@@ -90,8 +90,8 @@ data, and an option to set the attachment upload date to the photo exposure time
 The second replaces (parts of) the upload form with bulk upload form that allows
 uploading multiple files.
 
-The skin extension comes in the form of a [[%SYSTEMWEB%.SkinTemplates][skin
-templates]]. See the _Installation_ section below.
+The skin extensions come in the form of a [[%SYSTEMWEB%.SkinTemplates][skin templates]].
+See the _Installation_ section below.
 
 
 
@@ -116,9 +116,9 @@ manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 ---+++ Skin Extensions
 
 To activate the upload form options described above add (prepend) =photogallery=
-(for JPEG rotation and timestamp options) and/or =dropzonejs= (for bulk
+(for JPEG rotation and timestamp options) and/or =bulkupload= (for bulk
 uploading) to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for
-details. The =dropzonejs= skin extension also works without activating this
+details. The =bulkupload= skin extension also works without activating this
 plugin.
 
 ---+++ Cache
@@ -152,7 +152,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  xx xxx xxxx  |     v1.5-dev  | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page%BR% \
 - remove [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]] skin extension%BR% \
-- ... |
+- make the whole thumbnail area clickable while the thumbnail image is being loaded%BR% \
+- various cleanup and small improvements |
 |  29 May 2016  |     v1.4    | \
 - minor cleanup (remove duplicate function, fix dependency file)  |
 |  16 May 2016  |     v1.3    | \
