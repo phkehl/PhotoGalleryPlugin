@@ -27,9 +27,8 @@ jQuery(function($)
         var dzFiles            = $('div.dropZoneFiles');
         var dzFilesResize      = $('div.dropZoneFilesResize');
         var submitButton       = uplForm.find('input[type=submit]');
-        var filecommentInput   = uplForm.find('input[name=filecomment]');
         var validationkeyInput = uplForm.find('input[name=validation_key]');
-        var propsCheckboxes    = uplForm.find('input[type=checkbox]');
+        var filePropsInputs    = uplForm.find('input[type=text], input[type=radio], input[type=checkbox], select');
         var origActionButtons  = uplForm.find('.patternActionButtons');
         var addButton          = dzCont.find('.dropZoneActionAdd');
         var clearButton        = dzCont.find('.dropZoneActionClear');
@@ -46,10 +45,9 @@ jQuery(function($)
 
         dzDebug('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
             dzCont: dzCont, uploadAction: uploadAction, dzFiles: dzFiles,
-            dzFilesResize: dzFilesResize, filecommentInput: filecommentInput,
-            validationkeyInput: validationkeyInput, propsCheckboxes: propsCheckboxes,
-            origActionButtons: origActionButtons, nonce: nonce,
-            addButton: addButton, clearButton: clearButton,
+            dzFilesResize: dzFilesResize, validationkeyInput: validationkeyInput,
+            filePropsInputs: filePropsInputs, origActionButtons: origActionButtons,
+            nonce: nonce, addButton: addButton, clearButton: clearButton,
             uploadButton: uploadButton, cancelButton: cancelButton,
             progBar: progBar, progLabel: progLabel});
 
@@ -84,7 +82,7 @@ jQuery(function($)
             //forceFallback: true, // for testing
             previewTemplate:        '' +
                 '<div class="dz-preview dz-file-preview">' +
-                '<div class="dz-filename"><span data-dz-name></span></div>' +
+                '<div class="dz-filename"><span class="dropZoneFileName" data-dz-name></span></div>' +
                 '<div class="dz-size"><span data-dz-size></span></div>' +
                 '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
                 '<div class="dz-success-mark">&nbsp;</div>' +
@@ -109,6 +107,19 @@ jQuery(function($)
 
         // make the dropzone resizable in height (but not width)
         dzFilesResize.resizable({ handles: 's' });
+
+        // ignore file drops on the original form (so that accidential drops outside the
+        // DropzoneJS don't load that file)
+        $('body').on('drop dragover', function (e)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        dzDebug('uplForm', uplForm);
+
+        // reset inputs to the original state FIXME: doesn't work :-(
+        //uplForm.find('input[type=checkbox]').each(function () { $(this).prop('checked', $(this).attr('checked') ? true : false); });
+        //uplForm.find('input[type=text]').each(function () { $(this).val( $(this).attr('value') ); });
 
 
         /* ***** arm the DropzoneJS interactions ************************************************* */
@@ -239,31 +250,20 @@ jQuery(function($)
 
             // ...add a tooltip to the remove icon
             addTooltip(file._removeLink, dictRemoveFile, 'help');
+            // destroy tooltip object or we'll end up with a stray tooltip sticking on the page
             $(file._removeLink).on('click', function ()
             {
-                $(this).tooltip('destroy').parent().tooltip('destroy');
-            });
-
-            // ...store form parameters
-            var tooltip = '';
-            file._dzParam = {};
-            file._dzParam.filecomment = filecommentInput.val();
-            tooltip += '<em>comment:</em> ' + (file._dzParam.filecomment || 'no comment set');
-            propsCheckboxes.each(function ()
-            {
-                if ($(this).attr('checked'))
+                if ($(this).hasClass('jqTooltipInited'))
                 {
-                    var name = $(this).attr('name');
-                    file._dzParam[name] = 'on';
-                    tooltip += '<br/><em>' + name + ':</em> on';
+                    $(this).tooltip('destroy');
                 }
             });
 
-            // ...add an info tooltip with the form parameters
-            addTooltip(file.previewElement, tooltip, 'info');
-
             // ...update progress bar info
             this.updateTotalUploadProgress();
+
+            // ...save form data
+            formToData($(file.previewElement), filePropsInputs)
 
             uploadButton.removeClass('dropZoneActionDisabled');
 
@@ -275,18 +275,24 @@ jQuery(function($)
         dzInst.on('sending', function (file, xhr, form)
         {
             dzDebug('sending file', { file: file, xhr: xhr, form: form, nonce: nonce });
-            file._dzParam.noredirect = 1;
+
+            // set required foswiki upload form data
+            form.append('noredirect', 1);
             if (nonce.charAt(0) == '?')
             {
-                file._dzParam.validation_key = StrikeOne.calculateNewKey(nonce);
+                form.append('validation_key', StrikeOne.calculateNewKey(nonce));
             }
             else if (nonce)
             {
-                file._dzParam.validation_key = nonce;
+                form.append('validation_key', nonce);
             }
-            Object.keys(file._dzParam).forEach(function (k)
+
+            // set all the data from the upload form
+            var data = $(file.previewElement).data('uploadFormData');
+            dzDebug('data', data);
+            Object.keys(data).forEach(function (k)
             {
-                form.append(k, file._dzParam[k]);
+                form.append(k, data[k]);
             });
 
             dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });
@@ -323,6 +329,66 @@ jQuery(function($)
         //    dzInst.options.maxFiles++;
         //});
 
+        // allow selecting a file by clicking the filename
+        // and sync selected file with file upload properties form
+        var formHighlight = filePropsInputs.parents('.foswikiFormStep');
+        var selectedFile = undefined;
+        var formDefaults = $('<div/>').appendTo(dzCont);
+        formToData(formDefaults, filePropsInputs);
+        dzFiles.on('click', '.dropZoneFileName', function (e)
+        {
+            //dzDebug('click', $(this));
+            e.stopPropagation();
+            formHighlight.effect('highlight');
+            if ($(this).hasClass('dropZoneSelected'))
+            {
+                $(this).removeClass('dropZoneSelected');
+                selectedFile = undefined;
+                dataToForm(formDefaults, filePropsInputs);
+                return;
+            }
+            if (selectedFile)
+            {
+                selectedFile.removeClass('dropZoneSelected');
+            }
+            selectedFile = $(this);
+            selectedFile.addClass('dropZoneSelected');
+            dataToForm($(this).parents('.dz-preview'), filePropsInputs);
+
+        });
+        dzFiles.on('click', function (e)
+        {
+            dzDebug('click', $(this));
+            if (selectedFile)
+            {
+                selectedFile.trigger('click');
+            }
+        });
+        filePropsInputs.on('change', function (e)
+        {
+            //dzDebug('change', $(this));
+            if (selectedFile)
+            {
+                formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
+            }
+        });
+        var inpKeyupTo;
+        filePropsInputs.on('keyup', function (e)
+        {
+            if (inpKeyupTo)
+            {
+                clearTimeout(inpKeyupTo);
+            }
+            var $this = $(this);
+            inpKeyupTo = setTimeout(function ()
+            {
+                if (selectedFile)
+                {
+                    formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
+                }
+            }, 250);
+        });
+
     });
 
     // console debug, three forms:
@@ -353,9 +419,51 @@ jQuery(function($)
     {
         $(el).data(
         {
-            position: 'bottom', delay: 150, arrow: true, duration: 200, items: el,
+            position: 'bottom', delay: 250, arrow: true, duration: 200, items: el,
             content: tooltip, tooltipClass: ((type || 'default') + ' dropZoneTooltip')
         }).addClass('jqUITooltip');
+    }
+
+    // save form data to the file element
+    function formToData(target, inputs)
+    {
+        var data = {};
+        inputs.each(function (ix, inp)
+        {
+            inp = $(inp);
+            var name = inp.attr('name');
+            var value;
+            if (inp.is('input[type=checkbox], input[type=radio]'))
+            {
+                value = inp.prop('checked') ? 'on' : '';
+            }
+            else
+            {
+                value = inp.val();
+            }
+            data[name] = value;
+        });
+        target.data('uploadFormData', data);
+        dzDebug('formToData', [ target, data ]);
+    }
+
+    // load form data from the file element
+    function dataToForm(target, inputs)
+    {
+        var data = target.data('uploadFormData') || {};
+        inputs.each(function (ix, inp)
+        {
+            inp = $(inp);
+            var name = inp.attr('name');
+            if (inp.is('input[type=checkbox], input[type=radio]'))
+            {
+                inp.prop('checked', data[name] ? true : false);
+            }
+            else
+            {
+                inp.val(data[name]);
+            }
+        });
     }
 });
 

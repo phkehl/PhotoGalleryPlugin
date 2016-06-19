@@ -21,6 +21,9 @@ div.dropZoneActions {
 
 .dropZoneTooltip/*.error*/ { max-width: 30em; }
 .dropZoneDict { display: none; }
+.dropZoneSelected { font-weight: bold; }
+
+
 
 .dropzone { cursor: pointer; }
 .dropzone .dz-message { text-align: center; height: 100%; width: 100%; display: table; }
@@ -58,6 +61,7 @@ div.dropZoneActions {
 .dropzone .dz-preview.dz-success:hover { background-color: hsl(125, 60%, 65%); }
 .dropzone .dz-preview.dz-error         { background-color: hsl(  0, 60%, 75%); }
 .dropzone .dz-preview.dz-error:hover   { background-color: hsl(  0, 60%, 65%); }
+
 
 .dropzone .dz-preview .dz-size strong,
 .dropZoneUploadProgressLabel strong { font-weight: normal; }
