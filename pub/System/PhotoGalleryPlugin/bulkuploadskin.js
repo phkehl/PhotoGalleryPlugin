@@ -13,6 +13,12 @@ jQuery(function($)
     {
         /* ***** prepare ************************************************************************* */
 
+        // don't do anything for the "attachagain" action
+        if (location && location.href && (location.href.indexOf('filename=') >= 0))
+        {
+            return;
+        }
+
         // sanity check that we're on the right page
         var uplFileSel   = $('input[name=filepath]');
         var uplForm      = $('form');
