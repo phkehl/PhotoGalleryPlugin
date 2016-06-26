@@ -266,7 +266,8 @@ jQuery(function($)
             {
                 if ($(this).hasClass('jqInitedTooltip'))
                 {
-                    $(this).tooltip('destroy');
+                    $(this).tooltip('destroy')
+                        .parents('.dz-preview.jqInitedTooltip').tooltip('destroy');
                 }
             });
 
@@ -503,7 +504,7 @@ jQuery(function($)
             },
             success: function (data, textStatus, jqXHR)
             {
-                dzDebug('data', data);
+                //dzDebug('data', data);
                 // abort if it doesn't seem to contain the table
                 if (data.indexOf('foswikiAttachments') < 0)
                 {
