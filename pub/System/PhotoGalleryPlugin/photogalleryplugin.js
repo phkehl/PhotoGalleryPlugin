@@ -4,7 +4,7 @@ jQuery(function($)
 {
     "use strict";
 
-    var DEBUG = true;
+    var doDEBUG = false;
 
 
     /* ***** init each gallery once ************************************************************** */
@@ -15,7 +15,7 @@ jQuery(function($)
         $(this).addClass('photoGalleryInited');
 
         var pgGlobalsDiv = $('#photoGalleryGlobals');
-        DEBUG = pgGlobalsDiv.data('debug');
+        doDEBUG = pgGlobalsDiv.data('debug');
         pgSetup(
         {
             t0:           t0,
@@ -32,7 +32,7 @@ jQuery(function($)
 
     function pgSetup(helper)
     {
-        pgDebug('init ' + helper.pgUid, helper);
+        DEBUG('init ' + helper.pgUid, helper);
 
         // find all photos and make list of items with all info for the
         // pswp thingy, arm tooltips
@@ -160,7 +160,7 @@ jQuery(function($)
                 var nPossible = Math.floor(availableSpace / frameWidth);
                 var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
                 helper.pgDiv.find('div.gallery').width(w);
-                //pgDebug('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
+                //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
                 // FIXME: optimise for least number of columns and rows (fewest empty spots)
             }, 25);
         });
@@ -225,7 +225,7 @@ jQuery(function($)
 
         function adminMenuShow(helper, ix)
         {
-            pgDebug('tsaction', $(this).data('tsaction'));
+            DEBUG('tsaction', $(this).data('tsaction'));
             helper.adminMenu.find('li.timestamp').toggle($(this).data('tsaction'));
             var ix = $(this).data('ix');
             helper.adminMenu.show()
@@ -262,11 +262,11 @@ jQuery(function($)
             }
         });
 
-        if (DEBUG)
+        if (doDEBUG)
         {
             var dt = ( +(new Date) - helper.t0 ) * 1e-3;
             var sp = helper.items.length / dt;
-            pgDebug('done ' + helper.pgUid + ': ' +
+            DEBUG('done ' + helper.pgUid + ': ' +
                 helper.items.length + ' in ' + dt.toFixed(3) + 's, ' + sp.toFixed(0) + '/s' );
         }
     }
@@ -539,7 +539,7 @@ jQuery(function($)
             }
         });
 
-        pgDebug(moveDialog.find('a.action-move'));
+        DEBUG(moveDialog.find('a.action-move'));
         moveDialog.find('a.action-move').on('click', function (e)
         {
             e.preventDefault();
@@ -599,7 +599,7 @@ jQuery(function($)
                 var nonce = jqXHR.getResponseHeader('X-Foswiki-Validation');
                 if (nonce)
                 {
-                    pgDebug('new nonce ' + nonce);
+                    DEBUG('new nonce ' + nonce);
                     helper.pgGlobalsDiv.data('nonce', nonce);
                 }
             },
@@ -666,12 +666,12 @@ jQuery(function($)
     }
 
     // console debug, three forms:
-    // - pgDebug('string');
-    // - pgDebug(object);
-    // - pgDebug('string', obect);
-    function pgDebug(strOrObj, obj)
+    // - DEBUG('string');
+    // - DEBUG(object);
+    // - DEBUG('string', obect);
+    function DEBUG(strOrObj, obj)
     {
-        if (DEBUG && window.console)
+        if (doDEBUG && window.console)
         {
             if (obj)
             {

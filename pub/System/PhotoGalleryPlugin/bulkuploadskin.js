@@ -5,7 +5,7 @@ jQuery(function($)
     "use strict";
 
     // add "debug=1" to the query string to enable debugging
-    var DEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
+    var doDEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
 
     $(document).ready(function()
     {
@@ -49,7 +49,7 @@ jQuery(function($)
         // (see https://foswiki.org/Development/HowToIntegrateWithRequestValidation)
         var nonce = validationkeyInput.val();
 
-        dzDebug('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
+        DEBUG('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
             dzCont: dzCont, uploadAction: uploadAction, dzFiles: dzFiles,
             dzFilesResize: dzFilesResize, validationkeyInput: validationkeyInput,
             filePropsInputs: filePropsInputs, origActionButtons: origActionButtons,
@@ -98,7 +98,7 @@ jQuery(function($)
             // restore original upload form if DropzoneJS is not supported by the browser
             fallback: function () { uplFileSel.show(); origActionButtons.show(); dzCont.remove(); }
         };
-        dzDebug('dzOpts', dzOpts);
+        DEBUG('dzOpts', dzOpts);
 
         // initialise the DropzoneJS...
         var dzInst = new Dropzone(dzFiles.get(0), dzOpts);
@@ -109,7 +109,7 @@ jQuery(function($)
         // ...and style and show it
         dzFiles.addClass('dropzone');
         dzCont.show();
-        dzDebug('instance', dzInst);
+        DEBUG('instance', dzInst);
         var msg = dzCont.find('.dropZoneDictDefaultMessage');
         msg.html( msg.html()
                   .replace('{{maxfilesize}}', dzInst.filesize(maxFileSize))
@@ -125,7 +125,7 @@ jQuery(function($)
             e.preventDefault();
             e.stopPropagation();
         });
-        dzDebug('uplForm', uplForm);
+        DEBUG('uplForm', uplForm);
 
         // reset inputs to the original state FIXME: doesn't work :-(
         //uplForm.find('input[type=checkbox]').each(function () { $(this).prop('checked', $(this).attr('checked') ? true : false); });
@@ -137,7 +137,7 @@ jQuery(function($)
         // on error, add a tooltip to the file entry with the error message
         dzInst.on('error', function (file, msg, xhr)
         {
-            dzDebug('error file: ' + msg, [ file, xhr ]);
+            DEBUG('error file: ' + msg, [ file, xhr ]);
             addTooltip(file.previewElement, msg, 'error');
         });
 
@@ -159,7 +159,7 @@ jQuery(function($)
             e.preventDefault();
             if ($(this).hasClass('dropZoneActionDisabled'))
             {
-                dzDebug('hasclass', $(this));
+                DEBUG('hasclass', $(this));
                 return;
             }
             dzInst.hiddenFileInput.click();
@@ -185,7 +185,7 @@ jQuery(function($)
             {
                 return;
             }
-            dzDebug('upload', { e: e });
+            DEBUG('upload', { e: e });
             dzInst.processQueue();
             dzInst.options.autoProcessQueue = true;
             progBar.progressbar('value', undefined);
@@ -224,7 +224,7 @@ jQuery(function($)
 
         dzInst.on('removedfile', function (file)
         {
-            //dzDebug('removedfile', [ this, file ]);
+            //DEBUG('removedfile', [ this, file ]);
             if (!this.files.length)
             {
                 uploadButton.addClass('dropZoneActionDisabled');
@@ -236,7 +236,7 @@ jQuery(function($)
         progBar.progressbar('disable');
         dzInst.on('totaluploadprogress', function (uploadProgress, totalBytes, totalBytesSent)
         {
-            //dzDebug('uploadprogress', [ this, uploadProgress, totalBytes, totalBytesSent ]);
+            //DEBUG('uploadprogress', [ this, uploadProgress, totalBytes, totalBytesSent ]);
             // need to recalculate these because DropzoneJS calculates rubbish
             uploadProgress = totalBytes = totalBytesSent = 0;
             this.files.forEach(function (f)
@@ -257,7 +257,7 @@ jQuery(function($)
         // when a file is dropped or added...
         dzInst.on('addedfile', function (file)
         {
-            dzDebug('addedfile file', { file: file } );
+            DEBUG('addedfile file', { file: file } );
 
             // ...add a tooltip to the remove icon
             //addTooltip(file._removeLink, dictRemoveFile, 'help');
@@ -287,7 +287,7 @@ jQuery(function($)
         // add form parameters to the POST request (the upload)
         dzInst.on('sending', function (file, xhr, form)
         {
-            dzDebug('sending file', { file: file, xhr: xhr, form: form, nonce: nonce });
+            DEBUG('sending file', { file: file, xhr: xhr, form: form, nonce: nonce });
 
             // set required foswiki upload form data
             form.append('noredirect', 1);
@@ -302,7 +302,7 @@ jQuery(function($)
 
             // set all the data from the upload form
             var data = $(file.previewElement).data('uploadFormData');
-            dzDebug('data', data);
+            DEBUG('data', data);
             Object.keys(data).forEach(function (k)
             {
                 form.append(k, data[k]);
@@ -314,11 +314,11 @@ jQuery(function($)
         // update nonce if we got a new one in Foswiki's response
         dzInst.on('complete', function (file)
         {
-            dzDebug('complete file', { file: file});
+            DEBUG('complete file', { file: file});
             if (file && file.xhr)
             {
                 var newNonce = file.xhr.getResponseHeader('X-Foswiki-Validation');
-                dzDebug('success file', { file: file, newNonce: newNonce });
+                DEBUG('success file', { file: file, newNonce: newNonce });
                 if (newNonce)
                 {
                     nonce = '?' + newNonce;
@@ -353,7 +353,7 @@ jQuery(function($)
         // clicking the filename with select/deselect the file
         dzFiles.on('click', '.dropZoneFileName', function (e)
         {
-            //dzDebug('click', $(this));
+            //DEBUG('click', $(this));
             e.stopPropagation();
             formHighlight.effect('highlight');
             if ($(this).hasClass('dropZoneSelected'))
@@ -375,7 +375,7 @@ jQuery(function($)
         // clicking outside will deselct the currently selected file (if any)
         dzFiles.on('click', function (e)
         {
-            //dzDebug('click', $(this));
+            //DEBUG('click', $(this));
             if (selectedFile)
             {
                 selectedFile.trigger('click');
@@ -384,7 +384,7 @@ jQuery(function($)
         // update the saved file upload props when the form inputs change
         filePropsInputs.on('change', function (e)
         {
-            //dzDebug('change', $(this));
+            //DEBUG('change', $(this));
             if (selectedFile)
             {
                 formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
@@ -409,12 +409,12 @@ jQuery(function($)
     });
 
     // console debug, three forms:
-    // - dzDebug('string');
-    // - dzDebug(object);
-    // - dzDebug('string', obect);
-    function dzDebug(strOrObj, obj)
+    // - DEBUG('string');
+    // - DEBUG(object);
+    // - DEBUG('string', obect);
+    function DEBUG(strOrObj, obj)
     {
-        if (DEBUG && window.console)
+        if (doDEBUG && window.console)
         {
             if (obj)
             {
@@ -461,7 +461,7 @@ jQuery(function($)
             data[name] = value;
         });
         target.data('uploadFormData', data);
-        dzDebug('formToData', [ target, data ]);
+        DEBUG('formToData', [ target, data ]);
     }
 
     // load form data from the file element
@@ -485,7 +485,7 @@ jQuery(function($)
 
     function updateAttachmentsTable(filenames)
     {
-        dzDebug('updateAttachmentsTable', filenames);
+        DEBUG('updateAttachmentsTable', filenames);
         var orig = $('div.foswikiAttachments');
         orig.block({ message: 'Refreshing&hellip;' });
         $.ajax(
@@ -500,7 +500,7 @@ jQuery(function($)
             },
             success: function (data, textStatus, jqXHR)
             {
-                //dzDebug('data', data);
+                //DEBUG('data', data);
                 // abort if it doesn't seem to contain the table
                 if (data.indexOf('foswikiAttachments') < 0)
                 {
