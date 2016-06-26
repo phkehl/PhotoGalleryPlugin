@@ -147,11 +147,11 @@ jQuery(function($)
             dzFiles.block({ message: 'Processing files&hellip;' });
         });
 
-        // arm buttons tooltips
-        [ addButton, clearButton, uploadButton, cancelButton ].forEach(function (el)
-        {
-            addTooltip(el, el.attr('title'), 'help');
-        });
+        // arm buttons tooltips, FIXME: these don't work reliably and will stick occasionally
+        //[ addButton, clearButton, uploadButton, cancelButton ].forEach(function (el)
+        //{
+        //    addTooltip(el, el.attr('title'), 'help');
+        //});
 
         // open file selection dialog (see also dzOpts.clickable)
         addButton.on('click', function (e)
@@ -260,15 +260,16 @@ jQuery(function($)
             dzDebug('addedfile file', { file: file } );
 
             // ...add a tooltip to the remove icon
-            addTooltip(file._removeLink, dictRemoveFile, 'help');
+            //addTooltip(file._removeLink, dictRemoveFile, 'help');
+            $(file._removeLink).attr('title', dictRemoveFile);
             // destroy tooltip object or we'll end up with a stray tooltip sticking on the page
             $(file._removeLink).on('click', function ()
             {
-                if ($(this).hasClass('jqInitedTooltip'))
-                {
-                    $(this).tooltip('destroy')
-                        .parents('.dz-preview.jqInitedTooltip').tooltip('destroy');
-                }
+                //if ($(this).hasClass('jqInitedTooltip'))
+                //{
+                //    $(this).tooltip('destroy')
+                //}
+                $(this).parents('.dz-preview.jqInitedTooltip').tooltip('destroy');
             });
 
             // ...update progress bar info
