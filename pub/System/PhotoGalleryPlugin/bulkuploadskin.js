@@ -405,11 +405,6 @@ jQuery(function($)
                 }
             }, 250);
         });
-    $('<a/>').appendTo(dzCont).text('bla').on('click', function (e)
-    {
-        updateAttachmentsTable();
-    });
-
     });
 
     // console debug, three forms:
