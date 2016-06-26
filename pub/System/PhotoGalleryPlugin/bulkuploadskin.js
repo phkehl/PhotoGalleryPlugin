@@ -219,7 +219,7 @@ jQuery(function($)
             addButton.removeClass('dropZoneActionDisabled');
             clearButton.removeClass('dropZoneActionDisabled');
             uploadButton.addClass('dropZoneActionDisabled');
-            updateAttachmentsTable();
+            updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
         });
 
         dzInst.on('removedfile', function (file)
@@ -334,7 +334,7 @@ jQuery(function($)
                 cancelButton.removeClass('dropZoneActionDisabled').hide();
                 addButton.removeClass('dropZoneActionDisabled');
                 clearButton.removeClass('dropZoneActionDisabled');
-                updateAttachmentsTable();
+                updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
             }
         });
 
@@ -483,9 +483,9 @@ jQuery(function($)
         });
     }
 
-    function updateAttachmentsTable()
+    function updateAttachmentsTable(filenames)
     {
-        dzDebug('updateAttachmentsTable');
+        dzDebug('updateAttachmentsTable', filenames);
         var orig = $('div.foswikiAttachments');
         orig.block({ message: 'Refreshing&hellip;' });
         $.ajax(
@@ -515,8 +515,27 @@ jQuery(function($)
                 else
                 {
                     var table = $('<div>').html(data);
-                    orig.html(table.find('div.foswikiAttachments'));
+                    orig.html(table.find('div.foswikiAttachments table'));
                 }
+                // highlight uploaded files
+                $('div.foswikiAttachments table tr').filter(function ()
+                {
+                    var trText = $(this).text();
+                    var res = false;
+                    filenames.forEach(function (fn)
+                    {
+                        if (trText.match(fn))
+                        {
+                            res = true;
+                        }
+                    });
+                    return res;
+                })
+                    .removeClass(function (ix, cls)
+                    {
+                        return (cls.match(/(^| +)foswikiTableRowdataBg[^ ]+/g) || []).join(' ');
+                    })
+                    .addClass('bulkUploadHighlight');
             },
             error: function (jqXHR, textStatus, errorThrown)
             {
