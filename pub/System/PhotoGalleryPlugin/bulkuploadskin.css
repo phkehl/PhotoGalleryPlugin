@@ -24,7 +24,7 @@ div.dropZoneActions {
 .dropZoneDict { display: none; }
 .dropZoneSelected { font-weight: bold; }
 
-.foswikiAttachments .bulkUploadHighlight td { background-color: hsl(50, 50%, 90%) !important /*thanks, PatternSkinTheme/colors.css */; }
+.foswikiAttachments .bulkUploadHighlight td { background-color: hsl(50, 100%, 90%) !important /*thanks, PatternSkinTheme/colors.css */; }
 
 
 .dropzone { cursor: pointer; }
