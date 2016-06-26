@@ -155,6 +155,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.6-dev  |\
+- bulk upload improvements: replace unreliable jquery ui tooltips on buttons with a help twisty, highlight uploaded files in attachments table%BR% \
+- various cleanup%BR% \
 - ... |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
