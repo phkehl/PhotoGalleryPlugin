@@ -32,7 +32,7 @@ use warnings;
 This module implements the System.PhotoGalleryPlugin. See System.VarPHOTOGALLERY for the user
 API. See source code for developer details.
 
----++ Issues, Ideas
+---++ Issues, Todos, Ideas
 
    * According to Foswiki:Development/HowToIntegrateWithRequestValidation the REST handler should
      generate a new nonce in each request. It doesn't seem to do that.
@@ -45,6 +45,13 @@ API. See source code for developer details.
      How much does it really save? Does it work with the livequery stuff?
    * Sort out the timezone mess. Foswiki::Time::formatTime() isn't going to help.
    * Honour refresh=cache/on in %PHOTOGALLERY% (?). Be careful with PageCaching enabled.
+   * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
+     (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
+   * Create a MapsPlugin or so to display GPX tracks, photos, ...
+   * Invalidate PageCache when deleting or modifying photo.
+   * Image info cache in separate files per image.
+   * Generate image info cache on upload.
+   * Calculate upload speed.
    * ...
 
 =cut
