@@ -57,7 +57,7 @@ jQuery(function($)
             uploadButton: uploadButton, cancelButton: cancelButton,
             progBar: progBar, progLabel: progLabel });
 
-        // maximum number of file we allow to upload in one go FIXME: reasonable?
+        // maximum number of file we allow to upload in one go FIXME: reasonable number?
         var maxNumFiles = 100;
 
         /* ***** initialise the DropzoneJS thingy ************************************************ */
@@ -461,6 +461,7 @@ jQuery(function($)
             data[name] = value;
         });
         target.data('uploadFormData', data);
+        target.effect('highlight');
         DEBUG('formToData', [ target, data ]);
     }
 

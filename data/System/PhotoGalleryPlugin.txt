@@ -156,6 +156,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 | *Date*        |  *Version*  | *Comment*   |
 |  xx xxx xxxx  |     v1.6-dev  |\
 - bulk upload improvements: replace unreliable jquery ui tooltips on buttons with a help twisty, highlight uploaded files in attachments table%BR% \
+- improve file properties editing in bulk upload form%BR% \
 - various cleanup%BR% \
 - ... |
 |  19 Jun 2016  |     v1.5    | \
