@@ -60,6 +60,9 @@ jQuery(function($)
         // maximum number of file we allow to upload in one go FIXME: reasonable number?
         var maxNumFiles = 100;
 
+        // other global states
+        var uploadStartedTs = 0; // upload started timestamp in [ms]
+
         /* ***** initialise the DropzoneJS thingy ************************************************ */
 
         // put dropzone div in place of the upload file selector
@@ -194,6 +197,7 @@ jQuery(function($)
             cancelButton.show();
             addButton.addClass('dropZoneActionDisabled');
             clearButton.addClass('dropZoneActionDisabled');
+            uploadStartedTs = +(new Date);
         });
         uploadButton.addClass('dropZoneActionDisabled');
 
@@ -248,9 +252,21 @@ jQuery(function($)
                 }
             });
             uploadProgress = totalBytes ? (totalBytesSent / totalBytes * 1e2) : 0;
+
+            // calculate upload speed
+            var speedStr = '??';
+            if (uploadProgress && uploadStartedTs)
+            {
+                var dt = (+(new Date) - uploadStartedTs) * 1e-3;
+                DEBUG('speed: ' + dt.toFixed(1) + ' ' + totalBytesSent);
+                var speed = totalBytesSent / dt;
+                speedStr = this.filesize(speed) + '/s';
+            }
+
+            // update progress bar and its text
             progBar.progressbar('value', uploadProgress);
             progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
-                           + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%)': ''));
+                           + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%, ' + speedStr + ')': '') + '.');
         });
         dzInst.updateTotalUploadProgress();
 

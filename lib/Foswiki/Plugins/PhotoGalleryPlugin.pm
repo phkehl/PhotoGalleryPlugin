@@ -51,7 +51,6 @@ API. See source code for developer details.
    * Invalidate PageCache when deleting or modifying photo.
    * Image info cache in separate files per image.
    * Generate image info cache on upload.
-   * Calculate upload speed.
    * ...
 
 =cut
