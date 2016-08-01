@@ -265,8 +265,15 @@ jQuery(function($)
 
             // update progress bar and its text
             progBar.progressbar('value', uploadProgress);
-            progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
-                           + (uploadProgress ? ' (' + uploadProgress.toFixed(0) + '%, ' + speedStr + ')': '') + '.');
+            if (uploadProgress)
+            {
+                progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
+                               + ' (' + uploadProgress.toFixed(0) + '%, ' + speedStr + ').');
+            }
+            else
+            {
+                progLabel.html('Nothing uploaded yet.');
+            }
         });
         dzInst.updateTotalUploadProgress();
 

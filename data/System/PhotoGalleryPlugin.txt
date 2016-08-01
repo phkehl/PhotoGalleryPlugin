@@ -157,8 +157,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  xx xxx xxxx  |     v1.6-dev  |\
 - bulk upload improvements: replace unreliable jquery ui tooltips on buttons with a help twisty, highlight uploaded files in attachments table%BR% \
 - improve file properties editing in bulk upload form%BR% \
-- display average upload speed in bulk upload progress bar %BR% \
-- various cleanup%BR% \
+- display average upload speed in bulk upload progress bar%BR% \
+- various cleanup and minor improvements%BR% \
 - ... |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
