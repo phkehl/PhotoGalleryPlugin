@@ -223,7 +223,11 @@ jQuery(function($)
             addButton.removeClass('dropZoneActionDisabled');
             clearButton.removeClass('dropZoneActionDisabled');
             uploadButton.addClass('dropZoneActionDisabled');
-            updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
+            if (uploadStartedTs)
+            {
+                updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
+            }
+            uploadStartedTs = 0;
         });
 
         dzInst.on('removedfile', function (file)
@@ -348,6 +352,11 @@ jQuery(function($)
                 }
             }
 
+            if (file && (file.status == 'error'))
+            {
+                return;
+            }
+
             // file done after cancelling, do stuff we otherwise would do in the
             // "queuecomplete" handler
             if (!dzInst.options.autoProcessQueue)
@@ -373,6 +382,7 @@ jQuery(function($)
         var selectedFile = undefined;
         var formDefaults = $('<div/>').appendTo(dzCont);
         formToData(formDefaults, filePropsInputs);
+        filePropsInputs.removeAttr('disabled');
         // clicking the filename with select/deselect the file
         dzFiles.on('click', '.dropZoneFileName', function (e)
         {
@@ -399,7 +409,7 @@ jQuery(function($)
             }
             else
             {
-                filePropsInputs.attr('disabled', false);
+                filePropsInputs.removeAttr('disabled');
             }
             dataToForm(dzPreview, filePropsInputs);
 
@@ -411,6 +421,7 @@ jQuery(function($)
             if (selectedFile)
             {
                 selectedFile.trigger('click');
+                filePropsInputs.removeAttr('disabled');
             }
         });
         // update the saved file upload props when the form inputs change
@@ -525,7 +536,7 @@ jQuery(function($)
         {
             method: 'GET', timeout: 20000,
             url: foswiki.getScriptUrlPath('rest') + '/RenderPlugin/template',
-            data: { name: 'attach', expand: 'existingattachments', 'render' : 'on',
+            data: { name: 'attach', expand: 'existingattachments', render: 'on',
                     topic: foswiki.preferences.WEB + '/' + foswiki.preferences.TOPIC },
             complete:  function (jqXHR, textStatus)
             {
