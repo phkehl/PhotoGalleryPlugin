@@ -288,7 +288,7 @@ jQuery(function($)
             {
                 //var thumbUrl = thumb.attr('src').replace(/;refresh=[^;]*/, '').replace(/;_t=\d*/, '')
                 //   + ';refresh=on;_t=' + (+new Date);
-
+                DEBUG('data', data);
                 // current width and height
                 var iw = helper.items[ix].w;
                 var ih = helper.items[ix].h;
@@ -300,7 +300,7 @@ jQuery(function($)
                 // refresh thumbnail (swapping width and height)
                 var thumbUrl = thumb.attr('src').replace(/;refresh=[^;]*/, '')
                     .replace(/width=\d+/, 'width=' + th).replace(/height=\d+/, 'height=' + tw)
-                    + ';refresh=on;_t=' + (+new Date);
+                    .replace(/uid=\d+/, 'uid=' + (data.pguid || 0));
                 thumb.on('load', function ()
                 {
                     $(this).fadeIn();

@@ -810,7 +810,9 @@ sub doRestAdmin
         if ($att)
         {
             # bump uid so that the thumbnail URL will be new the next time and the thumbnail gets regenerated
+            # will also trigger an image info cache update (ImageWidth and ImageHeight swap)
             $att->{pguid}++;
+            $resp->{pguid} = $att->{pguid};
 
             # size may change slightly
             $att->{size} = -s $tFile;
@@ -1013,7 +1015,6 @@ sub doRestThumb
                   $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 1, 100);
     my $width   = $query->param('width');
     my $height  = $query->param('height');
-    my $refresh = $query->param('refresh') || ''; $refresh = ($refresh =~ m/(on|cache)/i ? 1 : 0);
     my $ver     = $query->param('ver') || 0;
     my $uid     = $query->param('uid') || 0;
     (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
@@ -1059,7 +1060,7 @@ sub doRestThumb
 
     # cache thumbnail unless it exists already
     my $cached = 1;
-    if (! -f $cacheFile || $refresh)
+    if (! -f $cacheFile)
     {
         $cached = 0;
         my $fh = $meta->openAttachment($name, '<');
@@ -1219,7 +1220,9 @@ sub _getThumbDims
 sub _getCacheFileName
 {
     my $type = shift;
-    return $RV->{cacheDir} . '/' . $type . '-' . Digest::MD5::md5_hex(@_);
+    my $cacheFile = $RV->{cacheDir} . '/' . $type . '-' . Digest::MD5::md5_hex(@_);
+    _debug("$type cache: @_ -> $cacheFile");
+    return $cacheFile;
 }
 
 # returns hash with image information from EXIF data and attachment meta data
@@ -1236,7 +1239,6 @@ sub _getImageInfo
     # try cache first
     my $cacheVer = 1; # bump this if something below changes
     my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
-    #_debug("cache: $cacheVer $web $topic $att->{name} $att->{size} $att->{version} -> $cacheFile");
     my $info;
     try { $info = Storable::retrieve($cacheFile); }
     catch Error::Simple with { };
