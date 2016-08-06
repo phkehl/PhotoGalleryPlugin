@@ -44,11 +44,9 @@ API. See source code for developer details.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
      How much does it really save? Does it work with the livequery stuff?
    * Sort out the timezone mess. Foswiki::Time::formatTime() isn't going to help.
-   * Honour refresh=cache/on in %PHOTOGALLERY% (?). Be careful with PageCaching enabled.
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
-   * Invalidate PageCache when deleting or modifying photo.
    * ...
 
 =cut
@@ -580,10 +578,6 @@ sub doPHOTOGALLERY
 
 ####################################################################################################
 
-
-# SMELL: Does this work as expected? It seems so.
-our $tempFile = '';
-
 sub beforeUploadHandler
 {
     my ($att, $meta) = @_;
@@ -623,7 +617,7 @@ sub beforeUploadHandler
 
             #Foswiki::Func::setSessionValue(__PACKAGE__ . '-tfile', $tFile);
             #$q->param(__PACKAGE__ . '-tfile', $tFile);
-            $tempFile = $tFile;
+            $RV->{tempFile} = $tFile;
             open($att->{stream}, '+<', $tFile);
         }
     }
@@ -654,11 +648,12 @@ sub afterUploadHandler
     # cleanup temp file from beforeUploadHandler()
     #if (my $tFile = Foswiki::Func::getSessionValue(__PACKAGE__ . '-tfile'))
     #if (my $tFile = $q->param(__PACKAGE__ . '-tfile'))
-    if (my $tFile = $tempFile)
+    if (my $tFile = $RV->{tempFile})
     {
         #Foswiki::Func::clearSessionValue(__PACKAGE__ . '-tfile');
         #$q->delete(__PACKAGE__ . '-tfile');
         unlink($tFile) if (-f $tFile);
+        delete $RV->{tempFile};
     }
 
     # get image info (on *all* uploads, as it doesn't cost much here)
@@ -821,6 +816,9 @@ sub doRestAdmin
             $meta->putKeyed('FILEATTACHMENT', $att);
             $meta->save();
         }
+
+        # clean up
+        unlink($tFile);
 
         $resp->{message} = "Rotated $respText.";
         $resp->{success} = 1;
@@ -1244,7 +1242,7 @@ sub _getImageInfo
     catch Error::Simple with { };
     if ($info)
     {
-        _debug("Getting image info from $web.$topic/$att->{name} (cached).");
+        #_debug("Getting image info from $web.$topic/$att->{name} (cached).");
         File::Touch::touch($cacheFile); # keep current
     }
 
@@ -1265,7 +1263,7 @@ sub _getImageInfo
         my $_info;
         if ($fh)
         {
-            _debug("Getting image info from $web.$topic/$att->{name}.");
+            #_debug("Getting image info from $web.$topic/$att->{name}.");
             seek($fh, 0, SEEK_SET);
             # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
             # bump $cacheVer above if this changes
@@ -1353,7 +1351,7 @@ sub _getImageInfo
         # cache
         if ($info)
         {
-            _debug($cacheFile);
+            #_debug($cacheFile);
             try { Storable::store($info, $cacheFile); }
             catch Error::Simple with
             {

@@ -82,7 +82,7 @@ The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference setting
 
 ---+++ Skin Extensions
 
-This plugin comes with a two skin extensions to the [[%SYSTEMWEB%.PatternSkin][PatternSkin]].
+This plugin comes with two skin extensions to the [[%SYSTEMWEB%.PatternSkin][PatternSkin]].
 
 The first adds two options (checkboxes) to the upload form, namely an option to
 activate lossless rotation of JPEG images based on EXIF camera orientation meta
@@ -160,7 +160,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - display average upload speed in bulk upload progress bar%BR% \
 - improved, simplified and optimised image info caching code (no visible changes)%BR% \
 - prevent thumbnails from being unnecessarily regenerated on %SYSTEMWEB%.PageCache refresh%BR% \
-- various cleanup and minor improvements%BR% \
+- improve and cleanup various code and documentation bits%BR% \
 - ... |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
