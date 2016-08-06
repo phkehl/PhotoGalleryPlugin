@@ -258,13 +258,13 @@ jQuery(function($)
             uploadProgress = totalBytes ? (totalBytesSent / totalBytes * 1e2) : 0;
 
             // calculate upload speed
-            var speedStr = '??';
+            var speedStr = '';
             if (uploadProgress && uploadStartedTs)
             {
                 var dt = (+(new Date) - uploadStartedTs) * 1e-3;
                 DEBUG('speed: ' + dt.toFixed(1) + ' ' + totalBytesSent);
                 var speed = totalBytesSent / dt;
-                speedStr = this.filesize(speed) + '/s';
+                speedStr = ', ' + this.filesize(speed) + '/s';
             }
 
             // update progress bar and its text
@@ -272,7 +272,7 @@ jQuery(function($)
             if (uploadProgress)
             {
                 progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
-                               + ' (' + uploadProgress.toFixed(0) + '%, ' + speedStr + ').');
+                               + ' (' + uploadProgress.toFixed(0) + '%' + speedStr + ').');
             }
             else
             {
