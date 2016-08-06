@@ -49,8 +49,6 @@ API. See source code for developer details.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
    * Invalidate PageCache when deleting or modifying photo.
-   * Image info cache in separate files per image.
-   * Generate image info cache on upload.
    * ...
 
 =cut
@@ -314,10 +312,6 @@ sub doPHOTOGALLERY
 
     ##### get image information for the selected attachments #######################################
 
-    my $infoCache = _getInfoCache($params->{web}, $params->{topic});
-    my $nCached = 0;
-
-    my $pubDir = $Foswiki::cfg{PubDir};
     my @images = ();
     for (my $ix = 0; $ix <= $#attachments; $ix++)
     {
@@ -328,40 +322,8 @@ sub doPHOTOGALLERY
             _debug(sprintf('%s getImageInfo %03i/%03i', $debugStr, $ix + 1, $#attachments + 1));
         }
 
-        # try cached info first
-        my $info;
-        if ($info = $infoCache->{$att->{name}})
-        {
-            if (!$info || ($info->{version} != $att->{version}))
-            {
-                $info = undef;
-            }
-        }
-        if ($info)
-        {
-            $nCached++;
-        }
-        else
-        {
-            my $fh;
-            try { $fh = $meta->openAttachment($att->{name}, '<'); }
-            catch Error::Simple with
-            {
-                $tml .= _wtf("Cannot read $params->{web}.$params->{topic}/$att->{name}!");
-            };
-            if ($fh)
-            {
-                $info = _getImageInfo($fh, $att);
-                $infoCache->{$att->{name}} = $info;
-            }
-        }
+        my $info = _getImageInfo($meta, $att);
         next unless ($info);
-
-        unless ($info->{ImageWidth} && $info->{ImageHeight})
-        {
-            _warning("No such image in $params->{web}.$params->{topic}: $att->{name}");
-            next;
-        }
 
         # photo number and total number of photos, not cached
         $info->{n} = $ix + 1;
@@ -411,11 +373,6 @@ sub doPHOTOGALLERY
         push(@images, $img);
         $RV->{shown}->{$att->{name}}++;
     }
-
-    # save cache
-    #_debug($infoCache);
-    _setInfoCache($infoCache, $params->{web}, $params->{topic});
-    _debug(sprintf('%s %i/%i (%.2f%%) cache hit', $debugStr, $nCached, $#attachments + 1, $nCached / ($#attachments + 1) * 1e2));
 
     #_debug("using", \@images);
     if ($#images < 0)
@@ -492,7 +449,7 @@ sub doPHOTOGALLERY
                      . 'style="min-width: ' . $params->{size}. 'px; min-height: ' . $params->{size} . 'px;"/>';
         $tml .=     '</a>';
         $tml .=   '</div>'; # crop
-        if ( ( ($params->{admin} eq 'on')   && $mayChange                      ) ||
+        if ( ( _checkBool($params->{admin}) && $mayChange                      ) ||
              ( ($params->{admin} eq 'user') && ($wikiName eq $img->{wikiName}) ) )
         {
             $tml .=   '<a class="admin" data-ix="' . $ix . '" data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false')
@@ -629,12 +586,12 @@ our $tempFile = '';
 
 sub beforeUploadHandler
 {
-    my ($attr, $meta) = @_;
+    my ($att, $meta) = @_;
 
     _initPluginStuff();
 
-    #_debug("beforeUploadHandler($attr->{name})");
-    #_debug("beforeUploadHandler attrs", $attr);
+    #_debug("beforeUploadHandler($att->{name})");
+    #_debug("beforeUploadHandler attrs", $att);
     #          'comment' => '',
     #          'name' => 'IMG_1262.jpg',
     #          'stream' => \*{'Foswiki::Meta::$opts{...}'},
@@ -644,22 +601,22 @@ sub beforeUploadHandler
     my $q = Foswiki::Func::getRequestObject();
     my $exifrotateimage = $q->param('exifrotateimage') || '';
 
-    if ( ($exifrotateimage eq 'on') && ($attr->{attachment} =~ m/\.(jpg|jpeg)/i))
+    if ( _checkBool($exifrotateimage) && ($att->{name} =~ m/\.(jpg|jpeg)/i))
     {
-        my $info = Image::ExifTool::ImageInfo($attr->{stream}, [ 'Orientation' ]);
+        my $info = Image::ExifTool::ImageInfo($att->{stream}, [ 'Orientation' ]);
         if ($info && $info->{Orientation})
         {
-            seek($attr->{stream}, 0, SEEK_SET);
+            seek($att->{stream}, 0, SEEK_SET);
             my (undef, $tFile) = File::Temp::tempfile(CLEANUP => 1);
-            File::Copy::copy($attr->{stream}, $tFile);
+            File::Copy::copy($att->{stream}, $tFile);
             my $exiftran = $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExifTranPath} || 'exiftran';
-            _debug("beforeUploadHandler($attr->{attachment}) $exiftran $tFile");
+            _debug("beforeUploadHandler($att->{name}) $exiftran $tFile");
             # SMELL: Use (the rather weird) Foswiki::Sandbox->sysCommand() instead of system()?
             system("exiftran -a -i $tFile 2>/dev/null >/dev/null");
             my $res = $?;
             if ($res != 0)
             {
-                _warning("beforeUploadHandler($attr->{attachment}) exiftran failed, res=$res");
+                _warning("beforeUploadHandler($att->{name}) exiftran failed, res=$res");
             }
             # SMELL: exiftran changes the filesize, but Foswiki::Meta::attach() doesn't recalculate
             # the (file)size attribute after calling the handler
@@ -667,7 +624,7 @@ sub beforeUploadHandler
             #Foswiki::Func::setSessionValue(__PACKAGE__ . '-tfile', $tFile);
             #$q->param(__PACKAGE__ . '-tfile', $tFile);
             $tempFile = $tFile;
-            open($attr->{stream}, '+<', $tFile);
+            open($att->{stream}, '+<', $tFile);
         }
     }
 
@@ -676,13 +633,13 @@ sub beforeUploadHandler
 
 sub afterUploadHandler
 {
-    my ($attr, $meta) = @_;
+    my ($att, $meta) = @_;
 
     _initPluginStuff();
 
-    #_debug("afterUploadHandler($attr->{attachment})");
+    #_debug("afterUploadHandler($att->{name})");
 
-    #_debug("afterUploadHandler", $attr));
+    #_debug("afterUploadHandler", $att));
     #          'comment' => '',
     #          'date' => 1452249355,
     #          'name' => 'IMG_1262.jpg',
@@ -704,26 +661,25 @@ sub afterUploadHandler
         unlink($tFile) if (-f $tFile);
     }
 
+    # get image info (on *all* uploads, as it doesn't cost much here)
+    my $info;
+    if ($att->{name} =~ m/\.(jpg|jpeg)/i)
+    {
+        $info = _getImageInfo($meta, $att);
+    }
+
+    # set attachment date to photo exposure time if requested and possible
     my $setexifdate = $q->param('setexifdate') || '';
     #_debug("setexifdate=$setexifdate");
-
-    if ( ($setexifdate eq 'on') &&
-         ($attr->{attachment} =~ m/\.(jpg|jpeg)/i) )
+    if ( _checkBool($setexifdate) && $info && $info->{CreateDate} &&
+         (my $attachment = $meta->get("FILEATTACHMENT", $att->{name})) )
     {
-        if (my $attachment = $meta->get("FILEATTACHMENT", $attr->{attachment}))
-        {
-            my $fh = $meta->openAttachment($attachment->{name}, '<');
-            my $info = _getImageInfo($fh) if ($fh);
-            if ($info && $info->{CreateDate})
-            {
-                _debug("afterUploadHandler($attr->{attachment}) filedate="
-                   . Foswiki::Time::formatTime($info->{CreateDate},
-                       $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}));
-                $attachment->{date} = $info->{CreateDate};
-                $meta->putKeyed('FILEATTACHMENT', $attachment);
-                $meta->save();
-            }
-        }
+        _debug("afterUploadHandler($att->{name}) filedate="
+               . Foswiki::Time::formatTime($info->{CreateDate},
+                 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{DateFmtDefault}));
+        $attachment->{date} = $info->{CreateDate};
+        $meta->putKeyed('FILEATTACHMENT', $attachment);
+        $meta->save();
     }
 
     return;
@@ -850,24 +806,19 @@ sub doRestAdmin
         File::Copy::copy($tFh, $aFh);
 
         # update size meta data
-        my $attachment = $meta->get("FILEATTACHMENT", $name);
-        if ($attachment)
+        my $att = $meta->get("FILEATTACHMENT", $name);
+        if ($att)
         {
             # bump uid so that the thumbnail URL will be new the next time and the thumbnail gets regenerated
-            $attachment->{pguid}++;
+            $att->{pguid}++;
 
             # size may change slightly
-            $attachment->{size} = -s $tFile;
+            $att->{size} = -s $tFile;
 
             # store attachment meta data (this will invalidate the page cache, too, it appears)
-            $meta->putKeyed('FILEATTACHMENT', $attachment);
+            $meta->putKeyed('FILEATTACHMENT', $att);
             $meta->save();
         }
-
-        # invalidate info cache
-        my $infoCache = _getInfoCache($web, $topic);
-        delete $infoCache->{$name};
-        _setInfoCache($infoCache, $web, $topic);
 
         $resp->{message} = "Rotated $respText.";
         $resp->{success} = 1;
@@ -923,7 +874,13 @@ sub doRestAdmin
 
         my $error;
         try { $from->moveAttachment($name, $to, new_name => $toName); }
-        catch Error::Simple with { $error = 1; }; #$error = (shift)->{-text}; $error =~ s/\n.*//; };
+        catch Error::Simple with
+        {
+            my $e = (shift)->stringify();
+            $e =~ s{\n.*$}{}ms; # remove stack trace
+            _warning($e);
+            $error = 1;
+        };
 
         if ($error)
         {
@@ -971,14 +928,13 @@ sub doRestAdmin
     # update attachment timestamp from EXIF data
     elsif ($action eq 'timestamp')
     {
-        if (my $attachment = $meta->get("FILEATTACHMENT", $name))
+        my $att = $meta->get("FILEATTACHMENT", $name);
+        if ( $att && (my $info = _getImageInfo($meta, $att)) )
         {
-            my $fh = $meta->openAttachment($attachment->{name}, '<');
-            my $info = _getImageInfo($fh) if ($fh);
             if ($info && $info->{CreateDate})
             {
-                $attachment->{date} = $info->{CreateDate};
-                $meta->putKeyed('FILEATTACHMENT', $attachment);
+                $att->{date} = $info->{CreateDate};
+                $meta->putKeyed('FILEATTACHMENT', $att);
                 $meta->save();
                 $resp->{message} = "$respText date set to "
                   . Foswiki::Time::formatTime(
@@ -1099,7 +1055,7 @@ sub doRestThumb
         return undef;
     }
 
-    my $cacheFile = _getCacheFile('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
+    my $cacheFile = _getCacheFileName('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
 
     # cache thumbnail unless it exists already
     my $cached = 1;
@@ -1226,13 +1182,13 @@ sub _checkOptions
     return $opts{$val} ? $val : $def;
 }
 
-# check on/off/yes/no option
+# check on/off/yes/no/1/0 option
 # 0 | 1 = _checkOnOff($input)
 sub _checkBool
 {
     my ($val) = @_;
-    my %true = ( yes => 1, on => 1 );
-    return $true{$val} ? 1 : 0;
+    my %true = ( yes => 1, on => 1, 1 => 1 );
+    return $true{lc($val)} ? 1 : 0;
 }
 
 # check "off" or range of a parameter
@@ -1241,7 +1197,7 @@ sub _checkOffOrRange
 {
     my ($val, $defOff, $defOn, $min, $max) = @_;
     if    (!defined $val || ($val eq '') || ($val eq 'off') ) { return $defOff; }
-    elsif ($val eq 'on') { return $defOn; }
+    elsif ($val =~ m/^on$/i) { return $defOn; }
     else { return _checkRange($val, $defOn, $min, $max); }
 }
 
@@ -1259,126 +1215,161 @@ sub _getThumbDims
 
 # get a cache filename (absolute, full path) of a given type (any string) and any number of
 # parameters to generate a unique id
-# $file = _getCacheFile($type, $str, ...)
-sub _getCacheFile
+# $file = _getCacheFileName($type, $str, ...)
+sub _getCacheFileName
 {
     my $type = shift;
     return $RV->{cacheDir} . '/' . $type . '-' . Digest::MD5::md5_hex(@_);
 }
 
-# load getImageInfo() info cache for a given $web and $topic
-# \%info = _getInfoCache($web, $topic)
-sub _getInfoCache
-{
-    my $cacheFile = _getCacheFile('info', $VERSION, $RELEASE, @_);
-    my $res;
-    try { $res = Storable::retrieve($cacheFile); }
-    catch Error::Simple with { $res = {}; };
-    return $res;
-}
-
-# store the getImageInfo() cache for a given $web and $topic
-# 0 | 1 = _setInfoCache(\%info, $web, $topic)
-sub _setInfoCache
-{
-    my $data = shift;
-    my $cacheFile = _getCacheFile('info', $VERSION, $RELEASE, @_);
-    my $res = 1;
-    try { Storable::store($data, $cacheFile); }
-    catch Error::Simple with { $res = 0; };
-    return $res;
-}
-
-# extract EXIF image information from an image file (handle), will at least return w(idth) and h(height)
-# \%info = _getImageInfo($fh)
+# returns hash with image information from EXIF data and attachment meta data
+# the EXIF info will be cached
+# returns undef if not at least ImageWidth and ImageHeight properties could be determined
+# (typically because the attachment is missing or it's not an image)
+# \%info | undef = _getImageInfo($meta, $att)
 sub _getImageInfo
 {
-    my ($fh, $att) = @_;
-    my $info = {};
-    my $_info;
+    my ($meta, $att) = @_;
 
-    if ($fh)
+    my ($web, $topic) = ($meta->web(), $meta->topic());
+
+    # try cache first
+    my $cacheVer = 1; # bump this if something below changes
+    my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
+    #_debug("cache: $cacheVer $web $topic $att->{name} $att->{size} $att->{version} -> $cacheFile");
+    my $info;
+    try { $info = Storable::retrieve($cacheFile); }
+    catch Error::Simple with { };
+    if ($info)
     {
-        seek($fh, 0, SEEK_SET);
-        # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
-        my @exifAttrs = qw(CreateDate Make Model FileModifyDate ExposureTime UserComment
-                           ISO FocalLength ApertureValue ImageWidth ImageHeight
-                           GPSLatitude GPSLongitude GPSAltitude);
-        my %exifOpts = ( DateFormat => '%s', CoordFormat => '%.9f');
-        if (my $exif = Image::ExifTool::ImageInfo($fh, \@exifAttrs, \%exifOpts))
-        {
-            $_info->{$_} = $exif->{$_} for grep { $exif->{$_} } keys %{$exif};
-        }
+        _debug("Getting image info from $web.$topic/$att->{name} (cached).");
+        File::Touch::touch($cacheFile); # keep current
     }
 
-    if ($_info)
+    # otherwise get info from file
+    if (!$info)
     {
-        my $make = $_info->{Make} || '';
-        my $model = $_info->{Model} || ''; $model =~ s/$make\s*//;
-        if ($make || $model)
+        # try top open the file
+        my $fh;
+        try { $fh = $meta->openAttachment($att->{name}, '<'); }
+        catch Error::Simple with
         {
-            $info->{MakeModel} = $make ? "$make $model" : $model;
-            # cleanup
-            $info->{MakeModel} =~ s/NIKON CORPORATION NIKON/Nikon/;
+            my $e = (shift)->stringify();
+            $e =~ s{\n.*$}{}ms; # remove stack trace
+            _warning("Cannot read $web.$topic/$att->{name}!", $e);
+        };
+
+        # get raw EXIF info
+        my $_info;
+        if ($fh)
+        {
+            _debug("Getting image info from $web.$topic/$att->{name}.");
+            seek($fh, 0, SEEK_SET);
+            # http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+            # bump $cacheVer above if this changes
+            my @exifAttrs = qw(CreateDate Make Model FileModifyDate ExposureTime UserComment
+                               ISO FocalLength ApertureValue ImageWidth ImageHeight
+                               GPSLatitude GPSLongitude GPSAltitude);
+            my %exifOpts = ( DateFormat => '%s', CoordFormat => '%.9f');
+            if (my $exif = Image::ExifTool::ImageInfo($fh, \@exifAttrs, \%exifOpts))
+            {
+                $_info->{$_} = $exif->{$_} for grep { $exif->{$_} } keys %{$exif};
+            }
         }
-        if ($_info->{ImageWidth} && $_info->{ImageHeight})
+
+        # check if it is any good
+        if (!$_info || !$_info->{ImageWidth} || !$_info->{ImageHeight})
         {
+            _warning("Failed getting image info from $web.$topic/$att->{name}%s!");
+            return undef;
+        }
+
+        # process EXIF info
+        if ($_info)
+        {
+            $info = {};
+            my $make = $_info->{Make} || '';
+            my $model = $_info->{Model} || ''; $model =~ s/$make\s*//;
+            if ($make || $model)
+            {
+                $info->{MakeModel} = $make ? "$make $model" : $model;
+                # cleanup
+                $info->{MakeModel} =~ s/NIKON CORPORATION NIKON/Nikon/;
+            }
             $info->{ImageWidth}  = $_info->{ImageWidth};
             $info->{ImageHeight} = $_info->{ImageHeight};
             $info->{ImageSize} = sprintf('%ix%i %.1fMP',
                 $info->{ImageWidth}, $info->{ImageHeight},
                 $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
-        }
-        foreach my $field (qw(CreateDate UserComment Make Model))
-        {
-            if ($_info->{$field})
+
+            if ($_info->{UserComments})
             {
-                $info->{$field} = $_info->{$field};
+                # clean up
+                my $userComments = $_info->{UserComments} || '';
+                $userComments =~ s{User comments}{}i;
+                $info->{UserComments} = $userComments if ($userComments);
+            }
+            foreach (grep { $_info->{$_} } qw(CreateDate Make Model))
+            {
+                $info->{$_} = $_info->{$_};
+            }
+            if ($_info->{ExposureTime})
+            {
+                $info->{ExposureTime} = $_info->{ExposureTime} . 's';
+            }
+            if ($_info->{FocalLength})
+            {
+                $info->{FocalLength} = $_info->{FocalLength};
+                $info->{FocalLength} =~ s/\s+//g;
+            }
+            if ($_info->{ApertureValue})
+            {
+                $info->{ApertureValue} = 'f/' . $_info->{ApertureValue};
+            }
+            if ($_info->{ISO})
+            {
+                $info->{ISO} = 'ISO-' . $_info->{ISO};
+            }
+            if ($_info->{GPSLatitude} && ($_info->{GPSLatitude} =~ m/^(.+)\s*([NS])$/))
+            {
+                $info->{Lat} = ($2 eq 'N' ? +1 : -1) * $1;
+            }
+            if ($_info->{GPSLongitude} && ($_info->{GPSLongitude} =~ m/^(.+)\s*([EW])$/))
+            {
+                $info->{Lon} = ($2 eq 'W' ? +1 : -1) * $1;
+            }
+            if ($_info->{GPSAltitude} && ($_info->{GPSAltitude} =~ m/^(.+)\s*m.*$/))
+            {
+                $info->{Alt} = 1 * sprintf('%.0f', $1); # ellipsoid or orthometric height?
+            }
+            if ($info->{Lat} && $info->{Lon})
+            {
+                $info->{Coords} = "$info->{Lat}/$info->{Lon}" . ($info->{Alt} ? "/$info->{Alt}" : '');
             }
         }
-        if ($_info->{ExposureTime})
+
+        # cache
+        if ($info)
         {
-            $info->{ExposureTime} = $_info->{ExposureTime} . 's';
+            _debug($cacheFile);
+            try { Storable::store($info, $cacheFile); }
+            catch Error::Simple with
+            {
+                my $e = (shift)->stringify();
+                $e =~ s{\n.*$}{}ms; # remove stack trace
+                _warning($e);
+            };
         }
-        if ($_info->{FocalLength})
+
+        # failed extracting EXIF data, not much we can do..
+        else
         {
-            $info->{FocalLength} = $_info->{FocalLength};
-            $info->{FocalLength} =~ s/\s+//g;
-        }
-        if ($_info->{ApertureValue})
-        {
-            $info->{ApertureValue} = 'f/' . $_info->{ApertureValue};
-        }
-        if ($_info->{ISO})
-        {
-            $info->{ISO} = 'ISO-' . $_info->{ISO};
-        }
-        if ($_info->{GPSLatitude} && ($_info->{GPSLatitude} =~ m/^(.+)\s*([NS])$/))
-        {
-            $info->{Lat} = ($2 eq 'N' ? +1 : -1) * $1;
-        }
-        if ($_info->{GPSLongitude} && ($_info->{GPSLongitude} =~ m/^(.+)\s*([EW])$/))
-        {
-            $info->{Lon} = ($2 eq 'W' ? +1 : -1) * $1;
-        }
-        if ($_info->{GPSAltitude} && ($_info->{GPSAltitude} =~ m/^(.+)\s*m.*$/))
-        {
-            $info->{Alt} = 1 * sprintf('%.0f', $1); # ellipsoid or orthometric height?
-        }
-        if ($info->{Lat} && $info->{Lon})
-        {
-            $info->{Coords} = "$info->{Lat}/$info->{Lon}" . ($info->{Alt} ? "/$info->{Alt}" : '');
+            $info = {};
         }
     }
 
-    # only use stuff that doesn't change or that changes the version, too
-    # (e.g. don't use comment here, as that will not change the version
-    #  and we won't notice the need to refresh the cache)
-    if ($att)
-    {
-        $info->{WikiName} = Foswiki::Func::getWikiName($att->{user});
-        $info->{version} = $att->{version};
-    }
+    # add wiki name of image (attachment) owner
+    $info->{WikiName} = Foswiki::Func::getWikiName($att->{user});
 
     return $info;
 }
