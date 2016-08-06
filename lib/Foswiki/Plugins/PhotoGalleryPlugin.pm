@@ -601,7 +601,7 @@ sub beforeUploadHandler
         if ($info && $info->{Orientation})
         {
             seek($att->{stream}, 0, SEEK_SET);
-            my (undef, $tFile) = File::Temp::tempfile(CLEANUP => 1);
+            my $tFile = _getTempFileName();
             File::Copy::copy($att->{stream}, $tFile);
             my $exiftran = $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{ExifTranPath} || 'exiftran';
             _debug("beforeUploadHandler($att->{name}) $exiftran $tFile");
@@ -778,7 +778,9 @@ sub doRestAdmin
 
         # open attachment for reading, temp file for writing and copy image
         my $aFh = $meta->openAttachment($name, '<');
-        my ($tFh, $tFile) = File::Temp::tempfile();
+        my $tFile = _getTempFileName();
+        my $tFh;
+        open($tFh, '>', $tFile);
         binmode($tFh);
         File::Copy::copy($aFh, $tFh);
         close($tFh);
@@ -787,6 +789,7 @@ sub doRestAdmin
         # execute exiftran on temporary file
         my %args = ( rotatel => '-2', rotater => '-9' );
         # SMELL: Use (the rather weird) Foswiki::Sandbox->sysCommand() instead of system()?
+        _debug("$debugText $exiftran $args{$action} $tFile");
         my $res = system("$exiftran $args{$action} -i $tFile 2>/dev/null >/dev/null");
         if ($res != 0)
         {
@@ -1062,7 +1065,7 @@ sub doRestThumb
     {
         $cached = 0;
         my $fh = $meta->openAttachment($name, '<');
-        my (undef, $tFile) = File::Temp::tempfile();
+        my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
         my $epeg = Image::Epeg->new($tFile);
         $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
@@ -1221,6 +1224,14 @@ sub _getCacheFileName
     my $cacheFile = $RV->{cacheDir} . '/' . $type . '-' . Digest::MD5::md5_hex(@_);
     _debug("$type cache: @_ -> $cacheFile");
     return $cacheFile;
+}
+
+# get a temporary file name
+sub _getTempFileName
+{
+    my $f = '';
+    do { $f = _getCacheFileName('temp', rand()); } until (!-f $f);
+    return $f;
 }
 
 # returns hash with image information from EXIF data and attachment meta data
