@@ -159,7 +159,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - improve file properties editing in bulk upload form%BR% \
 - display average upload speed in bulk upload progress bar%BR% \
 - improved, simplified and optimised image info caching code (no visible changes)%BR% \
-- prevent thumbnails from being unnecessarily regenerated on %SYSTEMWEB%.PageCache refresh%BR% \
+- prevent thumbnails from being unnecessarily regenerated on %SYSTEMWEB%.PageCaching refresh and other circumstances%BR% \
 - improve and cleanup various code and documentation bits%BR% \
 - ... |
 |  19 Jun 2016  |     v1.5    | \
