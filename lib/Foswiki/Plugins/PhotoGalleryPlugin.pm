@@ -43,8 +43,8 @@ API. See source code for developer details.
    * Document and assert exact HTML5 browser requirement.
    * Create inline JSON data for PSWP items instead of creating them in the browser.
      How much does it really save? Does it work with the livequery stuff?
-   * Sort out the timezone mess. Foswiki::Time::formatTime() isn't going to help. DateTime will work
-     (but add a dependency).
+   * Work around the timezone mess. Foswiki::Time::formatTime() isn't going to help. DateTime will work
+     (but add a dependency). Time::Piece perhaps? http://stackoverflow.com/questions/19526930/how-can-i-convert-a-date-time-and-time-zone-correctly
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
