@@ -392,7 +392,16 @@ jQuery(function($)
             }
             selectedFile = $(this);
             selectedFile.addClass('dropZoneSelected');
-            dataToForm($(this).parents('.dz-preview'), filePropsInputs);
+            var dzPreview = $(this).parents('.dz-preview');
+            if (dzPreview.hasClass('dz-error'))
+            {
+                filePropsInputs.attr('disabled', true);
+            }
+            else
+            {
+                filePropsInputs.attr('disabled', false);
+            }
+            dataToForm(dzPreview, filePropsInputs);
 
         });
         // clicking outside will deselct the currently selected file (if any)
