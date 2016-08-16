@@ -1,5 +1,7 @@
 /* PhotoGalleryPlugin DropzoneJS Foswiki integration stylesheet */
 
+.foswikiFormStep p:empty { margin: 0; }
+
 div.dropZoneContainer {
     min-width: 40em; overflow: hidden; }
 div.dropZoneFilesResize {
