@@ -154,6 +154,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
+| .. ... ....   |     v1.7-dev   |\
+- ... |
 |  9 Sep 2016   |     v1.6    |\
 - bulk upload improvements: replace unreliable jquery ui tooltips on buttons with a help twisty, highlight uploaded files in attachments table%BR% \
 - improve file properties editing in bulk upload form%BR% \
