@@ -161,8 +161,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - improved, simplified and optimised image info caching code (no visible changes)%BR% \
 - prevent thumbnails from being unnecessarily regenerated on %SYSTEMWEB%.PageCaching refresh and other circumstances%BR% \
 <!-- - provide skin extension for Foswiki 2.2 that uses a new mechanism to add attachment properties to the attach dialog, see Foswiki:Tasks/Item14092 %BR% --> \
-- improve and cleanup various code and documentation bits%BR% \
-- ... |
+- improve and cleanup various code and documentation bits  |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
 - remove [[Foswiki:Extensions/TopicInteractionPlugin][TopicInteractionPlugin]] skin extension%BR% \
