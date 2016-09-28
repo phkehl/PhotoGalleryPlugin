@@ -48,6 +48,7 @@ API. See source code for developer details.
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
+   * Upload skip: copy properties checkboxes to checkboxes for every item. Make list sortable.
    * ...
 
 =cut
