@@ -18,7 +18,7 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
 }%%ADDTOZONE{
     "head" id="bulkuploadskin-css" requires="dropzonejs-css"
     text="<link type=\"text/css\" rel=\"stylesheet\" href=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/bulkuploadskin.compressed.css\"/>"
-}%<div class="dropZoneContainer" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
+}%<div class="dropZoneContainer foswikiFormSteps" style="display: none;" data-filesizelimit="%IF{"$ATTACHFILESIZELIMIT > 0" then="%ATTACHFILESIZELIMIT%" else="0"}%">
 %TWISTY{id="bulkuploadhelp" link="<b>%MAKETEXT{"Help"}%</b>" mode="div" showimgleft="%ICONURLPATH{toggleopen}%"
 hideimgleft="%ICONURLPATH{toggleclose}%"
 }%
@@ -28,7 +28,7 @@ hideimgleft="%ICONURLPATH{toggleclose}%"
    * Click the <img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/tick.png"/> _Upload_ button to start uploading all new files in the queue.
    * While uploading, click the <img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/cross.png"/> _Cancel_ button to cancel pending uploads.
    * Files in the upload queue can be removed by clicking their <img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/delete.png"/> icon.
-   * The attachment comment and properties are set per file in the queue when adding/dropping the file. To change these select after the file has been added to the queue, select the file in the queue by clicking its filename and then adjust the comment and properties.
+   * The attachment comment and properties can be set per file. The checkboxes correspond to the following attributes:<ul id="bulkuploadattrhelp"></ul>
 %ENDTWISTY%<div class="dropZoneDict dropZoneDictFileTooBig">%MAKETEXT{"File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB."}%</div>
 <div class="dropZoneDict dropZoneDictRemoveFile">%MAKETEXT{"Remove from queue."}%</div>
 <div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"><div class="dz-message"><span class="dropZoneDictDefaultMessage">%MAKETEXT{"Drop up to {{maxnumfiles}} files here (up to {{maxfilesize}} each)."}%</span></div></div></div>
@@ -43,5 +43,4 @@ hideimgleft="%ICONURLPATH{toggleclose}%"
 }%<div class="dropZoneUploadProgress"><div class="dropZoneUploadProgressLabel"></div></div>
 </div>
 </div>%TMPL:END%%TMPL:P{"bulkupload"}%
-
 %{ eof }%

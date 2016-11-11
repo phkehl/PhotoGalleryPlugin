@@ -32,10 +32,8 @@ jQuery(function($)
         // more HTML elements that we'll need
         var dzFiles            = $('div.dropZoneFiles');
         var dzFilesResize      = $('div.dropZoneFilesResize');
-        var submitButton       = uplForm.find('input[type=submit]');
         var validationkeyInput = uplForm.find('input[name=validation_key]');
-        var filePropsInputs    = uplForm.find('input[type=text], input[type=radio], input[type=checkbox], select');
-        var origActionButtons  = uplForm.find('.patternActionButtons');
+        var filePropsCheckboxes= uplForm.find('input[type=checkbox]');
         var addButton          = dzCont.find('.dropZoneActionAdd');
         var clearButton        = dzCont.find('.dropZoneActionClear');
         var uploadButton       = dzCont.find('.dropZoneActionUpload');
@@ -52,23 +50,54 @@ jQuery(function($)
         DEBUG('dropzonejsskin', { uplFileSel: uplFileSel, uplForm: uplForm,
             dzCont: dzCont, uploadAction: uploadAction, dzFiles: dzFiles,
             dzFilesResize: dzFilesResize, validationkeyInput: validationkeyInput,
-            filePropsInputs: filePropsInputs, origActionButtons: origActionButtons,
+            filePropsCheckboxes: filePropsCheckboxes,
             nonce: nonce, addButton: addButton, clearButton: clearButton,
             uploadButton: uploadButton, cancelButton: cancelButton,
             progBar: progBar, progLabel: progLabel });
 
-        // maximum number of file we allow to upload in one go FIXME: reasonable number?
+        // maximum number of file we allow to upload in one go FIXME: is this reasonable number?
         var maxNumFiles = 100;
 
         // other global states
         var uploadStartedTs = 0; // upload started timestamp in [ms]
 
+
+        /* ***** get file properties inputs ****************************************************** */
+
+        var dzCheckboxesHtml = '';
+        var dzCheckboxesHelp = '';
+        filePropsCheckboxes.each(function ()
+        {
+            var cb = $(this);
+            var id = cb.attr('id');
+            var name = cb.attr('name');
+            var tooltip = '';
+            if (id)
+            {
+                var label = uplForm.find('label[for=' + id + ']');
+                if (label)
+                {
+                    tooltip += label.text();
+                    var info = label.next();
+                    if (info.is('span'))
+                    {
+                        tooltip += ' (' + info.text() + ')';
+                    }
+                }
+            }
+            dzCheckboxesHtml += '<label class="checkbox" title="' + escAttr(tooltip) + '">'
+                + '<input type="checkbox" name="' + name + '"'
+                + (cb.is(':checked') ? ' checked' : '') + '/><span></span></label>';
+            dzCheckboxesHelp += '<li>' + tooltip + '</li>';
+        });
+        $('#bulkuploadattrhelp').append(dzCheckboxesHelp);
+
+
         /* ***** initialise the DropzoneJS thingy ************************************************ */
 
         // put dropzone div in place of the upload file selector
-        dzCont.insertAfter(uplFileSel);
-        uplFileSel.hide();
-        origActionButtons.hide();
+        dzCont.insertAfter(uplForm);
+        uplForm.hide();
 
         // DropzoneJS options
         Dropzone.autoDiscover = false
@@ -81,7 +110,7 @@ jQuery(function($)
             maxFilesize:            (maxFileSize / 1024 / 1024).toFixed(2),
             uploadMultiple:         false,
             autoProcessQueue:       false,
-            addRemoveLinks:         true,
+            addRemoveLinks:         false, // we do it ourselves
             parallelUploads:        1,
             createImageThumbnails:  false,
             maxFiles:               maxNumFiles,
@@ -93,13 +122,19 @@ jQuery(function($)
             //forceFallback: true, // for testing
             previewTemplate:        '' +
                 '<div class="dz-preview dz-file-preview">' +
-                '<div class="dz-filename"><span class="dropZoneFileName" data-dz-name></span></div>' +
-                '<div class="dz-size"><span data-dz-size></span></div>' +
-                '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
-                '<div class="dz-success-mark">&nbsp;</div>' +
+                  '<div class="dz-filename"><span class="dropZoneFileName" data-dz-name></span></div>' +
+                  '<div class="dz-size"><span data-dz-size></span></div>' +
+                  '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
+                  '<div class="dz-success-mark">&nbsp;</div>' +
+                  '<a class="dz-remove" data-dz-remove="" title="Remove from queue."></a>' +
+                  '<div class="dropzoneForm">' +
+                    dzCheckboxesHtml +
+                    '<input class="comment" type="text" name="filecomment" placeholder="file comment"' +
+                    ' style="width: calc(100% - ' + filePropsCheckboxes.length + ' * 1.5em - 0.75em);"/>' +
+                  '</div>' +
                 '</div>',
             // restore original upload form if DropzoneJS is not supported by the browser
-            fallback: function () { uplFileSel.show(); origActionButtons.show(); dzCont.remove(); }
+            fallback: function () { uplForm.show(); dzCont.remove(); }
         };
         DEBUG('dzOpts', dzOpts);
 
@@ -129,10 +164,6 @@ jQuery(function($)
             e.stopPropagation();
         });
         DEBUG('uplForm', uplForm);
-
-        // reset inputs to the original state FIXME: doesn't work :-(
-        //uplForm.find('input[type=checkbox]').each(function () { $(this).prop('checked', $(this).attr('checked') ? true : false); });
-        //uplForm.find('input[type=text]').each(function () { $(this).val( $(this).attr('value') ); });
 
 
         /* ***** arm the DropzoneJS interactions ************************************************* */
@@ -302,9 +333,6 @@ jQuery(function($)
             // ...update progress bar info
             this.updateTotalUploadProgress();
 
-            // ...save form data
-            formToData($(file.previewElement), filePropsInputs)
-
             uploadButton.removeClass('dropZoneActionDisabled');
 
             // (mostly) done processing files
@@ -327,12 +355,20 @@ jQuery(function($)
                 form.append('validation_key', nonce);
             }
 
+            var dropzoneForm = $(file.previewElement).find('.dropzoneForm');
+
+            // disable inputs
+            dropzoneForm.find('input[type=checkbox]').attr('disabled', true);
+            dropzoneForm.find('input[type=text]').attr('readonly', true);
+
             // set all the data from the upload form
-            var data = $(file.previewElement).data('uploadFormData');
-            DEBUG('data', data);
-            Object.keys(data).forEach(function (k)
+            dropzoneForm.find('input').each(function ()
             {
-                form.append(k, data[k]);
+                var name = $(this).attr('name');
+                var val = $(this).val(); // FIXME: we get the wrong value for the checkboxes?!
+                DEBUG(name + '=' + val);
+                form.append(name, val);
+
             });
 
             dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });
@@ -376,79 +412,6 @@ jQuery(function($)
         //    dzInst.options.maxFiles++;
         //});
 
-        // allow selecting a file by clicking the filename
-        // and sync selected file with file upload properties form
-        var formHighlight = filePropsInputs.parents('.foswikiFormStep');
-        var selectedFile = undefined;
-        var formDefaults = $('<div/>').appendTo(dzCont);
-        formToData(formDefaults, filePropsInputs);
-        filePropsInputs.removeAttr('disabled');
-        // clicking the filename with select/deselect the file
-        dzFiles.on('click', '.dropZoneFileName', function (e)
-        {
-            //DEBUG('click', $(this));
-            e.stopPropagation();
-            formHighlight.effect('highlight');
-            if ($(this).hasClass('dropZoneSelected'))
-            {
-                $(this).removeClass('dropZoneSelected');
-                selectedFile = undefined;
-                dataToForm(formDefaults, filePropsInputs);
-                return;
-            }
-            if (selectedFile)
-            {
-                selectedFile.removeClass('dropZoneSelected');
-            }
-            selectedFile = $(this);
-            selectedFile.addClass('dropZoneSelected');
-            var dzPreview = $(this).parents('.dz-preview');
-            if (dzPreview.hasClass('dz-error'))
-            {
-                filePropsInputs.attr('disabled', true);
-            }
-            else
-            {
-                filePropsInputs.removeAttr('disabled');
-            }
-            dataToForm(dzPreview, filePropsInputs);
-
-        });
-        // clicking outside will deselct the currently selected file (if any)
-        dzFiles.on('click', function (e)
-        {
-            //DEBUG('click', $(this));
-            if (selectedFile)
-            {
-                selectedFile.trigger('click');
-                filePropsInputs.removeAttr('disabled');
-            }
-        });
-        // update the saved file upload props when the form inputs change
-        filePropsInputs.on('change', function (e)
-        {
-            //DEBUG('change', $(this));
-            if (selectedFile)
-            {
-                formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
-            }
-        });
-        var inpKeyupTo; // debounce
-        filePropsInputs.on('keyup', function (e)
-        {
-            if (inpKeyupTo)
-            {
-                clearTimeout(inpKeyupTo);
-            }
-            var $this = $(this);
-            inpKeyupTo = setTimeout(function ()
-            {
-                if (selectedFile)
-                {
-                    formToData(selectedFile.parents('.dz-preview'), filePropsInputs);
-                }
-            }, 250);
-        });
     });
 
     // console debug, three forms:
@@ -474,6 +437,12 @@ jQuery(function($)
         }
     }
 
+    // escape string so that it's suitable for HTML attributes
+    function escAttr(str)
+    {
+        return str.replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;');
+    }
+
     // add a (HTML) tooltip to the element
     function addTooltip(el, tooltip, type)
     {
@@ -484,53 +453,11 @@ jQuery(function($)
         }).addClass('jqUITooltip');
     }
 
-    // save form data to the file element
-    function formToData(target, inputs)
-    {
-        var data = {};
-        inputs.each(function (ix, inp)
-        {
-            inp = $(inp);
-            var name = inp.attr('name');
-            var value;
-            if (inp.is('input[type=checkbox], input[type=radio]'))
-            {
-                value = inp.prop('checked') ? 'on' : '';
-            }
-            else
-            {
-                value = inp.val();
-            }
-            data[name] = value;
-        });
-        target.data('uploadFormData', data);
-        target.effect('highlight');
-        DEBUG('formToData', [ target, data ]);
-    }
-
-    // load form data from the file element
-    function dataToForm(target, inputs)
-    {
-        var data = target.data('uploadFormData') || {};
-        inputs.each(function (ix, inp)
-        {
-            inp = $(inp);
-            var name = inp.attr('name');
-            if (inp.is('input[type=checkbox], input[type=radio]'))
-            {
-                inp.prop('checked', data[name] ? true : false);
-            }
-            else
-            {
-                inp.val(data[name]);
-            }
-        });
-    }
-
+    // reload attachments table and highlight newly uploaded files
     function updateAttachmentsTable(filenames)
     {
-        DEBUG('updateAttachmentsTable', filenames);
         var orig = $('div.foswikiAttachments');
+        DEBUG('updateAttachmentsTable', [ filenames, orig ]);
         orig.block({ message: 'Refreshing&hellip;' });
         $.ajax(
         {
@@ -584,6 +511,7 @@ jQuery(function($)
             error: function (jqXHR, textStatus, errorThrown)
             {
                 // whatever.. perhaps the RenderPlugin is not installed
+                DEBUG('RenderPlugin not installed and activated?');
             }
         });
     }

@@ -5,9 +5,9 @@
 div.dropZoneContainer {
     min-width: 40em; overflow: hidden; }
 div.dropZoneFilesResize {
-    height: 10em; padding: 0; }
+    height: 20em; padding: 0; }
 div.dropZoneFiles {
-    height: 100%; overflow-y: auto; padding: 0.15em 0.25em; }
+    height: 100%; overflow-y: auto; padding: 0.25em; }
 div.dropZoneUploadProgress {
     position: relative; height: 1.4em; line-height: 1.4em; display: inline-block;
     width: calc(100% - (3 * 7em)); float: right; }
@@ -24,7 +24,7 @@ div.dropZoneActions {
 
 .dropZoneTooltip/*.error*/ { max-width: 30em; }
 .dropZoneDict { display: none; }
-.dropZoneSelected { font-weight: bold; }
+.dropzoneFileName { font-weight: bold; }
 
 .foswikiAttachments .bulkUploadHighlight td { background-color: hsl(50, 100%, 90%) !important /*thanks, PatternSkinTheme/colors.css */; }
 
@@ -35,8 +35,8 @@ div.dropZoneActions {
 .dropzone.dz-started .dz-message { display: none; }
 
 .dropzone .dz-preview {
-    display: block; width: 100%; height: 1.4em; box-sizing: content-box;
-    margin: 0.2em 0; overflow: hidden; line-height: 1.0em; }
+    display: block; width: 100%; box-sizing: border-box;
+    margin: 0 0 0.25em 0; overflow: hidden; line-height: 1.0em; }
 .dropzone .dz-preview .dz-image { display: none; }
 
 .dropzone .dz-preview .dz-filename,
@@ -44,39 +44,55 @@ div.dropZoneActions {
 .dropzone .dz-preview .dz-progress,
 .dropzone .dz-preview.dz-success .dz-success-mark,
 .dropzone .dz-preview.dz-error   .dz-error-mark,
-.dropzone .dz-preview .dz-remove {
+.dropzone .dz-preview .dz-remove,
+.dropzone .dz-preview .dropzoneForm {
     display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    line-height: 1.2em; margin: 0.1em 0; }
+    line-height: 1.2em; margin: 0; }
+
 .dropzone .dz-preview .dz-remove { color: transparent; }
 .dropzone .dz-preview .dz-remove:hover { text-decoration: none; }
 
-.dropzone .dz-preview .dz-filename { width: calc(100% - 20.6em - 16px - 16px); padding: 0 0.25em; }
-.dropzone .dz-preview .dz-size     { width:  5em; padding: 0 0.25em; text-align: right; }
-.dropzone .dz-preview .dz-progress { width: 15em; height: 1.0em; margin: 0.2em 0.1em; }
+.dropzone .dz-preview .dz-filename     { width: calc(100% - 20.6em - 16px - 16px); padding: 0 0.25em; }
+.dropzone .dz-preview .dz-size         { width:  5em; padding: 0 0.25em; text-align: right; }
+.dropzone .dz-preview .dz-progress     { width: 15em; height: 1.0em; margin: 0.2em 0.1em; }
 .dropzone .dz-preview .dz-remove,
 .dropzone .dz-preview .dz-error-mark,
 .dropzone .dz-preview .dz-success-mark { width: 16px; height: 16px; margin-left: 0.1em; height: 1.2em; }
-
+.dropzone .dz-preview .dropzoneForm    { width: 100%; }
 .dropzone .dz-preview .dz-error-mark,
 .dropzone .dz-preview .dz-success-mark { top: unset; left: unset; position: unset; margin-left: 0.1em; }
-
-.dropzone .dz-preview:hover            { background-color: hsl(  0,  0%, 80%); }
-.dropzone .dz-preview.dz-success       { background-color: hsl(125, 60%, 75%); }
-.dropzone .dz-preview.dz-success:hover { background-color: hsl(125, 60%, 65%); }
-.dropzone .dz-preview.dz-error         { background-color: hsl(  0, 60%, 75%); }
-.dropzone .dz-preview.dz-error:hover   { background-color: hsl(  0, 60%, 65%); }
-
+.dropzone .dz-preview                  { background-color: hsl(210, 100%, 98%); border: 0.1em solid hsl(210, 100%, 80%); }
+.dropzone .dz-preview:hover            { background-color: hsl(210, 100%, 90%); }
+.dropzone .dz-preview.dz-success       { background-color: hsl(125, 60%, 85%); }
+.dropzone .dz-preview.dz-success:hover { background-color: hsl(125, 60%, 75%); }
+.dropzone .dz-preview.dz-error         { background-color: hsl(  0, 60%, 85%); }
+.dropzone .dz-preview.dz-error:hover   { background-color: hsl(  0, 60%, 75%); }
 
 .dropzone .dz-preview .dz-size strong,
 .dropZoneUploadProgressLabel strong { font-weight: normal; }
 
-.dropzone .dz-preview               .dz-remove,
-.dropzone .dz-preview.dz-complete.dz-success    .dz-remove,
-.dropzone .dz-preview.dz-complete.dz-error      .dz-remove { background-image: url('../FamFamFamSilkIcons/delete.png'); }
-.dropzone .dz-preview.dz-processing .dz-remove { background-image: url('../FamFamFamSilkIcons/cancel.png'); }
-.dropzone .dz-preview .dz-success-mark { background-image: url('../FamFamFamSilkIcons/accept.png'); }
-.dropzone .dz-preview .dz-error-mark   { background-image: url('../FamFamFamSilkIcons/exclamation.png'); }
+.dropzone .dz-preview                        .dz-remove,
+.dropzone .dz-preview.dz-complete.dz-success .dz-remove,
+.dropzone .dz-preview.dz-complete.dz-error   .dz-remove       { background-image: url('../FamFamFamSilkIcons/delete.png'); }
+.dropzone .dz-preview.dz-processing          .dz-remove       { background-image: url('../FamFamFamSilkIcons/cancel.png'); }
+.dropzone .dz-preview                        .dz-success-mark { background-image: url('../FamFamFamSilkIcons/accept.png'); }
+.dropzone .dz-preview                        .dz-error-mark   { background-image: url('../FamFamFamSilkIcons/exclamation.png'); }
 
-
+.dropzoneForm label.checkbox input                       { display: none; }
+.dropzoneForm label.checkbox input         + span        { display: inline-block; line-height: 0.9em; vertical-align: top; }
+.dropzoneForm label.checkbox input         + span:before { content: '\00b7'; }
+.dropzoneForm label.checkbox input:checked + span:before { content: '\2714'; }
+.dropzoneForm label.checkbox       {
+    cursor: pointer; white-space: nowrap; border: 0.1em solid hsl(0, 0%, 70%); display: inline-block;
+    width: 1.1em; height: 1.1em; min-height: 1.1em; max-height: 1.1em; margin-left: 0.2em; text-align: center; }
+.dropzoneForm label.checkbox:hover { border: 0.1em solid hsl(0, 0%, 40%); }
+.dropzoneForm input.comment {
+    border: unset; border-bottom: 0.1em solid hsl(0, 0%, 70%); border-radius: unset; background-color: transparent;
+    box-sizing: content-box; height: 1.1em; line-height: 1.1em; font-size: 0.9em;
+    margin: 0 0 0 0.25em; padding: 0 0.15em 0.05em 0.15em; vertical-align: text-bottom; box-shadow: unset; }
+.dropzoneForm input.comment:hover,
+.dropzoneForm input.comment:active,
+.dropzoneForm input.comment:focus {
+    border-bottom: 0.1em solid hsl(0, 0%, 40%); background-color: transparent; box-shadow: unset; }
 
 /* eof */
