@@ -16,8 +16,11 @@ corner. Available tools include losslessly rotating the photo using exiftran
 correcting the attachment timestamp to the photo exposure date, moving the
 attachment to another topic, and deleting the attachment.
 
-This plugin works only with JPEG images and it works best
-with photos from digital cameras that have EXIF data
-embedded.
+This plugin works only with JPEG images and it works best with photos from
+digital cameras that have EXIF data embedded.
+
+A PatternSkin extension that replaces the default upload form with a bulk upload
+form is included, too. This is currently based on DropZoneJS
+(http://www.dropzonejs.com) by Matias Meno.
 
 ![PhotoGalleryPlugin Screenshot](https://raw.githubusercontent.com/phkehl/PhotoGalleryPlugin/master/pub/System/PhotoGalleryPlugin/screenshot0.jpg "PhotoGalleryPlugin Screenshot")
