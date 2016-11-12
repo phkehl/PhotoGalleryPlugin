@@ -23,4 +23,6 @@ A PatternSkin extension that replaces the default upload form with a bulk upload
 form is included, too. This is currently based on DropZoneJS
 (http://www.dropzonejs.com) by Matias Meno.
 
+See the file `data/System/PhotoGalleryPlugin.txt` for the full documentation.
+
 ![PhotoGalleryPlugin Screenshot](https://raw.githubusercontent.com/phkehl/PhotoGalleryPlugin/master/pub/System/PhotoGalleryPlugin/screenshot0.jpg "PhotoGalleryPlugin Screenshot")
