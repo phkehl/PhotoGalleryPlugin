@@ -153,7 +153,9 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 ---++ Change History
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
-| *Date*        |  *Version*  | *Comment*   |
+| *Date*        |  *Version*  | *Comments*   |
+|  .. ... ...   |   v1.8-dev  |\
+- ... |
 |  12 Nov 2016  |     v1.7    |\
 - move file upload properties to the upload items in the bulk upload form for easier editing%BR% \
 - completely replace %SYSTEMWEB%.PatternSkin upload form with bulk upload form%BR% \
