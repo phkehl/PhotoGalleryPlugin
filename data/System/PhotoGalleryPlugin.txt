@@ -56,8 +56,7 @@ Here are a few screenshots of the plugin in action:
 %IMAGE{ "screenshot4.jpg" width="313" height="198" type="frame" align="none" caption="image zoomed and shown in !PhotoSwipe gallery, caption composed from attachment comment and EXIF meta data" }%
 %IMAGE{ "screenshot2.jpg" width="283" height="127" type="frame" align="none" caption="action menu pops up when hovering the top right corner of the thumbnail" }%
 %IMAGE{ "screenshot3.jpg" width="264" height="144" type="frame" align="none" caption="edit attachment comment dialog" }%
-%IMAGE{ "screenshot5.jpg" width="427" height="367" type="frame" align="none" caption="bulk upload skin extension" }%
-%IMAGE{ "screenshot6.jpg" width="427" height="367" type="frame" align="none" caption="bulk upload skin extension" }%
+%IMAGE{ "screenshot5.jpg" width="433" height="294" type="frame" align="none" caption="bulk upload skin extension" }%
 </div>
 
 
@@ -89,8 +88,8 @@ activate lossless rotation of JPEG images based on EXIF camera orientation meta
 data, and an option to set the attachment upload date to the photo exposure time
 (from EXIF).
 
-The second replaces (parts of) the upload form with bulk upload form that allows
-uploading multiple files.
+The second replaces the upload form with bulk upload form that allows batch uploading
+multiple files.
 
 The skin extensions come in the form of a [[%SYSTEMWEB%.SkinTemplates][skin templates]].
 See the _Installation_ section below.
@@ -111,9 +110,10 @@ described above. In Linux distributions the package is typically called
 centres". Try the command =sudo apt-get install exiftran= on Debian and
 derivates.
 
-The [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl module might not
-be available as a system package. It can be downloaded from CPAN and be built and installed
-manually (see e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
+The [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl module, required
+for fast thumbnail generation, might not be available as a system package. It
+can be downloaded from CPAN and be built and installed manually (see
+e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 
 ---+++ Skin Extensions
 
@@ -154,9 +154,11 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comment*   |
-| .. ... ....   |     v1.7-dev   |\
-- ... |
-|  9 Sep 2016   |     v1.6    |\
+|  12 Nov 2016  |     v1.7    |\
+- move file upload properties to the upload items in the bulk upload form for easier editing%BR% \
+- completely replace %SYSTEMWEB%.PatternSkin upload form with bulk upload form%BR% \
+- minor improvements and documentation updates |
+|   9 Sep 2016  |     v1.6    |\
 - bulk upload improvements: replace unreliable jquery ui tooltips on buttons with a help twisty, highlight uploaded files in attachments table%BR% \
 - improve file properties editing in bulk upload form%BR% \
 - display average upload speed in bulk upload progress bar%BR% \
@@ -174,7 +176,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  16 May 2016  |     v1.3    | \
 - add possibility to automatically split galleries into individual days by injecting customisable headings %BR% \
 - minor documentation improvements  |
-|  1 May 2016   |     v1.2    | \
+|   1 May 2016  |     v1.2    | \
 - add cache cleanup script%BR% \
 - improve bulk upload script%BR% \
 - force meta data and thumbnail cache update when attachment version changes%BR% \
@@ -197,8 +199,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
 %META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1466343179" size="49627" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot6.jpg" attachment="screenshot6.jpg" comment="plugin screenshot" date="1466343179" size="61113" user="PhilippeKehl" version="1"}%
+%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1478966365" size="50985" user="PhilippeKehl" version="2"}%
 %META:FORM{name="PackageForm"}%
 %META:FIELD{name="Author" title="Author" value="[[Foswiki:Main/PhilippeKehl][Philippe Kehl]]"}%
 %META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%

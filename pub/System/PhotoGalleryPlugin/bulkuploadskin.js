@@ -86,7 +86,7 @@ jQuery(function($)
                 }
             }
             dzCheckboxesHtml += '<label class="checkbox" title="' + escAttr(tooltip) + '">'
-                + '<input type="checkbox" name="' + name + '"'
+                + '<input type="checkbox" name="' + name + '" value="on"'
                 + (cb.is(':checked') ? ' checked' : '') + '/><span></span></label>';
             dzCheckboxesHelp += '<li>' + tooltip + '</li>';
         });
@@ -278,6 +278,7 @@ jQuery(function($)
             //DEBUG('uploadprogress', [ this, uploadProgress, totalBytes, totalBytesSent ]);
             // need to recalculate these because DropzoneJS calculates rubbish
             uploadProgress = totalBytes = totalBytesSent = 0;
+            var nDone = 0;
             this.files.forEach(function (f)
             {
                 if (f.upload)
@@ -285,15 +286,22 @@ jQuery(function($)
                     totalBytes += f.upload.total || 0;
                     totalBytesSent += f.upload.bytesSent || 0;
                 }
+                if (f.status === 'success')
+                {
+                    nDone++;
+                }
             });
             uploadProgress = totalBytes ? (totalBytesSent / totalBytes * 1e2) : 0;
+            if (uploadProgress && (totalBytesSent === totalBytes))
+            {
+                nDone = this.files.length;
+            }
 
             // calculate upload speed
             var speedStr = '';
             if (uploadProgress && uploadStartedTs)
             {
                 var dt = (+(new Date) - uploadStartedTs) * 1e-3;
-                DEBUG('speed: ' + dt.toFixed(1) + ' ' + totalBytesSent);
                 var speed = totalBytesSent / dt;
                 speedStr = ', ' + this.filesize(speed) + '/s';
             }
@@ -302,8 +310,9 @@ jQuery(function($)
             progBar.progressbar('value', uploadProgress);
             if (uploadProgress)
             {
-                progLabel.html('Uploaded  ' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
-                               + ' (' + uploadProgress.toFixed(0) + '%' + speedStr + ').');
+                progLabel.html('Uploaded  ' + nDone + ' of ' + this.files.length
+                               + ' (' + this.filesize(totalBytesSent) + ' of ' + this.filesize(totalBytes)
+                               + ', ' + uploadProgress.toFixed(0) + '%' + speedStr + ').');
             }
             else
             {
@@ -362,13 +371,16 @@ jQuery(function($)
             dropzoneForm.find('input[type=text]').attr('readonly', true);
 
             // set all the data from the upload form
-            dropzoneForm.find('input').each(function ()
+            dropzoneForm.find('input[type=checkbox]').each(function ()
             {
-                var name = $(this).attr('name');
-                var val = $(this).val(); // FIXME: we get the wrong value for the checkboxes?!
-                DEBUG(name + '=' + val);
-                form.append(name, val);
-
+                if ($(this).is(':checked'))
+                {
+                    form.append($(this).attr('name'), 'on');
+                }
+            });
+            dropzoneForm.find('input[type=text]').each(function ()
+            {
+                form.append($(this).attr('name'), $(this).val());
             });
 
             dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });

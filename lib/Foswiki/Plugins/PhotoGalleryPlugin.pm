@@ -34,9 +34,8 @@ API. See source code for developer details.
 
 ---++ Issues, Todos, Ideas
 
-   * According to Foswiki:Development/HowToIntegrateWithRequestValidation the REST handler should
-     generate a new nonce in each request. It doesn't seem to do that.
-   * Handle (validation) session timeout. Re-authenticate? Display useful warning.
+   * Handle (validation, Foswiki:Development/HowToIntegrateWithRequestValidation) session
+     timeout. Re-authenticate? Display useful warning.
    * More Make/Model EXIF cleanup (NIKON CORPORATION / NIKON D4, ...) (maybe Google has a list of common names?)
    * Add more EXIF tags. Need sample images.
    * Nicer "processing animation" (pub/System/ConfigurePlugin/loader-bars.gif maybe?)
@@ -48,7 +47,6 @@ API. See source code for developer details.
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
-   * Upload skip: copy properties checkboxes to checkboxes for every item. Make list sortable.
    * ...
 
 =cut
