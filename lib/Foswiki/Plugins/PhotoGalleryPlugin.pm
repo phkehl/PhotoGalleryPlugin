@@ -47,6 +47,11 @@ API. See source code for developer details.
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
+   * Add file properties template to the bulk upload form for setting defaults for dropped files.
+   * Make filename editable in bulk upload form.
+   * Show gear (tools menu) in fullscreen.
+   * Show "moved to" ("deleted") text in fullscreen.
+   * Does the scroolTo() work when exiting full-screen?
    * ...
 
 =cut
