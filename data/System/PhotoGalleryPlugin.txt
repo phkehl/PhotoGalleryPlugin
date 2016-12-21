@@ -155,6 +155,10 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
 |  .. ... ...   |   v1.8-dev  |\
+- widen file size column in bulk upload form to avoid clipping of text%BR% \
+- remove all use of %SYSTEMWEB%.JQueryUITooltip in bulk upload form as it doesn't work well, rely on browser tooltip instead%BR% \
+- allow renaming the file name in the bulk upload form before uploading%BR% \
+- various style improvements in the bulk upload form%BR% \
 - ... |
 |  12 Nov 2016  |     v1.7    |\
 - move file upload properties to the upload items in the bulk upload form for easier editing%BR% \

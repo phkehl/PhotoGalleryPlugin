@@ -29,7 +29,7 @@ div.dropZoneActions {
 .foswikiAttachments .bulkUploadHighlight td { background-color: hsl(50, 100%, 90%) !important /*thanks, PatternSkinTheme/colors.css */; }
 
 
-.dropzone { cursor: pointer; }
+.dropzone { cursor: default; }
 .dropzone .dz-message { text-align: center; height: 100%; width: 100%; display: table; }
 .dropzone .dz-message span { font-size: 125%; font-weight: bold; color: #aaa; vertical-align: middle; display: table-cell; }
 .dropzone.dz-started .dz-message { display: none; }
@@ -45,20 +45,20 @@ div.dropZoneActions {
 .dropzone .dz-preview.dz-success .dz-success-mark,
 .dropzone .dz-preview.dz-error   .dz-error-mark,
 .dropzone .dz-preview .dz-remove,
-.dropzone .dz-preview .dropzoneForm {
+.dropzone .dz-preview .dropZoneForm {
     display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     line-height: 1.2em; margin: 0; }
 
 .dropzone .dz-preview .dz-remove { color: transparent; }
 .dropzone .dz-preview .dz-remove:hover { text-decoration: none; }
 
-.dropzone .dz-preview .dz-filename     { width: calc(100% - 20.6em - 16px - 16px); padding: 0 0.25em; }
-.dropzone .dz-preview .dz-size         { width:  5em; padding: 0 0.25em; text-align: right; }
+.dropzone .dz-preview .dz-filename     { width: calc(100% - 21.6em - 16px - 16px); padding: 0 0.25em; }
+.dropzone .dz-preview .dz-size         { width:  6em; padding: 0 0.25em; text-align: right; }
 .dropzone .dz-preview .dz-progress     { width: 15em; height: 1.0em; margin: 0.2em 0.1em; }
 .dropzone .dz-preview .dz-remove,
 .dropzone .dz-preview .dz-error-mark,
 .dropzone .dz-preview .dz-success-mark { width: 16px; height: 16px; margin-left: 0.1em; height: 1.2em; }
-.dropzone .dz-preview .dropzoneForm    { width: 100%; }
+.dropzone .dz-preview .dropZoneForm    { width: 100%; }
 .dropzone .dz-preview .dz-error-mark,
 .dropzone .dz-preview .dz-success-mark { top: unset; left: unset; position: unset; margin-left: 0.1em; }
 .dropzone .dz-preview                  { background-color: hsl(210, 100%, 98%); border: 0.1em solid hsl(210, 100%, 80%); }
@@ -70,6 +70,7 @@ div.dropZoneActions {
 
 .dropzone .dz-preview .dz-size strong,
 .dropZoneUploadProgressLabel strong { font-weight: normal; }
+.dropZoneErrorMessage { text-align: center; line-height: 1.1em; color: hsl(0, 100%, 30%); }
 
 .dropzone .dz-preview                        .dz-remove,
 .dropzone .dz-preview.dz-complete.dz-success .dz-remove,
@@ -78,21 +79,35 @@ div.dropZoneActions {
 .dropzone .dz-preview                        .dz-success-mark { background-image: url('../FamFamFamSilkIcons/accept.png'); }
 .dropzone .dz-preview                        .dz-error-mark   { background-image: url('../FamFamFamSilkIcons/exclamation.png'); }
 
-.dropzoneForm label.checkbox input                       { display: none; }
-.dropzoneForm label.checkbox input         + span        { display: inline-block; line-height: 0.9em; vertical-align: top; }
-.dropzoneForm label.checkbox input         + span:before { content: '\00b7'; }
-.dropzoneForm label.checkbox input:checked + span:before { content: '\2714'; }
-.dropzoneForm label.checkbox       {
+.dropZoneForm label.checkbox input                       { display: none; }
+.dropZoneForm label.checkbox input         + span        { display: inline-block; line-height: 0.9em; vertical-align: top; }
+.dropZoneForm label.checkbox input         + span:before { content: '\00b7'; }
+.dropZoneForm label.checkbox input:checked + span:before { content: '\2714'; }
+.dropZoneForm label.checkbox       {
     cursor: pointer; white-space: nowrap; border: 0.1em solid hsl(0, 0%, 70%); display: inline-block;
     width: 1.1em; height: 1.1em; min-height: 1.1em; max-height: 1.1em; margin-left: 0.2em; text-align: center; }
-.dropzoneForm label.checkbox:hover { border: 0.1em solid hsl(0, 0%, 40%); }
-.dropzoneForm input.comment {
-    border: unset; border-bottom: 0.1em solid hsl(0, 0%, 70%); border-radius: unset; background-color: transparent;
-    box-sizing: content-box; height: 1.1em; line-height: 1.1em; font-size: 0.9em;
-    margin: 0 0 0 0.25em; padding: 0 0.15em 0.05em 0.15em; vertical-align: text-bottom; box-shadow: unset; }
-.dropzoneForm input.comment:hover,
-.dropzoneForm input.comment:active,
-.dropzoneForm input.comment:focus {
-    border-bottom: 0.1em solid hsl(0, 0%, 40%); background-color: transparent; box-shadow: unset; }
+.dropZoneForm label.checkbox:hover { border: 0.1em solid hsl(0, 0%, 40%); }
+
+.dropZoneForm input.comment, input.dropZoneFileName {
+    border: unset; border-radius: unset; background-color: transparent;
+    box-sizing: content-box; height: 1.2em; line-height: 1.2em; font-size: 1.0em;
+ padding: 0 0.15em 0.05em 0.15em; vertical-align: text-bottom; box-shadow: unset; }
+.dropZoneForm input.comment { margin: 0 0 0 0.25em; }
+input.dropZoneFileName { width: 100%; }
+.dropZoneForm input.comment:hover,
+.dropZoneForm input.comment:active,
+.dropZoneForm input.comment:focus,
+input.dropZoneFileName:hover,
+input.dropZoneFileName:active,
+input.dropZoneFileName:focus { background-color: hsl(210, 100%, 98%); box-shadow: unset; }
+input.dropZoneFileName[readonly],        .dropZoneForm input.comment[readonly],
+input.dropZoneFileName[readonly]:hover,  .dropZoneForm input.comment[readonly]:hover,
+input.dropZoneFileName[readonly]:active, .dropZoneForm input.comment[readonly]:active,
+input.dropZoneFileName[readonly]:focus,  .dropZoneForm input.comment[readonly]:focus {
+    background-color: transparent; border-color: unset; box-shadow: none; color: unset; }
+.dz-preview.dz-processing, .dz-preview.dz-complete,
+.dz-preview.dz-processing .dropZoneForm label.checkbox,
+.dz-preview.dz-complete   .dropZoneForm label.checkbox { cursor: default; }
+
 
 /* eof */

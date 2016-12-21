@@ -6,7 +6,7 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
 
 }%
 %TMPL:INCLUDE{"attach"}%
-%TMPL:DEF{"bulkupload"}%%JQREQUIRE{"ui::tooltip,ui::resizable,ui::progressbar,scrollto,blockui"}%%ADDTOZONE{
+%TMPL:DEF{"bulkupload"}%%JQREQUIRE{"ui::resizable,ui::progressbar,scrollto,blockui"}%%ADDTOZONE{
     "script" id="dropzonejs-js" requires="JQUERYPLUGIN"
     text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.compressed.js\"></script>"
 }%%ADDTOZONE{
@@ -29,6 +29,7 @@ hideimgleft="%ICONURLPATH{toggleclose}%"
    * While uploading, click the <img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/cross.png"/> _Cancel_ button to cancel pending uploads.
    * Files in the upload queue can be removed by clicking their <img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/delete.png"/> icon.
    * The attachment comment and properties can be set per file. The checkboxes correspond to the following attributes:<ul id="bulkuploadattrhelp"></ul>
+   * The attachment filenames can be edited before uploading the files.
 %ENDTWISTY%<div class="dropZoneDict dropZoneDictFileTooBig">%MAKETEXT{"File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB."}%</div>
 <div class="dropZoneDict dropZoneDictRemoveFile">%MAKETEXT{"Remove from queue."}%</div>
 <div class="foswikiInputField dropZoneFilesResize"><div class="dropZoneFiles"><div class="dz-message"><span class="dropZoneDictDefaultMessage">%MAKETEXT{"Drop up to {{maxnumfiles}} files here (up to {{maxfilesize}} each)."}%</span></div></div></div>

@@ -123,11 +123,12 @@ jQuery(function($)
             previewTemplate:        '' +
                 '<div class="dz-preview dz-file-preview">' +
                   '<div class="dz-filename"><span class="dropZoneFileName" data-dz-name></span></div>' +
+                  //'<div class="dz-filename"><input class="dropZoneFileName" data-dz-name/></div>' + // nope... :-(
                   '<div class="dz-size"><span data-dz-size></span></div>' +
                   '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
                   '<div class="dz-success-mark">&nbsp;</div>' +
                   '<a class="dz-remove" data-dz-remove="" title="Remove from queue."></a>' +
-                  '<div class="dropzoneForm">' +
+                  '<div class="dropZoneForm">' +
                     dzCheckboxesHtml +
                     '<input class="comment" type="text" name="filecomment" placeholder="file comment"' +
                     ' style="width: calc(100% - ' + filePropsCheckboxes.length + ' * 1.5em - 0.75em);"/>' +
@@ -171,8 +172,11 @@ jQuery(function($)
         // on error, add a tooltip to the file entry with the error message
         dzInst.on('error', function (file, msg, xhr)
         {
-            DEBUG('error file: ' + msg, [ file, xhr ]);
-            addTooltip(file.previewElement, msg, 'error');
+            DEBUG('error file: ' + msg, [ file, xhr, $(file.previewElement) ]);
+            var preview = $(file.previewElement);
+            preview.find('.dropZoneForm').remove();
+            $('<div>').addClass('dropZoneErrorMessage').text(msg).appendTo(preview);
+            preview.find('.dropZoneFileName').attr('disabled', true);
         });
 
         // display a message while DropzoneJS is processing dropped/added files
@@ -180,12 +184,6 @@ jQuery(function($)
         {
             dzFiles.block({ message: 'Processing files&hellip;' });
         });
-
-        // arm buttons tooltips, FIXME: these don't work reliably and will stick occasionally
-        //[ addButton, clearButton, uploadButton, cancelButton ].forEach(function (el)
-        //{
-        //    addTooltip(el, el.attr('title'), 'help');
-        //});
 
         // open file selection dialog (see also dzOpts.clickable)
         addButton.on('click', function (e)
@@ -256,7 +254,7 @@ jQuery(function($)
             uploadButton.addClass('dropZoneActionDisabled');
             if (uploadStartedTs)
             {
-                updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
+                updateAttachmentsTable(dzInst.files.map(function (x) { return x.ourName; }));
             }
             uploadStartedTs = 0;
         });
@@ -324,20 +322,15 @@ jQuery(function($)
         // when a file is dropped or added...
         dzInst.on('addedfile', function (file)
         {
-            DEBUG('addedfile file', { file: file } );
+            DEBUG('addedfile file', [ file, file.previewElement ] );
+
+            // ...replace filename <span> with <input>
+            var fnSpan = $(file.previewElement).find('.dropZoneFileName');
+            var fnInput = $('<input>').addClass('dropZoneFileName').val(fnSpan.text()).attr('placeholder', 'filename');
+            fnSpan.replaceWith(fnInput);
 
             // ...add a tooltip to the remove icon
-            //addTooltip(file._removeLink, dictRemoveFile, 'help');
             $(file._removeLink).attr('title', dictRemoveFile);
-            // destroy tooltip object or we'll end up with a stray tooltip sticking on the page
-            $(file._removeLink).on('click', function ()
-            {
-                //if ($(this).hasClass('jqInitedTooltip'))
-                //{
-                //    $(this).tooltip('destroy')
-                //}
-                $(this).parents('.dz-preview.jqInitedTooltip').tooltip('destroy');
-            });
 
             // ...update progress bar info
             this.updateTotalUploadProgress();
@@ -364,23 +357,34 @@ jQuery(function($)
                 form.append('validation_key', nonce);
             }
 
-            var dropzoneForm = $(file.previewElement).find('.dropzoneForm');
+            var dropZoneForm = $(file.previewElement).find('.dropZoneForm');
+            var dropZoneFileName = $(file.previewElement).find('.dropZoneFileName');
 
             // disable inputs
-            dropzoneForm.find('input[type=checkbox]').attr('disabled', true);
-            dropzoneForm.find('input[type=text]').attr('readonly', true);
+            dropZoneForm.find('input[type=checkbox]').attr('disabled', true);
+            dropZoneForm.find('input[type=text]').attr('readonly', true);
+            dropZoneFileName.attr('readonly', true);
 
             // set all the data from the upload form
-            dropzoneForm.find('input[type=checkbox]').each(function ()
+            dropZoneForm.find('input[type=checkbox]').each(function ()
             {
                 if ($(this).is(':checked'))
                 {
                     form.append($(this).attr('name'), 'on');
                 }
             });
-            dropzoneForm.find('input[type=text]').each(function ()
+            dropZoneForm.find('input[type=text]').each(function ()
             {
                 form.append($(this).attr('name'), $(this).val());
+            });
+            form.append('filename', dropZoneFileName.val());
+            //file.name = dropZoneFileName.val(); // read-only :-(
+            file.ourName = dropZoneFileName.val();
+
+            // we cannot CSS style the placeholder (easily), so set an invisible dummy value for empty elements
+            dropZoneForm.find('input[type=text]').each(function ()
+            {
+                if (!$(this).val()) { $(this).val(' '); }
             });
 
             dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });
@@ -414,7 +418,7 @@ jQuery(function($)
                 cancelButton.removeClass('dropZoneActionDisabled').hide();
                 addButton.removeClass('dropZoneActionDisabled');
                 clearButton.removeClass('dropZoneActionDisabled');
-                updateAttachmentsTable(dzInst.files.map(function (x) { return x.name; }));
+                updateAttachmentsTable(dzInst.files.map(function (x) { return x.ourName; }));
             }
         });
 
@@ -453,16 +457,6 @@ jQuery(function($)
     function escAttr(str)
     {
         return str.replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;');
-    }
-
-    // add a (HTML) tooltip to the element
-    function addTooltip(el, tooltip, type)
-    {
-        $(el).data(
-        {
-            position: 'bottom', delay: 250, arrow: true, duration: 200, items: el,
-            content: tooltip, tooltipClass: ((type || 'default') + ' dropZoneTooltip')
-        }).addClass('jqUITooltip');
     }
 
     // reload attachments table and highlight newly uploaded files

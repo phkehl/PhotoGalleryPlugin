@@ -52,6 +52,7 @@ API. See source code for developer details.
    * Show gear (tools menu) in fullscreen.
    * Show "moved to" ("deleted") text in fullscreen.
    * Does the scroolTo() work when exiting full-screen?
+   * Prevent empty (and duplicate?) filename in bulk upload form.
    * ...
 
 =cut
