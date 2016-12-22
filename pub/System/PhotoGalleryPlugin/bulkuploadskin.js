@@ -85,7 +85,7 @@ jQuery(function($)
                     }
                 }
             }
-            dzCheckboxesHtml += '<label class="checkbox" title="' + escAttr(tooltip) + '">'
+            dzCheckboxesHtml += '<label class="dropZoneAttrCb checkbox" title="' + escAttr(tooltip) + '">'
                 + '<input type="checkbox" name="' + name + '" value="on"'
                 + (cb.is(':checked') ? ' checked' : '') + '/><span></span></label>';
             dzCheckboxesHelp += '<li>' + tooltip + '</li>';
@@ -176,7 +176,7 @@ jQuery(function($)
             var preview = $(file.previewElement);
             preview.find('.dropZoneForm').remove();
             $('<div>').addClass('dropZoneErrorMessage').text(msg).appendTo(preview);
-            preview.find('.dropZoneFileName').attr('disabled', true);
+            preview.find('.dropZoneFileName').attr('readonly', true);
         });
 
         // display a message while DropzoneJS is processing dropped/added files
@@ -243,6 +243,7 @@ jQuery(function($)
         }).hide();
 
         // uploading finished
+        // FIXME: why is this triggered when a too big file is added?! (we don't want to disable the Upload button)
         dzInst.on('queuecomplete', function ()
         {
             dzInst.options.autoProcessQueue = false;
@@ -251,9 +252,9 @@ jQuery(function($)
             cancelButton.hide();
             addButton.removeClass('dropZoneActionDisabled');
             clearButton.removeClass('dropZoneActionDisabled');
-            uploadButton.addClass('dropZoneActionDisabled');
             if (uploadStartedTs)
             {
+                uploadButton.addClass('dropZoneActionDisabled');
                 updateAttachmentsTable(dzInst.files.map(function (x) { return x.ourName; }));
             }
             uploadStartedTs = 0;
@@ -326,8 +327,18 @@ jQuery(function($)
 
             // ...replace filename <span> with <input>
             var fnSpan = $(file.previewElement).find('.dropZoneFileName');
-            var fnInput = $('<input>').addClass('dropZoneFileName').val(fnSpan.text()).attr('placeholder', 'filename');
+            var fnInput = $('<input>').addClass('dropZoneFileName').val(fnSpan.text())
+                .data('orig', fnSpan.text()).attr('placeholder', 'filename');
             fnSpan.replaceWith(fnInput);
+
+            // reset filename if field is left empty
+            fnInput.on('focusout', function (e)
+            {
+                if (!fnInput.val())
+                {
+                    fnInput.val(fnInput.data('orig')).effect('highlight', 2000);
+                }
+            });
 
             // ...add a tooltip to the remove icon
             $(file._removeLink).attr('title', dictRemoveFile);
@@ -415,6 +426,7 @@ jQuery(function($)
                     {
                         DEBUG('file name change: ' + file.ourName + ' -> ' + newName);
                         file.ourName = newName;
+                        $(file.previewElement).find('.dropZoneFileName').val(newName).effect('highlight', 2000);
                     }
                 }
             }
