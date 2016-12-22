@@ -53,6 +53,7 @@ API. See source code for developer details.
    * Show "moved to" ("deleted") text in fullscreen.
    * Does the scroolTo() work when exiting full-screen?
    * Prevent empty (and duplicate?) filename in bulk upload form.
+   * Rename files like foswiki would do (via dz's renameFilename() option).
    * ...
 
 =cut

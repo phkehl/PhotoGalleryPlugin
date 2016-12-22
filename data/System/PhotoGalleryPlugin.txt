@@ -158,6 +158,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - widen file size column in bulk upload form to avoid clipping of text%BR% \
 - remove all use of %SYSTEMWEB%.JQueryUITooltip in bulk upload form as it doesn't work well, rely on browser tooltip instead%BR% \
 - allow renaming the file name in the bulk upload form before uploading%BR% \
+- consider that Foswiki may change the uploaded file name to remove illegal characters%BR% \
 - various style improvements in the bulk upload form%BR% \
 - ... |
 |  12 Nov 2016  |     v1.7    |\

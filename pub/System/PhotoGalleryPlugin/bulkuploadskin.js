@@ -393,7 +393,7 @@ jQuery(function($)
         // update nonce if we got a new one in Foswiki's response
         dzInst.on('complete', function (file)
         {
-            DEBUG('complete file', { file: file});
+            DEBUG('complete file', { file: file });
             if (file && file.xhr)
             {
                 var newNonce = file.xhr.getResponseHeader('X-Foswiki-Validation');
@@ -401,6 +401,21 @@ jQuery(function($)
                 if (newNonce)
                 {
                     nonce = '?' + newNonce;
+                }
+
+                // consider filename change
+                var res = file.xhr.responseText;
+                // OK: IMG_1555.JPG uploaded
+                // OK: OopsException(attention/upload_name_changed web=>Sandbox topic=>BlaBlaTest params=>[IMG_1555 (foo "bar").JPG,IMG_1555 (foo bar).JPG])
+                if (res.indexOf('upload_name_changed') > 0)
+                {
+                    var offs = res.indexOf(file.ourName) + file.ourName.length + 1;
+                    var newName = res.substr(offs, res.length - offs - 2);
+                    if (newName)
+                    {
+                        DEBUG('file name change: ' + file.ourName + ' -> ' + newName);
+                        file.ourName = newName;
+                    }
                 }
             }
 
@@ -501,7 +516,7 @@ jQuery(function($)
                     var res = false;
                     filenames.forEach(function (fn)
                     {
-                        if (trText.match(fn))
+                        if (trText.indexOf(fn) > -1)
                         {
                             res = true;
                         }
