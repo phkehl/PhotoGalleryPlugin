@@ -48,12 +48,8 @@ API. See source code for developer details.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
    * Add file properties template to the bulk upload form for setting defaults for dropped files.
-   * Make filename editable in bulk upload form.
    * Show gear (tools menu) in fullscreen.
-   * Show "moved to" ("deleted") text in fullscreen.
-   * Does the scroolTo() work when exiting full-screen?
-   * Prevent empty (and duplicate?) filename in bulk upload form.
-   * Rename files like foswiki would do (via dz's renameFilename() option).
+   * Maybe prevent empty (and duplicate?) filename in bulk upload form?
    * ...
 
 =cut
@@ -202,9 +198,9 @@ sub doPHOTOGALLERY
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
-        qw(Debug UI UI::Tooltip UI::Button UI::Autocomplete BlockUI PNotify)))
+        qw(Debug UI UI::Tooltip UI::Button UI::Autocomplete BlockUI PNotify ScrollTo)))
     {
-        return _wtf("Disabled %SYSTEMWEB%.JQueryPlugins: <literal>$missing</literal>!");
+        return _wtf("Required %SYSTEMWEB%.JQueryPlugins are disabled: <literal>$missing</literal>!");
     }
 
     if (!Foswiki::Func::topicExists($params->{web}, $params->{topic}))
@@ -389,8 +385,8 @@ sub doPHOTOGALLERY
     # stuff output only once per request / topic
     unless ($RV->{jsCss})
     {
-        # JQueryPlugins CSS and JS
-        $tml .= '%JQREQUIRE{"ui::tooltip,ui::tooltip"}%';
+        # JQueryPlugins CSS and JS (N.B. keep in sync with check-for-enabled list above)
+        $tml .= '%JQREQUIRE{"ui::tooltip,ui::tooltip,scrollto"}%';
         my @cssDeps = qw(JQUERYPLUGIN::UI::TOOLTIP);
         my @jsDeps  = qw(JQUERYPLUGIN::FOSWIKI::PREFERENCES);
         if ($params->{admin})

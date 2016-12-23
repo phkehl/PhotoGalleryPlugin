@@ -207,6 +207,7 @@ jQuery(function($)
             }
             dzInst.removeAllFiles();
             uploadButton.addClass('dropZoneActionDisabled');
+            clearButton.addClass('dropZoneActionDisabled');
         });
 
         // start upload
@@ -229,6 +230,7 @@ jQuery(function($)
             uploadStartedTs = +(new Date);
         });
         uploadButton.addClass('dropZoneActionDisabled');
+        clearButton.addClass('dropZoneActionDisabled');
 
         // cancel pending uploads
         cancelButton.on('click', function (e)
@@ -347,6 +349,7 @@ jQuery(function($)
             this.updateTotalUploadProgress();
 
             uploadButton.removeClass('dropZoneActionDisabled');
+            clearButton.removeClass('dropZoneActionDisabled');
 
             // (mostly) done processing files
             dzFiles.unblock();

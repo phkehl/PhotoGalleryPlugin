@@ -4,6 +4,7 @@ jQuery(function($)
 {
     "use strict";
 
+    // add "debug=1" to query string to enable
     var doDEBUG = false;
 
 
@@ -44,7 +45,7 @@ jQuery(function($)
             var caption = frame.find('span.caption');
             var zoomcap = frame.find('div.zoomcap');
             var thumb = frame.find('img.thumb');
-            helper.items.push(
+            var item =
             {
                 frame: frame,              // div.frame
                 thumb: thumb,              // img.tumb within div.frame
@@ -54,7 +55,10 @@ jQuery(function($)
                 h:     a.data('h'),        // image height
                 msrc:  thumb.attr('src'),  // tumbnail href
                 title: (zoomcap.length ? zoomcap.html() : caption.html())  // caption
-            });
+            };
+            // remove dead links
+            item.title = item.title.replace(/<a[^>]+rel="nofollow"[^>]*>(.+?)<\/a>/, '$1');
+            helper.items.push(item);
             frame.find('div.label').attr('title', caption.text());
         });
 
@@ -129,6 +133,10 @@ jQuery(function($)
             helper.pswp.init();
             helper.pswp.listen('destroy', function ()
             {
+                if (this && this.currItem && this.currItem.thumb)
+                {
+                    $(window).scrollTo(this.currItem.thumb, { duration: 500, offset: { top: -50 } });
+                }
                 helper.pswp = null;
                 if (slideshowIv)
                 {
@@ -457,7 +465,7 @@ jQuery(function($)
                 {
                     helper.items[ix].frame.find('img, .img, .caption, .label, .admin').remove();
                     helper.items[ix].frame.find('div.crop').html(data.link);
-                    helper.items[ix] = {};
+                    helper.items[ix] = { title: data.link };
                 });
             });
         if (helper.items[ix].editDialog)
@@ -560,7 +568,7 @@ jQuery(function($)
                         {
                             helper.items[ix].frame.find('img, .img, .caption, .label, .admin').remove();
                             helper.items[ix].frame.find('div.crop').html(data.link);
-                            helper.items[ix] = {};
+                            helper.items[ix] = { title: data.link };
                             moveDialog.unblock();
                             moveDialog.dialog('close');
                         });

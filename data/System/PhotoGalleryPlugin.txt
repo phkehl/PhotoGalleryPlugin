@@ -160,7 +160,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - allow renaming the file name in the bulk upload form before uploading%BR% \
 - consider that Foswiki may change the uploaded file name to remove illegal characters%BR% \
 - various style improvements in the bulk upload form%BR% \
-- ... |
+- scroll thumbnail view to last viewed photo on exit of fullscreen%BR% \
+- remove dead links from fullscreen caption  |
 |  12 Nov 2016  |     v1.7    |\
 - move file upload properties to the upload items in the bulk upload form for easier editing%BR% \
 - completely replace %SYSTEMWEB%.PatternSkin upload form with bulk upload form%BR% \
