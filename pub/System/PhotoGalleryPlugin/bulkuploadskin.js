@@ -121,7 +121,8 @@ jQuery(function($)
             // fall-back to original upload form if the browser isn't supported
             //forceFallback: true, // for testing
             previewTemplate:        '' +
-                '<div class="dz-preview dz-file-preview">' +
+                '<div class="dz-preview dz-file-preview dropZoneSortable">' +
+                  '<div class="dropZoneFileSortHandle"></div>' +
                   '<div class="dz-filename"><span class="dropZoneFileName" data-dz-name></span></div>' +
                   //'<div class="dz-filename"><input class="dropZoneFileName" data-dz-name/></div>' + // nope... :-(
                   '<div class="dz-size"><span data-dz-size></span></div>' +
@@ -156,6 +157,30 @@ jQuery(function($)
 
         // make the dropzone resizable in height (but not width)
         dzFilesResize.resizable({ handles: 's' });
+
+        // make the dropzone files sortable
+        function makeSortable()
+        {
+            if (dzFiles.hasClass('ui-sortable'))
+            {
+                dzFiles.sortable('destroy');
+            }
+            dzFiles.sortable(
+            {
+                items: 'div.dropZoneSortable',
+                opacity: 0.5, axis: 'y', cursor: 'move', handle: '.dropZoneFileSortHandle',
+                // order dropzone's internal file list accordingly
+                stop: function (e, ui)
+                {
+                    var order = $(this).find('.dropZoneFileName').map(function () { return $(this).data('orig'); }).get();
+                    dzInst.files = dzInst.files.sort(function (a, b)
+                    {
+                        return order.indexOf(a.name) - order.indexOf(b.name);
+                    });
+                }
+            });
+        }
+        makeSortable();
 
         // ignore file drops on the original form (so that accidential drops outside the
         // DropzoneJS don't load that file)
@@ -402,6 +427,11 @@ jQuery(function($)
             });
 
             dzFiles.scrollTo($(file.previewElement), 500, { axis: 'y', offset: -40 });
+
+            // this file is now no longer sortable
+            $(file.previewElement).removeClass('dropZoneSortable');
+            //dzFiles.sortable('refresh').sortable('refreshPositions');
+            makeSortable(); // 'refresh' isn't enough... :-(
         });
 
         // update nonce if we got a new one in Foswiki's response
@@ -432,7 +462,13 @@ jQuery(function($)
                         $(file.previewElement).find('.dropZoneFileName').val(newName).effect('highlight', 2000);
                     }
                 }
+
             }
+
+            // this file is now no longer sortable
+            $(file.previewElement).removeClass('dropZoneSortable');
+            //dzFiles.sortable('refresh').sortable('refreshPositions');
+            makeSortable(); // 'refresh' isn't enough... :-(
 
             if (file && (file.status == 'error'))
             {
@@ -470,11 +506,11 @@ jQuery(function($)
         {
             if (obj)
             {
-                console.log('dz: ' + strOrObj + ': %g', obj);
+                console.log('dz: ' + strOrObj + ': %o', obj);
             }
             else if (typeof strOrObj === 'object')
             {
-                console.log('dz: %g', strOrObj);
+                console.log('dz: %o', strOrObj);
             }
             else
             {

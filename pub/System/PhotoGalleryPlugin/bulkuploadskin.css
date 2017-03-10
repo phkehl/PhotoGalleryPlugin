@@ -35,8 +35,8 @@ div.dropZoneActions {
 .dropzone.dz-started .dz-message { display: none; }
 
 .dropzone .dz-preview {
-    display: block; width: 100%; box-sizing: border-box;
-    margin: 0 0 0.25em 0; overflow: hidden; line-height: 1.0em; }
+    display: block; width: 100%; box-sizing: border-box; position: relative;
+    margin: 0 0 0.25em 0; padding-left: calc(16px + 0.5em); overflow: hidden; line-height: 1.0em; }
 .dropzone .dz-preview .dz-image { display: none; }
 
 .dropzone .dz-preview .dz-filename,
@@ -109,6 +109,11 @@ input.dropZoneFileName[readonly]:focus,  .dropZoneForm input.comment[readonly]:f
 .dz-preview.dz-processing, .dz-preview.dz-complete,
 .dz-preview.dz-processing label.dropZoneAttrCb.checkbox,
 .dz-preview.dz-complete   label.dropZoneAttrCb.checkbox { cursor: default; }
+.dropZoneFileSortHandle { width: calc(0.5em + 16px); height: 100%; display: inline-block;
+    box-sizing: content-box; position: absolute; left: 0; top: 0;
+    background-image: url('../FamFamFamSilkIcons/attach.png'); background-position: 0.25em 50%; background-repeat: no-repeat; }
 
+.dropZoneSortable .dropZoneFileSortHandle { cursor: grab; }
+.dropZoneSortable .dropZoneFileSortHandle:hover { background-color: hsl(210, 100%, 80%); }
 
 /* eof */

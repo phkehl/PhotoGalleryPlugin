@@ -157,6 +157,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  .. ... ....  |   v1.9-dev  |\
 - set minimal Foswiki required to release 2.1.3, see Foswiki:System/ReleaseNotes02x01 %BR% \
 - update =photogallery.tmpl= to use the new mechanism of adding attachment properties to the attach dialog, see Foswiki:Tasks/Item14092 %BR% \
+- allow re-ordering pending items in the upload queue %BR%
 ...  |
 |  23 Dec 2016  |   v1.8      |\
 - widen file size column in bulk upload form to avoid clipping of text%BR% \
