@@ -120,7 +120,7 @@ e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
 To activate the upload form options described above add (prepend) =photogallery=
 (for JPEG rotation and timestamp options) and/or =bulkupload= (for bulk
 uploading) to the =SKIN= list in [[%LOCALSITEPREFS%]]. See [[Skins]] for
-details. <!-- Use =photogallery22= for Foswiki 2.2 and later. -->
+details.
 
 The =bulkupload= skin extension also works without activating this plugin.
 Installing the [[Foswiki:Extensions/RenderPlugin][RenderPlugin]] is recommended
@@ -155,6 +155,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
 |  .. ... ....  |   v1.9-dev  |\
+- set minimal Foswiki required to release 2.1.3 (Foswiki:System/ReleaseNotes02x01)%BR%
+- update =photogallery.tmpl= to use the new mechanism of adding attachment properties to the attach dialog (Foswiki:Tasks/Item14092)%BR% \
 ...  |
 |  23 Dec 2016  |   v1.8      |\
 - widen file size column in bulk upload form to avoid clipping of text%BR% \
@@ -174,7 +176,6 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 - display average upload speed in bulk upload progress bar%BR% \
 - improved, simplified and optimised image info caching code (no visible changes)%BR% \
 - prevent thumbnails from being unnecessarily regenerated on %SYSTEMWEB%.PageCaching refresh and other circumstances%BR% \
-<!-- - provide skin extension for Foswiki 2.2 that uses a new mechanism to add attachment properties to the attach dialog, see Foswiki:Tasks/Item14092 %BR% --> \
 - improve and cleanup various code and documentation bits  |
 |  19 Jun 2016  |     v1.5    | \
 - add bulk upload skin extension that extends the standard %SYSTEMWEB%.PatternSkin attach page with bulk upload capabilities%BR% \
@@ -222,5 +223,5 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25$ROOTMODULE%25"}%
 %META:FIELD{name="ExtensionClassification" title="ExtensionClassification" value="Interface and Visualisation"}%
 %META:FIELD{name="ExtensionType" title="ExtensionType" value="PluginPackage"}%
-%META:FIELD{name="Compatibility" title="[[Compatibility]]" value="Foswiki 2.1, modern HTML5 browsers, Linux server, some exotic Perl modules"}%
-%META:FIELD{name="IncompatibleWith" title="[[IncompatibleWith]]" value="2.0.3, 2.0.2, 2.0.1, 2.0.0, 1.1.10, 1.1.9, 1.1.8, 1.1.7, 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.1.2, 1.1.1, 1.1.0, 1.0.10, 1.0.9, 1.0.8, 1.0.7, 1.0.6, 1.0.5, 1.0.4, 1.0.3, 1.0.2, 1.0.1, 1.0.0"}%
+%META:FIELD{name="Compatibility" title="[[Compatibility]]" value="Foswiki 2.1.3 or later, modern HTML5 browsers, Linux server, some exotic Perl modules"}%
+%META:FIELD{name="IncompatibleWith" title="[[IncompatibleWith]]" value="2.1.2, 2.1.1, 2.1.0, 2.0.3, 2.0.2, 2.0.1, 2.0.0, 1.1.10, 1.1.9, 1.1.8, 1.1.7, 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.1.2, 1.1.1, 1.1.0, 1.0.10, 1.0.9, 1.0.8, 1.0.7, 1.0.6, 1.0.5, 1.0.4, 1.0.3, 1.0.2, 1.0.1, 1.0.0"}%
