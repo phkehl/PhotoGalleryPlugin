@@ -112,7 +112,7 @@ headings inserted by =dayheading=. It also expands the standard  \
 |
 
 %RED%<sup>1</sup>%ENDCOLOR% These defaults depend on
-[[PhotoGalleryPlugin#Plugin_Configuration_and_Defaults][plugin configuration defaults]]
+[[PhotoGalleryPlugin#Plugin_Configuration_and_Defaults][plugin configuration defaults]].
 Your administrator may have chosen to change these.
 
 Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
@@ -159,7 +159,7 @@ hovering the gear icon. The following admin actions are available from the menu:
    * _edit_ allows editing the attachment comment
    * _timestamp_ sets the attachment timestamp to the photo exposure time. The
      menu entry is only shown if the photo has the necessary EXIF data and if
-     the attachment time differs.
+     the attachment time differs from the exposure time.
    * _delete_ will delete the photo by moving it to the [[Trash.TrashAttachment]]
      topic (see also %SYSTEMWEB%.FileAttachment)
    * _move_ allows moving a photo to another topic. The provided dialog input

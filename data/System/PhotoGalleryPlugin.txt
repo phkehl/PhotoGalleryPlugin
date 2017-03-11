@@ -68,14 +68,15 @@ Here are a few screenshots of the plugin in action:
 ---+++ Plugin Configuration and Defaults
 
 The following settings are available in the [[%SCRIPTURLPATH{"configure"}%][configure]]
-interface:
+interface for several of VarPHOTOGALLERY's defaults:
 
-   * ={Plugins}{PhotoGalleryPlugin}{ExifTranPath}=   &ndash; path to the =exiftran= utility
-   * ={Plugins}{PhotoGalleryPlugin}{QualityDefault}= &ndash; the default thumbnail quality factor
-   * ={Plugins}{PhotoGalleryPlugin}{DateFmtDefault}= &ndash; the default time format to render timestamps
-   * ={Plugins}{PhotoGalleryPlugin}{CaptFmtDefault}= &ndash; the default caption format for thumbnails and photos
-   * ={Plugins}{PhotoGalleryPlugin}{AdminDefault}=   &ndash; the default admin mode
-   * ={Plugins}{PhotoGalleryPlugin}{SizeDefault}=    &ndash; the default thumbnail size
+   * ={Plugins}{PhotoGalleryPlugin}{ExifTranPath}=      &ndash; path to the =exiftran= utility
+   * ={Plugins}{PhotoGalleryPlugin}{QualityDefault}=    &ndash; the default thumbnail quality factor
+   * ={Plugins}{PhotoGalleryPlugin}{DateFmtDefault}=    &ndash; the default time format to render timestamps
+   * ={Plugins}{PhotoGalleryPlugin}{CaptFmtDefault}=    &ndash; the default caption format for thumbnails and photos
+   * ={Plugins}{PhotoGalleryPlugin}{AdminDefault}=      &ndash; the default admin mode
+   * ={Plugins}{PhotoGalleryPlugin}{SizeDefault}=       &ndash; the default thumbnail size
+   * ={Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault}= &ndash; the default day heading format
 
 The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference settings]].
 
@@ -155,6 +156,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
 |  .. ... ....  |  v1.10-dev  |\
+- documentation cleanup %BR% \
 ...  |
 |  11 Mar 2017  |     v1.9    |\
 - set minimal Foswiki required to release 2.1.3, see Foswiki:System/ReleaseNotes02x01 %BR% \
