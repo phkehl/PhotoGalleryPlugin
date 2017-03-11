@@ -47,9 +47,7 @@ API. See source code for developer details.
    * Add configurable link to coordinates and perhaps also an icon on the thumbnail.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
-   * Add file properties template to the bulk upload form for setting defaults for dropped files.
    * Show gear (tools menu) in fullscreen.
-   * Maybe prevent empty (and duplicate?) filename in bulk upload form?
    * ...
 
 =cut
