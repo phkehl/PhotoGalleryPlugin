@@ -48,6 +48,8 @@ API. See source code for developer details.
      (default, e.g.: https://tools.wmflabs.org/geohack/geohack.php?params=48.143889_N_17.109722_E)
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
    * Show gear (tools menu) in fullscreen.
+   * Allow sorting by regex named group.
+   * Allow use of other image formats.
    * ...
 
 =cut
