@@ -88,6 +88,8 @@ label.dropZoneAttrCb.checkbox { line-height: 1.1em;
     cursor: pointer; white-space: nowrap; border: 0.1em solid hsl(0, 0%, 70%); display: inline-block;
     width: 1.1em; height: 1.1em; min-height: 1.1em; max-height: 1.1em; margin-left: 0.2em; text-align: center; }
 label.dropZoneAttrCb.checkbox:hover { border: 0.1em solid hsl(0, 0%, 40%); }
+label.dropZoneAttrCb.dropZoneAttrCbNotAvail { border-style: dotted; cursor: no-drop; }
+label.dropZoneAttrCb.dropZoneAttrCbNotAvail input + span:before { content: ''; }
 
 .dropZoneForm input.comment, input.dropZoneFileName {
     border: unset; border-radius: unset; background-color: transparent;

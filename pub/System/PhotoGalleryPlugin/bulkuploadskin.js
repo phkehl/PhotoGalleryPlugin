@@ -72,22 +72,28 @@ jQuery(function($)
             var id = cb.attr('id');
             var name = cb.attr('name');
             var tooltip = '';
+            var filenamematch = '';
             if (id)
             {
                 var label = uplForm.find('label[for=' + id + ']');
                 if (label)
                 {
-                    tooltip += label.text();
-                    var info = label.next();
+                    tooltip += label.text(); // use original label as new checkbox tooltip
+                    var info = label.next(); // and add info <span> next to the original label, too
                     if (info.is('span'))
                     {
                         tooltip += ' (' + info.text() + ')';
                     }
                 }
+                if (cb.data('filenamematch'))
+                {
+                    filenamematch = cb.data('filenamematch');
+                }
             }
             dzCheckboxesHtml += '<label class="dropZoneAttrCb checkbox" title="' + escAttr(tooltip) + '">'
                 + '<input type="checkbox" name="' + name + '" value="on"'
-                + (cb.is(':checked') ? ' checked' : '') + '/><span></span></label>';
+                + (cb.is(':checked') ? ' checked' : '') + ' data-filenamematch="' + filenamematch + '"/>'
+                + '<span></span></label>';
             dzCheckboxesHelp += '<li>' + tooltip + '</li>';
         });
         $('#bulkuploadattrhelp').append(dzCheckboxesHelp);
@@ -369,6 +375,31 @@ jQuery(function($)
 
             // ...add a tooltip to the remove icon
             $(file._removeLink).attr('title', dictRemoveFile);
+
+            $(file.previewElement).find('.dropZoneAttrCb input').each(function ()
+            {
+                var cb = $(this);
+                var fnmatch = cb.data('filenamematch');
+                var fn = fnInput.val();
+                if (fnmatch && fnmatch.length && fn && fn.length)
+                {
+                    var match = false;
+                    try
+                    {
+                        var re = new RegExp(fnmatch, 'i');
+                        match = re.test(fn);
+                    }
+                    catch (e)
+                    {
+                        match = false;
+                    }
+                    if (!match)
+                    {
+                        cb.prop('checked', false).attr('disabled', true);
+                        cb.parent().addClass('dropZoneAttrCbNotAvail').attr('title', 'not available for this file');
+                    }
+                }
+            });
 
             // ...update progress bar info
             this.updateTotalUploadProgress();
