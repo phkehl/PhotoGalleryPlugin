@@ -521,7 +521,6 @@ jQuery(function($)
                         $(file.previewElement).find('.dropZoneFileName').val(newName).effect('highlight', 2000);
                     }
                 }
-
             }
 
             // this file is now no longer sortable
@@ -643,6 +642,8 @@ jQuery(function($)
             {
                 // whatever.. perhaps the RenderPlugin is not installed
                 DEBUG('RenderPlugin not installed and activated?');
+                $.pnotify({ type: 'warning', width: '50em', delay: 8000,
+                            text: 'Could not refresh attachment table. RenderPlugin not installed or activated?' });
             }
         });
     }

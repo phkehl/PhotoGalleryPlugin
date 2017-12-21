@@ -161,6 +161,7 @@ photo gallery plugin%BR%:
 bulk upload skin extension:%BR%
 - allow specifying for what files a upload form attribute is usable, and used that to allow the rotate and timestamp attributes only for jpeg images%BR% \
 - allow double-clicking attribute checkboxes to propagate state to other pending files%BR%
+- notify (warn) user if attachment table could not be refresed (RenderPlugin missing)%BR%
 ...  |
 |  11 Mar 2017  |     v1.9    |\
 - set minimal Foswiki required to release 2.1.3, see Foswiki:System/ReleaseNotes02x01 %BR% \

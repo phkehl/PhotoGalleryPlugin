@@ -6,7 +6,7 @@ This adds a DropzoneJS upload form to allow for batch uploads of many files.
 
 }%
 %TMPL:INCLUDE{"attach"}%
-%TMPL:DEF{"bulkupload"}%%JQREQUIRE{"ui::resizable,ui::progressbar,scrollto,blockui"}%%ADDTOZONE{
+%TMPL:DEF{"bulkupload"}%%JQREQUIRE{"ui::resizable,ui::progressbar,scrollto,blockui,pnotify"}%%ADDTOZONE{
     "script" id="dropzonejs-js" requires="JQUERYPLUGIN"
     text="<script type=\"text/javascript\" src=\"%PUBURLPATH%/%SYSTEMWEB%/PhotoGalleryPlugin/dropzone.compressed.js\"></script>"
 }%%ADDTOZONE{
