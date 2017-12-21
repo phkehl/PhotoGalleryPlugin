@@ -28,7 +28,7 @@ Each selection can be:%BR% \
 | Sets the size in pixels for the thumbnails (50..500).  \
 | 150 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
-| =size=  \
+| =quality=  \
 | Sets the thumbnail quality factor (1..100).  \
 | 85 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
