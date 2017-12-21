@@ -357,14 +357,15 @@ jQuery(function($)
         dzInst.on('addedfile', function (file)
         {
             DEBUG('addedfile file', [ file, file.previewElement ] );
+            var dzPreview = $(file.previewElement);
 
             // ...replace filename <span> with <input>
-            var fnSpan = $(file.previewElement).find('.dropZoneFileName');
+            var fnSpan = dzPreview.find('.dropZoneFileName');
             var fnInput = $('<input>').addClass('dropZoneFileName').val(fnSpan.text())
                 .data('orig', fnSpan.text()).attr('placeholder', 'filename');
             fnSpan.replaceWith(fnInput);
 
-            // reset filename if field is left empty
+            // ...reset filename if field is left empty
             fnInput.on('focusout', function (e)
             {
                 if (!fnInput.val())
@@ -376,7 +377,8 @@ jQuery(function($)
             // ...add a tooltip to the remove icon
             $(file._removeLink).attr('title', dictRemoveFile);
 
-            $(file.previewElement).find('.dropZoneAttrCb input').each(function ()
+            // ...disable checkbox that are not applicable (if possible)
+            dzPreview.find('.dropZoneAttrCb input').each(function ()
             {
                 var cb = $(this);
                 var fnmatch = cb.data('filenamematch');
@@ -399,6 +401,32 @@ jQuery(function($)
                         cb.parent().addClass('dropZoneAttrCbNotAvail').attr('title', 'not available for this file');
                     }
                 }
+            });
+
+            // add double-click handler
+            dzPreview.find('.dropZoneAttrCb').on('dblclick', function (e)
+            {
+                e.preventDefault();
+                e.stopPropagation();
+                if (dzPreview.hasClass('dz-complete'))
+                {
+                    return;
+                }
+
+                var cbDiv = $(this);
+                var input = cbDiv.find('input');
+                var status = input.is(':checked');
+                var name   = input.attr('name');
+                dzFiles.find('input[name=' + name + ']').each(function ()
+                {
+                    var inp = $(this);
+                    if (!inp.parent().hasClass('dropZoneAttrCbNotAvail') &&
+                        !inp.parents('.dz-preview').hasClass('dz-complete') )
+                    {
+                        inp.prop('checked', status);
+                    }
+                });
+
             });
 
             // ...update progress bar info
