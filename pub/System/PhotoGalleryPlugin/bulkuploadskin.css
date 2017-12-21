@@ -118,4 +118,6 @@ input.dropZoneFileName[readonly]:focus,  .dropZoneForm input.comment[readonly]:f
 .dropZoneSortable .dropZoneFileSortHandle { cursor: grab; }
 .dropZoneSortable .dropZoneFileSortHandle:hover { background-color: hsl(210, 100%, 80%); }
 
+#bulkuploadactions { display: none; }
+
 /* eof */
