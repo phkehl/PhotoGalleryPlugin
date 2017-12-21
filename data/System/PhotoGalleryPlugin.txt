@@ -158,6 +158,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 |  .. ... ....  |  v1.10-dev  |\
 photo gallery plugin%BR%:
 - documentation cleanup%BR% \
+- when leaving viewer, only scroll page if thumb is not fully visible, only animate y axis%BR% \
 bulk upload skin extension:%BR%
 - allow specifying for what files a upload form attribute is usable, and used that to allow the rotate and timestamp attributes only for jpeg images%BR% \
 - allow double-clicking attribute checkboxes to propagate state to other pending files%BR%

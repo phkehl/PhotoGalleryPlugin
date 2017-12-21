@@ -135,7 +135,14 @@ jQuery(function($)
             {
                 if (this && this.currItem && this.currItem.thumb)
                 {
-                    $(window).scrollTo(this.currItem.thumb, { duration: 500, offset: { top: -50 } });
+                    var y0 = this.currItem.thumb.offset().top;
+                    var y1 = y0 + this.currItem.thumb.outerHeight();
+                    var Y0 = $(window).scrollTop();
+                    var Y1 = Y0 + $(window).innerHeight();
+                    if ((Y1 < y1) || (Y0 > y0))
+                    {
+                        $(window).scrollTo(this.currItem.thumb, { duration: 500, offset: { top: -50 }, axis: 'y' });
+                    }
                 }
                 helper.pswp = null;
                 if (slideshowIv)
