@@ -1,0 +1,19 @@
+%{
+
+PhotoGalleryPlugin's bulk upload skin extension for the PatternSkin.
+
+This adds actions to the attachment table.
+
+}%
+%TMPL:INCLUDE{"attachtables"}%
+%TMPL:DEF{ATTACH:files:row(basic)}%|  %A_ICON%<span class="foswikiHidden">%A_EXT%</span>  \
+| <a href="%ATTACHURLPATH%/%ENCODE{%A_FILE%}%"><noautolink>%A_FILE%</noautolink></a>  \
+|  <span class="bulkuploadAttActions foswikiNoBreak"><span class="foswikiIcon"><img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/pencil.png" width="16" height="16" title="%MAKETEXT{"edit attachment comment"}%"/></span> \
+<span class="foswikiIcon"><img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/arrow_right.png" width="16" height="16" title="%MAKETEXT{"move attachment image to another topic"}%"/></span> \
+<span class="foswikiIcon"><img src="%PUBURLPATH%/%SYSTEMWEB%/FamFamFamSilkIcons/bin.png" width="16" height="16"  title="%MAKETEXT{"delete attachment image (move to <nop>' . $Foswiki::cfg{TrashWebName} . '.TrashAttachment topic)"}%"/></span> \
+<a href="%SCRIPTURLPATH{"attach"}%/%WEB%/%TOPIC%?filename=%ENCODE{"%A_FILE%"}%;revInfo=1" title="%MAKETEXT{"change, update, previous revisions, move, delete..."}%" rel="nofollow">%ICON{gear}%</a></span>  \
+|  %A_SIZE%\
+| <span class="foswikiNoBreak">%A_DATE%</span>  \
+| %A_USER%  \
+| %A_COMMENT%  |%TMPL:END%
+%{ eof }%
