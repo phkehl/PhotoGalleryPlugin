@@ -157,6 +157,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 | *Date*        |  *Version*  | *Comments*   |
 |  .. ... ....  |  v1.11-dev  | \
 - highlight last viewed photo's thumbnail when exiting fullscreen viewer%BR% \
+- add _width_ and _float_ parameters for more layout control%BR% \
 - ... |
 |  23 Dec 2017  |  v1.10  | \
 photo gallery plugin:%BR% \

@@ -162,26 +162,29 @@ jQuery(function($)
         });
 
         // add window resize event that centres the gallery
-        var nFrames = helper.items.length;
-        var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5;
-        var debounceTimer;
-        $(window).on('resize', function (e)
+        if (helper.pgDiv.hasClass('pg-auto-width'))
         {
-            if (debounceTimer)
+            var nFrames = helper.items.length;
+            var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5;
+            var debounceTimer;
+            $(window).on('resize', function (e)
             {
-                clearTimeout(debounceTimer);
-            }
-            debounceTimer = setTimeout(function ()
-            {
-                var availableSpace = helper.pgDiv.innerWidth();
-                var nPossible = Math.floor(availableSpace / frameWidth);
-                var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
-                helper.pgDiv.find('div.gallery').width(w);
-                //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
-                // FIXME: optimise for least number of columns and rows (fewest empty spots)
-            }, 25);
-        });
-        $(window).trigger('resize'); // trigger initial centring
+                if (debounceTimer)
+                {
+                    clearTimeout(debounceTimer);
+                }
+                debounceTimer = setTimeout(function ()
+                {
+                    var availableSpace = helper.pgDiv.innerWidth();
+                    var nPossible = Math.floor(availableSpace / frameWidth);
+                    var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
+                    helper.pgDiv.find('div.gallery').width(w);
+                    //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
+                    // FIXME: optimise for least number of columns and rows (fewest empty spots)
+                }, 25);
+            });
+            $(window).trigger('resize'); // trigger initial centering
+        }
 
         // handle hash: open pswp at index if "&gid=...&pid=..." hash is present
         var hash = location.hash.match(/&gid=(\d+)&pid=(\d+)/);

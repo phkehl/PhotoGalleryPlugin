@@ -36,6 +36,14 @@ Each selection can be:%BR% \
 | Selects how to sort attachments (=date=, =name= or =off=).  \
 | =date=  \
 |
+| =width=  \
+| Selects how many thumbnails to show in one row (=0= = auto, i.e. as many as there is space).  \
+| =0=  \
+|
+| =float=  \
+| Float gallery on the =left= or =right= (only if =width= > 0) or keep gallery centred (=none=).  \
+| =none=  \
+|
 | =remaining=  \
 | Filter-out photos already used by previous galleries (in the same topic) (=on= or =off=).  \
 | =off=  \
@@ -139,6 +147,9 @@ Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
    * =%<nop>PHOTOGALLERY{ remaining="on" quiet="on" }%=
      -- outputs a gallery with all remaining photos (those not shown in previous
      calls to =%<nop>PHOTOGALLERY%= in the same topic) if there are any
+   * =%<nop>PHOTOGALLERY{ "IMG_0687.JPG" width="1" float="right" }%=
+     -- show a single image gallery floating at the right
+
 
 
 %STOPINCLUDE%

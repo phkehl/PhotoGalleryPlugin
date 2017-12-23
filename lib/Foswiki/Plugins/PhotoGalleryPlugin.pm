@@ -183,6 +183,8 @@ sub doPHOTOGALLERY
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault}, 'on', 'off', 'user');
     $params->{dayheading}  = _checkOffOrRange($params->{dayheading}, '', 0, 0, 24);
     $params->{headingfmt}||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault};
+    $params->{width}       = _checkRange($params->{width}, 0, 0, 1000);
+    $params->{float}       = _checkOptions($params->{float}, 'none', 'left', 'right');
 
     my $wikiName = Foswiki::Func::getWikiName();
     my $user = Foswiki::Func::getCanonicalUserID($wikiName);
@@ -194,7 +196,7 @@ sub doPHOTOGALLERY
     _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
            "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
            "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName",
-           "user=$user", "dayheading=$params->{dayheading}");
+           "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}");
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
@@ -422,13 +424,35 @@ sub doPHOTOGALLERY
         $RV->{jsCss} = 1;
     }
 
-    # wrapper <div>
-    $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" class="photoGallery">',
-                    $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
+    # work out where to handle the align/width params
+    my $wrapperStyle = '';
+    my $wrapperClass = '';
+    my $galleryStyle = '';
+    # centred (non floating) gallery of specific width
+    if ($params->{width} && ($params->{float} eq 'none'))
+    {
+        $galleryStyle = 'width: ' . ($params->{width} * (5 + 1 + 5 + $params->{size} + 5 + 1 + 5)) . 'px;';
+    }
+    # floating (left or right) gallery of specific width
+    elsif ($params->{width})
+    {
+        $wrapperStyle = 'width: ' . ($params->{width} * (5 + 1 + 5 + $params->{size} + 5 + 1 + 5)) . 'px;';
+        $wrapperClass = "pg-float-$params->{float}";
+    }
+    # automatic width (and implicit centering)
+    else
+    {
+        $wrapperClass = "pg-auto-width";
+    }
 
+    # wrapper <div>
+    $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" '
+                    . 'class="photoGallery '. $wrapperClass .'" style="' . $wrapperStyle . '">',
+                    $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
     # render gallery HTML
     my $prevDayheading = 0;
-    $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0">';
+    $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0" '
+      . 'style="' . $galleryStyle . '">';
     for (my $ix = 0; $ix <= $#images; $ix++)
     {
         my $img = $images[$ix];
