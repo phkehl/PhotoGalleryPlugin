@@ -118,6 +118,8 @@ input.dropZoneFileName[readonly]:focus,  .dropZoneForm input.comment[readonly]:f
 .dropZoneSortable .dropZoneFileSortHandle { cursor: grab; }
 .dropZoneSortable .dropZoneFileSortHandle:hover { background-color: hsl(210, 100%, 80%); }
 
-#bulkuploadactions { display: none; }
+.bulkuploadAttActions {  }
+.bulkuploadAttActions .foswikiIcon { border: 0.2em solid transparent; cursor: pointer; }
+.bulkuploadAttActions .foswikiIcon:hover { border-color: #dadada; }
 
 /* eof */

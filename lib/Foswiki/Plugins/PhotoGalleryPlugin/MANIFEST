@@ -55,5 +55,6 @@ pub/System/PhotoGalleryPlugin/bulkuploadskin.css                    0644 Bulk up
 pub/System/PhotoGalleryPlugin/bulkuploadskin.compressed.js          0644 Bulk upload Foswiki integration javascript code
 pub/System/PhotoGalleryPlugin/bulkuploadskin.js                     0644 Bulk upload Foswiki integration javascript code
 templates/attach.bulkupload.tmpl                                    0644 Bulk upload attach page integration templates
+templates/attachtables.bulkupload.tmpl                              0644 Bulk upload attachment table action buttons
 
 # eof

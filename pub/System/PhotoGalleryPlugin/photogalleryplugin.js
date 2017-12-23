@@ -690,11 +690,11 @@ jQuery(function($)
         {
             if (obj)
             {
-                console.log('pg: ' + strOrObj + ': %g', obj);
+                console.log('pg: ' + strOrObj + ': %o', obj);
             }
             else if (typeof strOrObj === 'object')
             {
-                console.log('pg: %g', strOrObj);
+                console.log('pg: %o', strOrObj);
             }
             else
             {
