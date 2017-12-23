@@ -143,6 +143,8 @@ jQuery(function($)
                     {
                         $(window).scrollTo(this.currItem.thumb, { duration: 500, offset: { top: -50 }, axis: 'y' });
                     }
+                    var frame = this.currItem.frame;
+                    setTimeout(function () { frame.effect('highlight', { color: '#ff0000' }, 2000); }, 300);
                 }
                 helper.pswp = null;
                 if (slideshowIv)
@@ -690,11 +692,11 @@ jQuery(function($)
         {
             if (obj)
             {
-                console.log('pg: ' + strOrObj + ': %g', obj);
+                console.log('pg: ' + strOrObj + ': %o', obj);
             }
             else if (typeof strOrObj === 'object')
             {
-                console.log('pg: %g', strOrObj);
+                console.log('pg: %o', strOrObj);
             }
             else
             {
