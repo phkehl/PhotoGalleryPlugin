@@ -155,6 +155,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
+|  .. ... ....  |  v1.11-dev  | \
+- ... |
 |  23 Dec 2017  |  v1.10  | \
 photo gallery plugin:%BR% \
 - documentation cleanup%BR% \
