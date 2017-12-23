@@ -74,7 +74,7 @@ use Image::Epeg;
 
 ####################################################################################################
 
-our $VERSION           = '1.11';
+our $VERSION           = '1.12-dev';
 our $RELEASE           = '23 Dec 2017';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;

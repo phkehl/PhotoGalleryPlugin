@@ -155,6 +155,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
+|  .. ... ....  |  v1.12-dev  | \
+- ...  |
 |  23 Dec 2017  |  v1.11  | \
 - highlight last viewed photo's thumbnail when exiting fullscreen viewer%BR% \
 - add _width_ and _float_ parameters for more layout control  |
