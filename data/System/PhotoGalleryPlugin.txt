@@ -100,7 +100,7 @@ The handler returns a thumbnail in JPEG format. It caches the thumbnail and resp
 Example:
 =&lt;img src="%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/&gt;=
 
-Gives:
+Gives (if plugin is activated):
 <img width="200" height="150" style="border: 1px solid #000;" src="%SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/>
 
 ---
