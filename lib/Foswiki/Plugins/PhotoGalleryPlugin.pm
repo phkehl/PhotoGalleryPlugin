@@ -2,7 +2,7 @@
 #
 # PhotoGalleryPlugin for Foswiki
 #
-# Copyright (c) 2016 Philippe Kehl <phkehl at gmail dot com>
+# Copyright (c) 2016-2018 Philippe Kehl <phkehl at gmail dot com>
 #
 ####################################################################################################
 #
@@ -49,7 +49,10 @@ API. See source code for developer details.
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
    * Show gear (tools menu) in fullscreen.
    * Allow sorting by regex named group.
-   * Allow use of other image formats.
+   * Implement rotate actions for PNG, GIF, SVG.
+   * Multiple zoom levels (mouse zoom?) in photoswipe. Is it possible?
+   * Better SVG size calculation.
+   * Allow images from multiple topics.
    * ...
 
 =cut
@@ -70,12 +73,13 @@ use File::Touch;
 use Digest::MD5;
 use Storable;
 use Image::Epeg;
+use List::Util;
 
 
 ####################################################################################################
 
-our $VERSION           = '1.11-dev';
-our $RELEASE           = '23 Dec 2017';
+our $VERSION           = '1.13-dev';
+our $RELEASE           = '25 Dec 2017';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
@@ -172,10 +176,10 @@ sub doPHOTOGALLERY
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 1, 100);
     $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
     $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
-    $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', 'name', 'off');
-    $params->{caption}   ||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
-    $params->{thumbcap}  ||= $params->{caption};
-    $params->{zoomcap}   ||= $params->{caption};
+    $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', '-date', 'name', '-name', 'off');
+    $params->{caption}   //= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
+    $params->{thumbcap}  //= $params->{caption};
+    $params->{zoomcap}   //= $params->{caption};
     $params->{remaining}   = _checkBool($params->{remaining} || 'off');
     $params->{quiet}       = _checkBool($params->{quiet}     || 'off');
     $params->{unique}      = _checkBool($params->{unique}    || 'on' );
@@ -183,6 +187,9 @@ sub doPHOTOGALLERY
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault}, 'on', 'off', 'user');
     $params->{dayheading}  = _checkOffOrRange($params->{dayheading}, '', 0, 0, 24);
     $params->{headingfmt}||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault};
+    $params->{width}       = _checkRange($params->{width}, 0, 0, 1000);
+    $params->{float}       = _checkOptions($params->{float}, 'none', 'left', 'right');
+    $params->{random}      = _checkRange($params->{random}, 0, 0, 1000);
 
     my $wikiName = Foswiki::Func::getWikiName();
     my $user = Foswiki::Func::getCanonicalUserID($wikiName);
@@ -194,7 +201,10 @@ sub doPHOTOGALLERY
     _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
            "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
            "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName",
-           "user=$user", "dayheading=$params->{dayheading}");
+           "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}",
+           "random=$params->{random}", "caption=$params->{caption}",
+           "thumbcap=" . ($params->{thumbcap} eq $params->{caption} ? '<ditto>' : $params->{thumbcap}),
+           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}));
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
@@ -219,13 +229,16 @@ sub doPHOTOGALLERY
 
     ##### select images from attachments ###########################################################
 
-    # get list of all attachments, limit to jpeg images
+    # get list of all attachments
     my ($meta, $text) = Foswiki::Func::readTopic($params->{web}, $params->{topic});
     unless ($meta)
     {
         return _wtf("Cannot read meta data from topic '$params->{web}.$params->{topic}'!");
     }
-    my @attachments = grep { $_->{name} =~ m/\.jpe?g/i } $meta->find("FILEATTACHMENT");
+    my @attachments = $meta->find("FILEATTACHMENT");
+
+    # limit to supported image types (
+    @attachments = grep { $_->{name} =~ m/\.(jpe?g|png|gif|svg)/i } @attachments;
 
     # filter list of attachments...
     my @selected = ();
@@ -284,14 +297,35 @@ sub doPHOTOGALLERY
         @attachments = grep { !$RV->{shown}->{$_->{name}} } @attachments;
     }
 
-    # resort by date or name?
-    if ($params->{sort} eq 'date')
+    # sort by date or name?
+    if    ($params->{sort} eq 'date')
     {
         @attachments = sort { $a->{date} <=> $b->{date} } @attachments;
+    }
+    elsif ($params->{sort} eq '-date')
+    {
+        @attachments = reverse sort { $a->{date} <=> $b->{date} } @attachments;
     }
     elsif ($params->{sort} eq 'name')
     {
         @attachments = sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+    }
+    elsif ($params->{sort} eq '-name')
+    {
+        @attachments = reverse sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+    }
+    elsif ($params->{sort} eq 'random')
+    {
+        @attachments = List::Util::shuffle(@attachments);
+    }
+
+    # random pick?
+    if ($params->{random})
+    {
+        my @shuffled = List::Util::shuffle(@attachments);
+        my $maxIx = $params->{random} > ($#shuffled + 1) ? $#shuffled : $params->{random} - 1;
+        _debug('rand=' . $params->{random} . ' maxIx=' . $maxIx);
+        @attachments = @shuffled[0..$maxIx];
     }
 
     # any images left?
@@ -422,13 +456,35 @@ sub doPHOTOGALLERY
         $RV->{jsCss} = 1;
     }
 
-    # wrapper <div>
-    $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" class="photoGallery">',
-                    $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
+    # work out where to handle the align/width params
+    my $wrapperStyle = '';
+    my $wrapperClass = '';
+    my $galleryStyle = '';
+    # centred (non floating) gallery of specific width
+    if ($params->{width} && ($params->{float} eq 'none'))
+    {
+        $galleryStyle = 'width: ' . ($params->{width} * (5 + 1 + 5 + $params->{size} + 5 + 1 + 5)) . 'px;';
+    }
+    # floating (left or right) gallery of specific width
+    elsif ($params->{width})
+    {
+        $wrapperStyle = 'width: ' . ($params->{width} * (5 + 1 + 5 + $params->{size} + 5 + 1 + 5)) . 'px;';
+        $wrapperClass = "pg-float-$params->{float}";
+    }
+    # automatic width (and implicit centering)
+    else
+    {
+        $wrapperClass = "pg-auto-width";
+    }
 
+    # wrapper <div>
+    $tml .= sprintf('<div id="photoGallery%i" data-uid="%s" data-web="%s" data-topic="%s" data-uidelay="%i" data-ssdelay="%i" '
+                    . 'class="photoGallery '. $wrapperClass .'" style="' . $wrapperStyle . '">',
+                    $RV->{uid}, $RV->{uid}, $params->{web}, $params->{topic}, int($params->{uidelay} * 1e3), int($params->{ssdelay} * 1e3));
     # render gallery HTML
     my $prevDayheading = 0;
-    $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0">';
+    $tml .= '<div class="gallery jqUITooltip" data-delay="0" data-position="bottom" data-arrow="true" data-duration="0" '
+      . 'style="' . $galleryStyle . '">';
     for (my $ix = 0; $ix <= $#images; $ix++)
     {
         my $img = $images[$ix];
@@ -453,8 +509,10 @@ sub doPHOTOGALLERY
         if ( ( _checkBool($params->{admin}) && $mayChange                      ) ||
              ( ($params->{admin} eq 'user') && ($wikiName eq $img->{wikiName}) ) )
         {
-            $tml .=   '<a class="admin" data-ix="' . $ix . '" data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false')
-              . '">%ICON{gear}%</a>' if ($params->{admin});
+            $tml .=   '<a class="admin" data-ix="' . $ix . '"'
+              . ' data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false') . '"'
+              . ' data-rotaction="' . ($img->{name} =~ m{\.jpe?g}i ? 'true' : 'false') . '"'
+              . '>%ICON{gear}%</a>' if ($params->{admin});
         }
         # thumbnail captions, and the captions shown in PhotoSwipe
         # (We put these here into the HTML so that Foswiki can expand possible macros (e.g. the WikiNames).
@@ -465,7 +523,7 @@ sub doPHOTOGALLERY
             $tml .=     '<span class="caption">' . $img->{thumbcap} . '</span>';
             $tml .=   '</div>';
         }
-        if ($img->{thumbcap} ne $img->{zoomcap})
+        if ($img->{zoomcap} ne $img->{thumbcap})
         {
             $tml .= '<div class="zoomcap">' . $img->{zoomcap} . '</div>';
         }
@@ -1023,8 +1081,8 @@ sub doRestThumb
     my $uid     = $query->param('uid') || 0;
     (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
 
-    # need all parameters, works for JPEGs only
-    if (!$web || !$topic || !$name || !$quality || !$width || !$height || ($name !~ m/\.jpe?g$/i))
+    # need all parameters
+    if (!$web || !$topic || !$name || !$quality || !$width || !$height || ($name !~ m/\.(jpe?g|png|gif|svg)$/i))
     {
         $response->header(-Status => 400); # bad request
         return undef;
@@ -1070,11 +1128,29 @@ sub doRestThumb
         my $fh = $meta->openAttachment($name, '<');
         my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
-        my $epeg = Image::Epeg->new($tFile);
-        $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
-        $epeg->set_quality($quality);
-        $epeg->write_file($cacheFile);
-        unlink($tFile);
+
+        if ($name =~ m{\.jpe?g$})
+        {
+            my $epeg = Image::Epeg->new($tFile);
+            $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
+            $epeg->set_quality($quality);
+            $epeg->write_file($cacheFile);
+            unlink($tFile);
+        }
+        else
+        {
+            my $m = _getMagick();
+            if ($m)
+            {
+                eval
+                {
+                    $m->Read($tFile);
+                    $m->Resize(width => $width, height => $height);
+                    $m->Set(quality => $quality);
+                    $m->Write('jpg:' . $cacheFile);
+                }
+            }
+        }
     }
 
     # read and serve cached thumbnail
@@ -1099,6 +1175,37 @@ sub doRestThumb
     # wtf?!
     $response->header(-Status => 404); # not found
     return undef;
+}
+
+
+sub _getMagick
+{
+    if (exists $RV->{magic})
+    {
+        return $RV->{magic};
+    }
+    foreach my $impl (qw(Graphics::Magick Image::Magick))
+    {
+        my $h;
+        eval "require $impl; \$h = ${impl}->new();";
+        if ($@)
+        {
+            my $err = "$@"; $err =~ s{\r?\n.*}{}mgs;
+            _debug("tried loading $impl, but it failed: $err");
+        }
+        if ($h)
+        {
+            _debug("using $impl");
+            $RV->{magic} = $h;
+            last;
+        }
+    }
+    if (!$RV->{magic})
+    {
+        _warning('No magick found :-(');
+        $RV->{magic} = undef;
+    }
+    return $RV->{magic};
 }
 
 
@@ -1153,7 +1260,7 @@ sub _debug
 # _warning($str, ...)
 sub _warning
 {
-    Foswiki::Func::writeWarning(__PACKAGE__, @_);
+    Foswiki::Func::writeWarning(@_);
 }
 
 # writes a warning string to the error.log and returns an error to be included in the rendered page
@@ -1170,6 +1277,7 @@ sub _wtf
 sub _checkRange
 {
     my ($val, $def, $min, $max) = @_;
+    if ($val !~ m{^[0-9.]+$})              { return $def; } # FIXME: there's some isNumeric() somewhere
     if    (!defined $val || ($val eq '') ) { return $def; }
     if    ($val < $min)                    { return $min; }
     elsif ($val > $max)                    { return $max; }
@@ -1233,7 +1341,7 @@ sub _getCacheFileName
 sub _getTempFileName
 {
     my $f = '';
-    do { $f = _getCacheFileName('temp', rand()); } until (!-f $f);
+    do { $f = _getCacheFileName('temp', 'random', int(rand(9999999999))); } until (!-f $f);
     return $f;
 }
 
@@ -1249,7 +1357,7 @@ sub _getImageInfo
     my ($web, $topic) = ($meta->web(), $meta->topic());
 
     # try cache first
-    my $cacheVer = 1; # bump this if something below changes
+    my $cacheVer = 'v2'; # bump this if something below changes
     my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
     my $info;
     try { $info = Storable::retrieve($cacheFile); }
@@ -1292,10 +1400,27 @@ sub _getImageInfo
         }
 
         # check if it is any good
+        # (Image::ExifTool::ImageInfo() works for PNG and GIF images, too: we get ImageHeight and ImageWidth)
         if (!$_info || !$_info->{ImageWidth} || !$_info->{ImageHeight})
         {
             _warning("Failed getting image info from $web.$topic/$att->{name}%s!");
             return undef;
+        }
+
+        # SVG don't have a pixel size..
+        if ($att->{name} =~ m{\.svg}i)
+        {
+            $_info->{VectorImageHeight} = $_info->{ImageHeight};  # e.g. '100mm'
+            $_info->{VectorImageWidth} = $_info->{ImageWidth};
+
+            my $iw = $_info->{ImageWidth};
+            my $ih = $_info->{ImageHeight};
+            $iw =~ s{[^0-9.]+$}{};
+            $ih =~ s{[^0-9.]+$}{};
+
+            # make it big enough for the screen
+            $_info->{ImageHeight} = int( $_info->{ImageHeight} / $_info->{ImageWidth} * 10000 + 0.5 );
+            $_info->{ImageWidth} = 10000;
         }
 
         # process EXIF info
@@ -1312,10 +1437,19 @@ sub _getImageInfo
             }
             $info->{ImageWidth}  = $_info->{ImageWidth};
             $info->{ImageHeight} = $_info->{ImageHeight};
-            $info->{ImageSize} = sprintf('%ix%i %.1fMP',
-                $info->{ImageWidth}, $info->{ImageHeight},
-                $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
 
+            if ($_info->{VectorImageHeight})
+            {
+                $info->{VectorImageWidth}  = $_info->{VectorImageWidth};
+                $info->{VectorImageHeight} = $_info->{VectorImageHeight};
+                $info->{ImageSize} = $info->{VectorImageWidth} . ' x ' . $info->{VectorImageHeight};
+            }
+            else
+            {
+                $info->{ImageSize} = sprintf('%ix%i %.1fMP',
+                    $info->{ImageWidth}, $info->{ImageHeight},
+                    $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
+            }
             if ($_info->{UserComments})
             {
                 # clean up

@@ -33,8 +33,16 @@ Each selection can be:%BR% \
 | 85 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =sort=  \
-| Selects how to sort attachments (=date=, =name= or =off=).  \
+| Selects how to sort the selected attachments (=date=, =name=, =random= or =off=). Prefix with "-" to reverse the order (=-date=, =-name=). Sort on name is case-insensitive. \
 | =date=  \
+|
+| =width=  \
+| Selects how many thumbnails to show in one row (=0= = auto, i.e. as many as there is space).  \
+| =0=  \
+|
+| =float=  \
+| Float gallery on the =left= or =right= (only if =width= > 0) or keep gallery centred (=none=).  \
+| =none=  \
 |
 | =remaining=  \
 | Filter-out photos already used by previous galleries (in the same topic) (=on= or =off=).  \
@@ -47,6 +55,10 @@ Each selection can be:%BR% \
 | =unique=  \
 | Remove duplicates due to overlapping selections (=on= or =off=).  \
 | =on=  \
+|
+| =random=  \
+| Randomly pick a number of images from the list of selected images.  \
+| =0=  \
 |
 | =admin=  \
 | Display admin action menu if the user has permissions (=on= or =off=) or is the owner of the attachment (=user=).  \
@@ -90,11 +102,11 @@ Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines
 | =$comment($BR&nbsp;)%BR%($n/$N,&nbsp;%BR%$CreateDate(,&nbsp;)%BR%$ExposureTime(,&nbsp;)%BR%$FocalLength(,&nbsp;)%BR%$ApertureValue(,&nbsp;)%BR%$ISO(,&nbsp;)%BR%$Coords(,&nbsp;)%BR%$MakeModel(,&nbsp;)%BR%$WikiName,&nbsp;%BR%$name,&nbsp;%BR%$ImageSize,&nbsp;%BR%$size(MB)[MB])= %RED%<sup>1</sup>%ENDCOLOR%   \
 |
 | =thumbcap=  \
-| Caption format for thumbails if different from =caption= format.  \
+| Caption format for thumbails if different from =caption= format. Set to =""= to disable thumbnail captions. \
 | see =caption=  \
 |
 | =zoomcap=  \
-| Caption format for zoomed photo view if different from =caption= format.  \
+| Caption format for zoomed photo view if different from =caption= format. Set to =""= to disable captions in viewer. \
 | see =caption=  \
 |
 | =dayheading=  \
@@ -121,24 +133,27 @@ Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
 ---++ Examples
 
    * =%<nop>PHOTOGALLERY%=
-     -- renders a gallery with all photos attached to the current topic
+     &ndash; renders a gallery with all photos attached to the current topic
    * =%<nop>PHOTOGALLERY{ "/^IMG_.+\.JPG$/" }%=
-     -- uses all "IMG_*.JPG" photos (also "img_*.jpg" as the match is case insensitive)
+     &ndash; uses all "IMG_*.JPG" photos (also "img_*.jpg" as the match is case insensitive)
    * =%<nop>PHOTOGALLERY{ topic="SomeWeb.SomeTopic" }%=
-     -- uses all photos from the specified topic
+     &ndash; uses all photos from the specified topic
    * =%<nop>PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%=
-     -- uses the two specifed attachments
+     &ndash; uses the two specifed attachments
    * =%<nop>PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%=
-     -- uses all photo from number 1265 to number 1323
+     &ndash; uses all photo from number 1265 to number 1323
    * =%<nop>PHOTOGALLERY{ "IMG_1265.jpg..IMG_1270.jpg,IMG_1280.jpg..IMG_1290.jpg" }%=
-     -- uses all photo from number 1265 to number 1270 and from number 1280 to 1290
+     &ndash; uses all photo from number 1265 to number 1270 and from number 1280 to 1290
    * =%<nop>PHOTOGALLERY{ "/\.jpe?g/,/\.jpe?g/,/\.jpe?g/" sort="off" unique="off" }%=
-     -- uses all attached photos three times
+     &ndash; uses all attached photos three times
    * =%<nop>PHOTOGALLERY{ "doesnotexist" }%=
-     -- outputs an error message instead of a gallery
+     &ndash; outputs an error message instead of a gallery
    * =%<nop>PHOTOGALLERY{ remaining="on" quiet="on" }%=
-     -- outputs a gallery with all remaining photos (those not shown in previous
+     &ndash; outputs a gallery with all remaining photos (those not shown in previous
      calls to =%<nop>PHOTOGALLERY%= in the same topic) if there are any
+   * =%<nop>PHOTOGALLERY{ random="1" width="1" float="right" }%=
+     &ndash; show a random single image floating at the right
+
 
 
 %STOPINCLUDE%
@@ -155,7 +170,8 @@ thumbnails when hovering them with the mouse. The admin menu pops up when
 hovering the gear icon. The following admin actions are available from the menu:
 
    * _rotate left_ and _rotate right_ rotate the photo by 90 degrees to the left
-     and the right respectively. The rotation is lossless.
+     and the right respectively. The rotation is lossless. These actions are only
+     available for JPEG images.
    * _edit_ allows editing the attachment comment
    * _timestamp_ sets the attachment timestamp to the photo exposure time. The
      menu entry is only shown if the photo has the necessary EXIF data and if

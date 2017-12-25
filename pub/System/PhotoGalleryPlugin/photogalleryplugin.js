@@ -54,7 +54,7 @@ jQuery(function($)
                 w:     a.data('w'),        // image width
                 h:     a.data('h'),        // image height
                 msrc:  thumb.attr('src'),  // tumbnail href
-                title: (zoomcap.length ? zoomcap.html() : caption.html())  // caption
+                title: (zoomcap.length ? (zoomcap.html() || '') : (caption.html() || ''))  // caption
             };
             // remove dead links
             item.title = item.title.replace(/<a[^>]+rel="nofollow"[^>]*>(.+?)<\/a>/, '$1');
@@ -143,6 +143,8 @@ jQuery(function($)
                     {
                         $(window).scrollTo(this.currItem.thumb, { duration: 500, offset: { top: -50 }, axis: 'y' });
                     }
+                    var frame = this.currItem.frame;
+                    setTimeout(function () { frame.effect('highlight', { color: '#ff0000' }, 2000); }, 300);
                 }
                 helper.pswp = null;
                 if (slideshowIv)
@@ -160,26 +162,29 @@ jQuery(function($)
         });
 
         // add window resize event that centres the gallery
-        var nFrames = helper.items.length;
-        var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5;
-        var debounceTimer;
-        $(window).on('resize', function (e)
+        if (helper.pgDiv.hasClass('pg-auto-width'))
         {
-            if (debounceTimer)
+            var nFrames = helper.items.length;
+            var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5;
+            var debounceTimer;
+            $(window).on('resize', function (e)
             {
-                clearTimeout(debounceTimer);
-            }
-            debounceTimer = setTimeout(function ()
-            {
-                var availableSpace = helper.pgDiv.innerWidth();
-                var nPossible = Math.floor(availableSpace / frameWidth);
-                var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
-                helper.pgDiv.find('div.gallery').width(w);
-                //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
-                // FIXME: optimise for least number of columns and rows (fewest empty spots)
-            }, 25);
-        });
-        $(window).trigger('resize'); // trigger initial centring
+                if (debounceTimer)
+                {
+                    clearTimeout(debounceTimer);
+                }
+                debounceTimer = setTimeout(function ()
+                {
+                    var availableSpace = helper.pgDiv.innerWidth();
+                    var nPossible = Math.floor(availableSpace / frameWidth);
+                    var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
+                    helper.pgDiv.find('div.gallery').width(w);
+                    //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
+                    // FIXME: optimise for least number of columns and rows (fewest empty spots)
+                }, 25);
+            });
+            $(window).trigger('resize'); // trigger initial centering
+        }
 
         // handle hash: open pswp at index if "&gid=...&pid=..." hash is present
         var hash = location.hash.match(/&gid=(\d+)&pid=(\d+)/);
@@ -205,6 +210,8 @@ jQuery(function($)
                 {
                     var ix = icon.data('ix');
                     helper.adminMenu.find('li.timestamp').toggle(eval(icon.data('tsaction')));
+                    helper.adminMenu.find('li.rotatel').toggle(eval(icon.data('rotaction')));
+                    helper.adminMenu.find('li.rotater').toggle(eval(icon.data('rotaction')));
                     helper.adminMenu.fadeIn().position({ my: 'right top', at: 'right top', of: icon });
                     helper.adminMenu.find('li').data('ix', ix);;
                 }, 300);

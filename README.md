@@ -17,7 +17,8 @@ correcting the attachment timestamp to the photo exposure date, moving the
 attachment to another topic, and deleting the attachment.
 
 This plugin works only with JPEG images and it works best with photos from
-digital cameras that have EXIF data embedded.
+digital cameras that have EXIF data embedded. It can display PNG, GIF and SVG
+graphics as well.
 
 A PatternSkin extension that replaces the default upload form with a bulk upload
 form is included, too. This is currently based on DropZoneJS

@@ -3,6 +3,8 @@
 div.photoGallery { /*outline: 1px solid #f00;*/ margin-bottom: 0.5em; }
 div.photoGallery div.gallery { /*outline: 1px dotted #0f0;*/ margin: 0 auto; }
 
+div.photoGallery.pg-float-right { float: right; margin-left: 1em; }
+div.photoGallery.pg-float-left { float: left; margin-right: 1em; }
 
 div.photoGallery div.frame { background-color: #fff;
     border: 1px solid #aaa; display: inline-block; vertical-align: top;
