@@ -210,6 +210,8 @@ jQuery(function($)
                 {
                     var ix = icon.data('ix');
                     helper.adminMenu.find('li.timestamp').toggle(eval(icon.data('tsaction')));
+                    helper.adminMenu.find('li.rotatel').toggle(eval(icon.data('rotaction')));
+                    helper.adminMenu.find('li.rotater').toggle(eval(icon.data('rotaction')));
                     helper.adminMenu.fadeIn().position({ my: 'right top', at: 'right top', of: icon });
                     helper.adminMenu.find('li').data('ix', ix);;
                 }, 300);

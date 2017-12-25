@@ -44,6 +44,10 @@ pub/Sandbox/PhotoGalleryPluginTest/IMG_1265.jpg                     0644 Plugin 
 pub/Sandbox/PhotoGalleryPluginTest/IMG_1323.jpg                     0644 Plugin test photo
 pub/Sandbox/PhotoGalleryPluginTest/IMG_1324.jpg                     0644 Plugin test photo
 pub/Sandbox/PhotoGalleryPluginTest/IMG_1071.JPG                     0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/notjpeg_nometa.png               0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/notjpeg_withmeta.png             0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/notjpeg_animation.gif            0644 Plugin test photo
+pub/Sandbox/PhotoGalleryPluginTest/notjpeg_vector.svg               0644 Plugin test photo
 
 # bulk upload skin extension templates, styles and JavaScript code
 pub/System/PhotoGalleryPlugin/dropzone.compressed.css               0644 DropzoneJS stylesheet

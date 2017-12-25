@@ -26,23 +26,22 @@ corner. Available tools include losslessly rotating the photo using
 comment, correcting the attachment timestamp to the photo exposure date, moving
 the attachment to another topic, and deleting the attachment.
 
-This plugin works only with [[Wikipedia:JPEG][JPEG]] images and it works best
-with photos from digital cameras that have [[Wikipedia:EXIF][EXIF]] data
-embedded. It needs a fairly recent browser to support various Javascript and
-image scaling and transition magic.
+This plugin is primarily intended to be used with [[Wikipedia:JPEG][JPEG]]
+images and it works best with photos from digital cameras that have
+[[Wikipedia:EXIF][EXIF]] data embedded. It can display
+[[Wikipedia:Portable_Network_Graphics][PNG]], [[Wikipedia:GIF][GIF]] and
+[[Wikipedia:Scalable_Vector_Graphics][SVG]] graphics as well. It needs a fairly
+recent browser to support various Javascript and image scaling and transition
+magic.
 
-See VarPHOTOGALLERY on how to use it.
-
-The plugin ships with a bulk attach script (=tools/photogallerypluginattach.pl=)
-with built-in help. Optionally a skin extension to allow bulk uploading of
-images (or any file, even without activating or using this plugin) via the
-normal attach action is included. Currently [[http://www.dropzonejs.com][DropzoneJS]]
-by Matias Meno is used to support bulk uploading.
+The plugin also ships with a bulk attach script with built-in help. An optional
+a skin extension to allow bulk uploading of images (or any file, even without
+activating or using this plugin) via the normal attach action is included as
+well. Currently [[http://www.dropzonejs.com][DropzoneJS]] by Matias Meno is used
+to support bulk uploading.
 
 See [[%SYSTEMWEB%.PerlDoc?module=Foswiki::Plugins::PhotoGalleryPlugin][Foswiki::Plugins::PhotoGalleryPlugin]]
 for developer details.
-
-
 
 ---
 ---++ Screenshots
@@ -60,7 +59,49 @@ Here are a few screenshots of the plugin in action:
 </div>
 
 
+---
+---++ Usage
 
+
+---+++ %<nop>PHOTOGALLERY% Macro
+
+See VarPHOTOGALLERY on how to use it.
+See [[Sandbox.PhotoGalleryPluginTest][Sandbox.PhotoGalleryPluginTest]] for some examples.
+
+---+++ Bulk Attach Script
+
+The script can be found in the Foswiki installation folder in =tools/photogallerypluginattach.pl=.
+Run it as the same user Foswiki runs as (often this is the =www-data= system user).
+
+The script will "properly" attach images using the Foswiki engine (as opposed to
+directly "hack" it into the topic database). This makes sure that the attachment
+owner and all other meta data are correct and it also uses the automatic JPEG
+rotatation and timestamp features described above (if this plugin is
+activated). The script is not limited to photos or this plugin in general. It
+can be used to attach arbitrary files (even without this plugin installed).
+
+Example: <noautolink> =tools/photogallerypluginattach.pl -C -g -u WikiUsername Main.HolidaysInTheUpsideDown /path/to/photos/*jpg= </noautolink>
+
+---+++ Thumbnail REST Service
+
+There is a REST handler (see CommandAndCGIScripts) at
+=%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/resize=. It takes the following
+parameters:
+
+   * =topic=    &ndash; (required) the topic from which to take the attachment (Web.Topic format)
+   * =name=     &ndash; (required) name of the attachment in that topic
+   * =quality=  &ndash; (optional) JPEG quality factor of the generated thumbnail
+   * =width=    &ndash; (required) width in pixels of the generated thumbnail
+   * =height=   &ndash; (required) height in pixels of the generated thumbnail
+   * =ver=      &ndash; (optional) image version (serial), used to invalidate cache
+
+The handler returns a thumbnail in JPEG format. It caches the thumbnail and respects attachment/topic view permissions.
+
+Example:
+=&lt;img src="%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/&gt;=
+
+Gives:
+<img width="200" height="150" style="border: 1px solid #000;" src="%SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/>
 
 ---
 ---++ Preferences
@@ -112,9 +153,14 @@ centres". Try the command =sudo apt-get install exiftran= on Debian and
 derivates.
 
 The [[https://metacpan.org/pod/Image::Epeg][Image::Epeg]] Perl module, required
-for fast thumbnail generation, might not be available as a system package. It
-can be downloaded from CPAN and be built and installed manually (see
+for fast JPEG thumbnail generation, might not be available as a system
+package. It can be downloaded from CPAN and be built and installed manually (see
 e.g. [[http://www.cpan.org/modules/INSTALL.html][here]]).
+
+For other graphics formats
+[[https://metacpan.org/pod/Graphics::Magick][Graphics::Magick]] or
+[[https://metacpan.org/pod/Image::Magick][Image::Magick]] is used to generate
+thumbnails. No thumbnails will be shown if none of these is available.
 
 ---+++ Skin Extensions
 
@@ -155,12 +201,13 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
-|  .. ... ....  |  v1.12-dev  | \
+|  25 Dec 2017  |  v1.12  | \
 - Add =random= parameter to randomly select a number of attachments.%BR% \
 - Add reverse date and name and random sorting (=sort= paramter).%BR% \
 - Allow empty =thumbcap= and =zoomcap= to disable captions.%BR% \
-- Various minor code/css/docu improvements.%BR% \
-- ...  |
+- Add minimal support for PNG, GIF and SVG graphics.%BR% \
+- Document thumbnail REST handler.%BR% \
+- Various minor code/css/docu improvements.  |
 |  23 Dec 2017  |  v1.11  | \
 - highlight last viewed photo's thumbnail when exiting fullscreen viewer%BR% \
 - add _width_ and _float_ parameters for more layout control  |

@@ -49,7 +49,10 @@ API. See source code for developer details.
    * Create a MapsPlugin or so to display GPX tracks, photos, ...
    * Show gear (tools menu) in fullscreen.
    * Allow sorting by regex named group.
-   * Allow use of other image formats.
+   * Implement rotate actions for PNG, GIF, SVG.
+   * Multiple zoom levels (mouse zoom?) in photoswipe. Is it possible?
+   * Better SVG size calculation.
+   * Allow images from multiple topics.
    * ...
 
 =cut
@@ -75,7 +78,7 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.12-dev';
+our $VERSION           = '1.12';
 our $RELEASE           = '23 Dec 2017';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;
@@ -226,13 +229,16 @@ sub doPHOTOGALLERY
 
     ##### select images from attachments ###########################################################
 
-    # get list of all attachments, limit to jpeg images
+    # get list of all attachments
     my ($meta, $text) = Foswiki::Func::readTopic($params->{web}, $params->{topic});
     unless ($meta)
     {
         return _wtf("Cannot read meta data from topic '$params->{web}.$params->{topic}'!");
     }
-    my @attachments = grep { $_->{name} =~ m/\.jpe?g/i } $meta->find("FILEATTACHMENT");
+    my @attachments = $meta->find("FILEATTACHMENT");
+
+    # limit to supported image types (
+    @attachments = grep { $_->{name} =~ m/\.(jpe?g|png|gif|svg)/i } @attachments;
 
     # filter list of attachments...
     my @selected = ();
@@ -503,8 +509,10 @@ sub doPHOTOGALLERY
         if ( ( _checkBool($params->{admin}) && $mayChange                      ) ||
              ( ($params->{admin} eq 'user') && ($wikiName eq $img->{wikiName}) ) )
         {
-            $tml .=   '<a class="admin" data-ix="' . $ix . '" data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false')
-              . '">%ICON{gear}%</a>' if ($params->{admin});
+            $tml .=   '<a class="admin" data-ix="' . $ix . '"'
+              . ' data-tsaction="' . ($img->{exifTs} && ($img->{exifTs} != $img->{attTs}) ? 'true' : 'false') . '"'
+              . ' data-rotaction="' . ($img->{name} =~ m{\.jpe?g}i ? 'true' : 'false') . '"'
+              . '>%ICON{gear}%</a>' if ($params->{admin});
         }
         # thumbnail captions, and the captions shown in PhotoSwipe
         # (We put these here into the HTML so that Foswiki can expand possible macros (e.g. the WikiNames).
@@ -1073,8 +1081,8 @@ sub doRestThumb
     my $uid     = $query->param('uid') || 0;
     (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
 
-    # need all parameters, works for JPEGs only
-    if (!$web || !$topic || !$name || !$quality || !$width || !$height || ($name !~ m/\.jpe?g$/i))
+    # need all parameters
+    if (!$web || !$topic || !$name || !$quality || !$width || !$height || ($name !~ m/\.(jpe?g|png|gif|svg)$/i))
     {
         $response->header(-Status => 400); # bad request
         return undef;
@@ -1120,11 +1128,29 @@ sub doRestThumb
         my $fh = $meta->openAttachment($name, '<');
         my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
-        my $epeg = Image::Epeg->new($tFile);
-        $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
-        $epeg->set_quality($quality);
-        $epeg->write_file($cacheFile);
-        unlink($tFile);
+
+        if ($name =~ m{\.jpe?g$})
+        {
+            my $epeg = Image::Epeg->new($tFile);
+            $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
+            $epeg->set_quality($quality);
+            $epeg->write_file($cacheFile);
+            unlink($tFile);
+        }
+        else
+        {
+            my $m = _getMagick();
+            if ($m)
+            {
+                eval
+                {
+                    $m->Read($tFile);
+                    $m->Resize(width => $width, height => $height);
+                    $m->Set(quality => $quality);
+                    $m->Write('jpg:' . $cacheFile);
+                }
+            }
+        }
     }
 
     # read and serve cached thumbnail
@@ -1149,6 +1175,37 @@ sub doRestThumb
     # wtf?!
     $response->header(-Status => 404); # not found
     return undef;
+}
+
+
+sub _getMagick
+{
+    if (exists $RV->{magic})
+    {
+        return $RV->{magic};
+    }
+    foreach my $impl (qw(Graphics::Magick Image::Magick))
+    {
+        my $h;
+        eval "require $impl; \$h = ${impl}->new();";
+        if ($@)
+        {
+            my $err = "$@"; $err =~ s{\r?\n.*}{}mgs;
+            _debug("tried loading $impl, but it failed: $err");
+        }
+        if ($h)
+        {
+            _debug("using $impl");
+            $RV->{magic} = $h;
+            last;
+        }
+    }
+    if (!$RV->{magic})
+    {
+        _warning('No magick found :-(');
+        $RV->{magic} = undef;
+    }
+    return $RV->{magic};
 }
 
 
@@ -1203,7 +1260,7 @@ sub _debug
 # _warning($str, ...)
 sub _warning
 {
-    Foswiki::Func::writeWarning(__PACKAGE__, @_);
+    Foswiki::Func::writeWarning(@_);
 }
 
 # writes a warning string to the error.log and returns an error to be included in the rendered page
@@ -1284,7 +1341,7 @@ sub _getCacheFileName
 sub _getTempFileName
 {
     my $f = '';
-    do { $f = _getCacheFileName('temp', rand()); } until (!-f $f);
+    do { $f = _getCacheFileName('temp', 'random', int(rand(9999999999))); } until (!-f $f);
     return $f;
 }
 
@@ -1300,7 +1357,7 @@ sub _getImageInfo
     my ($web, $topic) = ($meta->web(), $meta->topic());
 
     # try cache first
-    my $cacheVer = 1; # bump this if something below changes
+    my $cacheVer = 'v2'; # bump this if something below changes
     my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
     my $info;
     try { $info = Storable::retrieve($cacheFile); }
@@ -1343,10 +1400,27 @@ sub _getImageInfo
         }
 
         # check if it is any good
+        # (Image::ExifTool::ImageInfo() works for PNG and GIF images, too: we get ImageHeight and ImageWidth)
         if (!$_info || !$_info->{ImageWidth} || !$_info->{ImageHeight})
         {
             _warning("Failed getting image info from $web.$topic/$att->{name}%s!");
             return undef;
+        }
+
+        # SVG don't have a pixel size..
+        if ($att->{name} =~ m{\.svg}i)
+        {
+            $_info->{VectorImageHeight} = $_info->{ImageHeight};  # e.g. '100mm'
+            $_info->{VectorImageWidth} = $_info->{ImageWidth};
+
+            my $iw = $_info->{ImageWidth};
+            my $ih = $_info->{ImageHeight};
+            $iw =~ s{[^0-9.]+$}{};
+            $ih =~ s{[^0-9.]+$}{};
+
+            # make it big enough for the screen
+            $_info->{ImageHeight} = int( $_info->{ImageHeight} / $_info->{ImageWidth} * 10000 + 0.5 );
+            $_info->{ImageWidth} = 10000;
         }
 
         # process EXIF info
@@ -1363,10 +1437,19 @@ sub _getImageInfo
             }
             $info->{ImageWidth}  = $_info->{ImageWidth};
             $info->{ImageHeight} = $_info->{ImageHeight};
-            $info->{ImageSize} = sprintf('%ix%i %.1fMP',
-                $info->{ImageWidth}, $info->{ImageHeight},
-                $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
 
+            if ($_info->{VectorImageHeight})
+            {
+                $info->{VectorImageWidth}  = $_info->{VectorImageWidth};
+                $info->{VectorImageHeight} = $_info->{VectorImageHeight};
+                $info->{ImageSize} = $info->{VectorImageWidth} . ' x ' . $info->{VectorImageHeight};
+            }
+            else
+            {
+                $info->{ImageSize} = sprintf('%ix%i %.1fMP',
+                    $info->{ImageWidth}, $info->{ImageHeight},
+                    $info->{ImageWidth} * $info->{ImageHeight} * 1e-6);
+            }
             if ($_info->{UserComments})
             {
                 # clean up

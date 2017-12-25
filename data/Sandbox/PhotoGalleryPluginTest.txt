@@ -1,6 +1,8 @@
 %META:TOPICINFO{author="ProjectContributor" date="1297286796" format="1.1" version="1"}%
 ---+!! Testing !PhotoGalleryPlugin
 
+%TOC%
+
 Here's some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
 
 ---++ Example 1
@@ -62,7 +64,7 @@ Produces:
 <verbatim class="tml">
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" random="1" width="1" float="right" size="100" thumbcap="" }%
 blablabla blabla...
-<div style="clear: both;"/>
+<div style="clear: both;"></div>
 </verbatim>
 
 Produces:
@@ -72,10 +74,18 @@ blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla
 blabla blablabla blabla blablablablabla blablabla blabla blablabla blabla
 blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla
 blabla blablabla blabla blablabla blabla
-<div style="clear: both;"/>
+<div style="clear: both;"></div>
 
 
+---++ Example 7
 
+<verbatim class="tml">
+%PHOTOGALLERY{ "/^notjpeg/" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "/^notjpeg/" }%
 
 
 ---++ List of all Galleries
@@ -98,4 +108,7 @@ Produces:
 %META:FILEATTACHMENT{name="IMG_1323.jpg" attachment="IMG_1323.jpg" comment="" date="1451846470" size="83204" user="ProjectContributor" version="1"}%
 %META:FILEATTACHMENT{name="IMG_1324.jpg" attachment="IMG_1324.jpg" comment="" date="1451846474" size="211737" user="ProjectContributor" version="1"}%
 %META:FILEATTACHMENT{name="IMG_1071.JPG" attachment="IMG_1071.JPG" comment="" date="1456445686" size="91008" user="ProjectContributor" version="1"}%
-
+%META:FILEATTACHMENT{name="notjpeg_nometa.png" attachment="notjpeg_nometa.png" comment="" date="1514216230" size="204131" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="notjpeg_withmeta.png" attachment="notjpeg_withmeta.png" comment="it's about time.." date="1514216231" size="125162" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="notjpeg_animation.gif" attachment="notjpeg_animation.gif" comment="" date="1514216230" size="700503" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="notjpeg_vector.svg" attachment="notjpeg_vector.svg" comment="" date="1514216230" size="10450" user="ProjectContributor" version="1"}%
