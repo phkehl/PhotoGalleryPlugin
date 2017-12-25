@@ -2,7 +2,7 @@
 #
 # PhotoGalleryPlugin for Foswiki
 #
-# Copyright (c) 2016-2017 Philippe Kehl <phkehl at gmail dot com>
+# Copyright (c) 2016-2018 Philippe Kehl <phkehl at gmail dot com>
 #
 ####################################################################################################
 #
@@ -78,7 +78,7 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.12';
+our $VERSION           = '1.13-dev';
 our $RELEASE           = '25 Dec 2017';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
 our $NO_PREFS_IN_TOPIC = 1;

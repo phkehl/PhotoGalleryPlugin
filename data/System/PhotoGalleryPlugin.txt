@@ -84,7 +84,7 @@ Example: <noautolink> =tools/photogallerypluginattach.pl -C -g -u WikiUsername M
 
 ---+++ Thumbnail REST Service
 
-There is a REST handler (see CommandAndCGIScripts) at
+There is a REST handler (see %SYSTEMWEB%.CommandAndCGIScripts) at
 =%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/resize=. It takes the following
 parameters:
 
