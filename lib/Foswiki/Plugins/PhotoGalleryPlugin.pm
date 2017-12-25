@@ -2,7 +2,7 @@
 #
 # PhotoGalleryPlugin for Foswiki
 #
-# Copyright (c) 2016 Philippe Kehl <phkehl at gmail dot com>
+# Copyright (c) 2016-2017 Philippe Kehl <phkehl at gmail dot com>
 #
 ####################################################################################################
 #
@@ -70,6 +70,7 @@ use File::Touch;
 use Digest::MD5;
 use Storable;
 use Image::Epeg;
+use List::Util;
 
 
 ####################################################################################################
@@ -172,10 +173,10 @@ sub doPHOTOGALLERY
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{QualityDefault}, 1, 100);
     $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
     $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
-    $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', 'name', 'off');
-    $params->{caption}   ||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
-    $params->{thumbcap}  ||= $params->{caption};
-    $params->{zoomcap}   ||= $params->{caption};
+    $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', '-date', 'name', '-name', 'off');
+    $params->{caption}   //= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
+    $params->{thumbcap}  //= $params->{caption};
+    $params->{zoomcap}   //= $params->{caption};
     $params->{remaining}   = _checkBool($params->{remaining} || 'off');
     $params->{quiet}       = _checkBool($params->{quiet}     || 'off');
     $params->{unique}      = _checkBool($params->{unique}    || 'on' );
@@ -185,6 +186,7 @@ sub doPHOTOGALLERY
     $params->{headingfmt}||= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault};
     $params->{width}       = _checkRange($params->{width}, 0, 0, 1000);
     $params->{float}       = _checkOptions($params->{float}, 'none', 'left', 'right');
+    $params->{random}      = _checkRange($params->{random}, 0, 0, 1000);
 
     my $wikiName = Foswiki::Func::getWikiName();
     my $user = Foswiki::Func::getCanonicalUserID($wikiName);
@@ -196,7 +198,10 @@ sub doPHOTOGALLERY
     _debug($debugStr, "$params->{web}.$params->{topic}", $params->{images}, "size=$params->{size}",
            "sort=$params->{sort}", "quiet=$params->{quiet}", "unique=$params->{unique}",
            "remaining=$params->{remaining}", "admin=$params->{admin}", "wikiName=$wikiName",
-           "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}");
+           "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}",
+           "random=$params->{random}", "caption=$params->{caption}",
+           "thumbcap=" . ($params->{thumbcap} eq $params->{caption} ? '<ditto>' : $params->{thumbcap}),
+           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}));
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
@@ -286,14 +291,35 @@ sub doPHOTOGALLERY
         @attachments = grep { !$RV->{shown}->{$_->{name}} } @attachments;
     }
 
-    # resort by date or name?
-    if ($params->{sort} eq 'date')
+    # sort by date or name?
+    if    ($params->{sort} eq 'date')
     {
         @attachments = sort { $a->{date} <=> $b->{date} } @attachments;
+    }
+    elsif ($params->{sort} eq '-date')
+    {
+        @attachments = reverse sort { $a->{date} <=> $b->{date} } @attachments;
     }
     elsif ($params->{sort} eq 'name')
     {
         @attachments = sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+    }
+    elsif ($params->{sort} eq '-name')
+    {
+        @attachments = reverse sort { lc($a->{name}) cmp lc($b->{name}) } @attachments;
+    }
+    elsif ($params->{sort} eq 'random')
+    {
+        @attachments = List::Util::shuffle(@attachments);
+    }
+
+    # random pick?
+    if ($params->{random})
+    {
+        my @shuffled = List::Util::shuffle(@attachments);
+        my $maxIx = $params->{random} > ($#shuffled + 1) ? $#shuffled : $params->{random} - 1;
+        _debug('rand=' . $params->{random} . ' maxIx=' . $maxIx);
+        @attachments = @shuffled[0..$maxIx];
     }
 
     # any images left?
@@ -489,7 +515,7 @@ sub doPHOTOGALLERY
             $tml .=     '<span class="caption">' . $img->{thumbcap} . '</span>';
             $tml .=   '</div>';
         }
-        if ($img->{thumbcap} ne $img->{zoomcap})
+        if ($img->{zoomcap} ne $img->{thumbcap})
         {
             $tml .= '<div class="zoomcap">' . $img->{zoomcap} . '</div>';
         }
@@ -1194,6 +1220,7 @@ sub _wtf
 sub _checkRange
 {
     my ($val, $def, $min, $max) = @_;
+    if ($val !~ m{^[0-9.]+$})              { return $def; } # FIXME: there's some isNumeric() somewhere
     if    (!defined $val || ($val eq '') ) { return $def; }
     if    ($val < $min)                    { return $min; }
     elsif ($val > $max)                    { return $max; }

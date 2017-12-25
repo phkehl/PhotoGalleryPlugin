@@ -33,7 +33,7 @@ Each selection can be:%BR% \
 | 85 %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =sort=  \
-| Selects how to sort attachments (=date=, =name= or =off=).  \
+| Selects how to sort the selected attachments (=date=, =name=, =random= or =off=). Prefix with "-" to reverse the order (=-date=, =-name=). Sort on name is case-insensitive. \
 | =date=  \
 |
 | =width=  \
@@ -55,6 +55,10 @@ Each selection can be:%BR% \
 | =unique=  \
 | Remove duplicates due to overlapping selections (=on= or =off=).  \
 | =on=  \
+|
+| =random=  \
+| Randomly pick a number of images from the list of selected images.  \
+| =0=  \
 |
 | =admin=  \
 | Display admin action menu if the user has permissions (=on= or =off=) or is the owner of the attachment (=user=).  \
@@ -98,11 +102,11 @@ Lastly, multiple consecutive, leading and trailing =%<nop>BR%= (i.e. empty lines
 | =$comment($BR&nbsp;)%BR%($n/$N,&nbsp;%BR%$CreateDate(,&nbsp;)%BR%$ExposureTime(,&nbsp;)%BR%$FocalLength(,&nbsp;)%BR%$ApertureValue(,&nbsp;)%BR%$ISO(,&nbsp;)%BR%$Coords(,&nbsp;)%BR%$MakeModel(,&nbsp;)%BR%$WikiName,&nbsp;%BR%$name,&nbsp;%BR%$ImageSize,&nbsp;%BR%$size(MB)[MB])= %RED%<sup>1</sup>%ENDCOLOR%   \
 |
 | =thumbcap=  \
-| Caption format for thumbails if different from =caption= format.  \
+| Caption format for thumbails if different from =caption= format. Set to =""= to disable thumbnail captions. \
 | see =caption=  \
 |
 | =zoomcap=  \
-| Caption format for zoomed photo view if different from =caption= format.  \
+| Caption format for zoomed photo view if different from =caption= format. Set to =""= to disable captions in viewer. \
 | see =caption=  \
 |
 | =dayheading=  \
@@ -147,8 +151,8 @@ Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
    * =%<nop>PHOTOGALLERY{ remaining="on" quiet="on" }%=
      -- outputs a gallery with all remaining photos (those not shown in previous
      calls to =%<nop>PHOTOGALLERY%= in the same topic) if there are any
-   * =%<nop>PHOTOGALLERY{ "IMG_0687.JPG" width="1" float="right" }%=
-     -- show a single image gallery floating at the right
+   * =%<nop>PHOTOGALLERY{ random="1" width="1" float="right" }%
+     -- show a random single image floating at the right
 
 
 

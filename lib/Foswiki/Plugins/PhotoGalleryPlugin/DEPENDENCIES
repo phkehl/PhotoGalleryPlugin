@@ -6,6 +6,7 @@ POSIX,>=0.1,cpan,Required for file operations (not sure which version is the min
 Digest::MD5,>=0.1,perl,Required for caching (not sure which version is the minimal requirement)
 Storable,>=0.1,perl,Required for caching (not sure which version is the minimal requirement)
 File::Touch,>=0.1,perl,Required for caching (not sure which version is the minimal requirement)
+List::Util,>=0.1,perl,Required (not sure which version is the minimal requirement)
 Image::Epeg,>=0.13,cpan,Required for fast thumbnail generation
 Foswiki::Plugins::JQueryPlugin,>=6.32,perl,Required for everything
 Foswiki::Contrib::FamFamFamContrib,>=1.9,perl,Required for action menu items

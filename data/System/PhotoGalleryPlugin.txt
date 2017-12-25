@@ -156,6 +156,10 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
 |  .. ... ....  |  v1.12-dev  | \
+- Add =random= parameter to randomly select a number of attachments.%BR% \
+- Add reverse date and name and random sorting (=sort= paramter).%BR% \
+- Allow empty =thumbcap= and =zoomcap= to disable captions.%BR% \
+- Various minor code/css/docu improvements.%BR% \
 - ...  |
 |  23 Dec 2017  |  v1.11  | \
 - highlight last viewed photo's thumbnail when exiting fullscreen viewer%BR% \

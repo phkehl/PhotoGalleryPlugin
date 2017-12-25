@@ -54,7 +54,7 @@ jQuery(function($)
                 w:     a.data('w'),        // image width
                 h:     a.data('h'),        // image height
                 msrc:  thumb.attr('src'),  // tumbnail href
-                title: (zoomcap.length ? zoomcap.html() : caption.html())  // caption
+                title: (zoomcap.length ? (zoomcap.html() || '') : (caption.html() || ''))  // caption
             };
             // remove dead links
             item.title = item.title.replace(/<a[^>]+rel="nofollow"[^>]*>(.+?)<\/a>/, '$1');

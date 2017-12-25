@@ -57,20 +57,42 @@ Produces:
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" }%
 
 
-
----++ List of all Galleries
-
-Here's a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Main.WebHome][Main]] web:
+---++ Example 6
 
 <verbatim class="tml">
-%SEARCH{ "%PHOTOGALLERY" web="Main" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+%PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" random="1" width="1" float="right" size="100" thumbcap="" }%
+blablabla blabla...
+<div style="clear: both;"/>
 </verbatim>
 
 Produces:
 
-%SEARCH{ "%PHOTOGALLERY" web="Main" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+%PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" random="1" width="1" float="right" size="100" thumbcap="" }%
+blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla
+blabla blablabla blabla blablablablabla blablabla blabla blablabla blabla
+blablabla blabla blablabla blabla blablabla blabla blablabla blabla blablabla
+blabla blablabla blabla blablabla blabla
+<div style="clear: both;"/>
 
 
+
+
+
+---++ List of all Galleries
+
+Here's a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Sandbox.WebHome][Sandbox]] web:
+
+<verbatim class="tml">
+%SEARCH{ "%PHOTOGALLERY" web="Sandbox" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+</verbatim>
+
+Produces:
+
+%SEARCH{ "%PHOTOGALLERY" web="Sandbox" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
+
+
+%META:PREFERENCE{name="ALLOWTOPICCHANGE" title="ALLOWTOPICCHANGE" type="Set" value="AdminUser"}%
+%META:PREFERENCE{name="PERMSET_CHANGE" title="PERMSET_CHANGE" type="Local" value="nobody"}%
 %META:FILEATTACHMENT{name="IMG_1262.jpg" attachment="IMG_1262.jpg" comment="The 'Pont du Gard', an old Roman railway bridge." date="1437938315" size="56673" user="ProjectContributor" version="1"}%
 %META:FILEATTACHMENT{name="IMG_1265.jpg" attachment="IMG_1265.jpg" comment="" date="1437939206" size="97274" user="ProjectContributor" version="1"}%
 %META:FILEATTACHMENT{name="IMG_1323.jpg" attachment="IMG_1323.jpg" comment="" date="1451846470" size="83204" user="ProjectContributor" version="1"}%
