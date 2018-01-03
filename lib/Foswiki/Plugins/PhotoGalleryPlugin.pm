@@ -80,7 +80,7 @@ use List::Util;
 
 our $VERSION           = '1.13-dev';
 our $RELEASE           = '25 Dec 2017';
-our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras.';
+our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics).';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
 our $CREATED_YEAR      = '2017';
@@ -1392,6 +1392,7 @@ sub _getImageInfo
             my @exifAttrs = qw(CreateDate Make Model FileModifyDate ExposureTime UserComment
                                ISO FocalLength ApertureValue ImageWidth ImageHeight
                                GPSLatitude GPSLongitude GPSAltitude);
+            # TODO: GPSImgDirection DateTimeOriginal(=CreateDate?) Flash ExposureMode
             my %exifOpts = ( DateFormat => '%s', CoordFormat => '%.9f');
             if (my $exif = Image::ExifTool::ImageInfo($fh, \@exifAttrs, \%exifOpts))
             {
