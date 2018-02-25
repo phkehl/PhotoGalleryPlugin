@@ -201,6 +201,9 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
+|  xx xxx xxx   |  v.14-dev  |\
+- fix an uncritical warning  \
+|
 |  25 Feb 2018  |  v1.13  |\
 - fix default parameter%BR%  \
 - handle errors in regular expression in <code>images</code> parameter%BR% \

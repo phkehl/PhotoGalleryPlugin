@@ -1305,9 +1305,9 @@ sub _esc_attr
 sub _checkRange
 {
     my ($val, $def, $min, $max) = @_;
-    if ($val !~ m{^[0-9.]+$})              { return $def; } # FIXME: there's some isNumeric() somewhere
-    if    (!defined $val || ($val eq '') ) { return $def; }
-    if    ($val < $min)                    { return $min; }
+    if    (!defined $val || ($val eq '')
+            || ($val !~ m{^[0-9.]+$}))     { return $def; }
+    elsif ($val < $min)                    { return $min; }
     elsif ($val > $max)                    { return $max; }
     else                                   { return $val; }
     #return ($val < $min) || ($val > $max) ? $def : $val;
