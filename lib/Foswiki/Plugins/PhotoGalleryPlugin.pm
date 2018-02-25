@@ -78,12 +78,12 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.13-dev';
-our $RELEASE           = '25 Dec 2017';
+our $VERSION           = '1.13';
+our $RELEASE           = '25 Feb 2018';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics).';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
-our $CREATED_YEAR      = '2017';
+our $CREATED_YEAR      = '2018';
 
 ####################################################################################################
 
@@ -169,7 +169,7 @@ sub doPHOTOGALLERY
     $params->{topic}     ||= $topic;
     ($params->{web}, $params->{topic})
                            = Foswiki::Func::normalizeWebTopicName($params->{web}, $params->{topic});
-    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g/';
+    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g$/';
     $params->{size}        = _checkRange($params->{size},
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}, 50, 500);
     $params->{quality}     = _checkRange($params->{quality},
@@ -205,6 +205,7 @@ sub doPHOTOGALLERY
            "random=$params->{random}", "caption=$params->{caption}",
            "thumbcap=" . ($params->{thumbcap} eq $params->{caption} ? '<ditto>' : $params->{thumbcap}),
            "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}));
+    #_debug($params->stringify());
 
     # check if all required jquery plugins are available and active
     if (my $missing = join(', ', grep { !$Foswiki::cfg{JQueryPlugin}{Plugins}{$_}{Enabled} }
@@ -248,7 +249,23 @@ sub doPHOTOGALLERY
         if ($selection =~ m{^/(.+)/$})
         {
             my $regex = $1;
-            push(@selected, grep { $_->{name} =~ m/$regex/i } @attachments);
+
+            # test regex, and abort if it didn't compile
+            eval { "dummy" =~ m/$regex/i };
+            if ($@)
+            {
+                my $err = "$@";
+                # ...Unmatched ( in regex; marked by <-- HERE in m/.+\.( <-- HERE ...
+                $err = ($err =~ m{<-- HERE in (.+) <-- HERE}) ? $1 : 'unknown problem';
+                return _wtf('%SYSTEMWEB%.RegularExpression error in <code>\'' . _esc_attr($regex)
+                  . '\'</code> (here: <code>' . _esc_attr(substr($err, 1, -1))
+                  . '<b style="color: red;">' . _esc_attr(substr($err, -1)) . '</b>'
+                  . '</code>)!');
+            }
+            else
+            {
+                push(@selected, grep { $_->{name} =~ m/$regex/i } @attachments);
+            }
         }
         # ...by "name..name" (lexical) or "name--name" (date) range
         elsif ($selection =~ m{^(.+)(\.\.|--)(.+)$})
@@ -1271,6 +1288,17 @@ sub _wtf
     _warning($msg);
     return '<span style="background-color: #faa; padding: 0.15em 0.25em;"><b>[[%SYSTEMWEB%.PhotoGalleryPlugin][PhotoGalleryPlugin]] error:</b> ' . $msg . '</span>';
 }
+
+# escape HTML attribute string
+sub _esc_attr
+{
+    my $str = shift;
+    $str =~ s{<}{&lt;}g;
+    $str =~ s{>}{&gt;}g;
+    $str =~ s{"}{&quot;}g;
+    return $str;
+}
+
 
 # check and assert range of a parameter
 # $value = _checkValue($input, $default, $min, $max)

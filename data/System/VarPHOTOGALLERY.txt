@@ -153,6 +153,8 @@ Multiple =%<nop>PHOTOGALLERY%= macros are allowed in the same topic.
      calls to =%<nop>PHOTOGALLERY%= in the same topic) if there are any
    * =%<nop>PHOTOGALLERY{ random="1" width="1" float="right" }%=
      &ndash; show a random single image floating at the right
+   * =%<nop>PHOTOGALLERY{ "/.+\.(jpe?g|png|gif|svg)$/" }%=
+     &ndash; uses all JPG, PNG, GIF and SVG photos and graphics
 
 
 
