@@ -23,6 +23,7 @@ cp -v PhotoGalleryPlugin/PhotoGalleryPlugin* core/
 (cd core && perl PhotoGalleryPlugin_installer -r uninstall)
 (cd core && ./pseudo-install.pl PhotoGalleryPlugin)
 
+rm -f PhotoGalleryPlugin/pub/System/PhotoGalleryPlugin/*compressed*
 
 export FOSWIKI_GIT=/home/flip/foswiki-dev
 export FOSWIKI_HOME=$FOSWIKI_GIT/core

@@ -374,6 +374,19 @@ jQuery(function($)
                 }
             });
 
+            // ...remove leading and trainling whitespace
+            fnInput.on('keyup', function (e)
+            {
+                var val = fnInput.val();
+                var val2 = val.replace(/^\s*/, '').replace(/\s*$/, '');
+                if (val != val2)
+                {
+                    fnInput.val(val2).effect('highlight').trigger('focusout');
+                }
+            });
+
+            // TODO: strip leading and trailing whitespace
+
             // ...add a tooltip to the remove icon
             $(file._removeLink).attr('title', dictRemoveFile);
 

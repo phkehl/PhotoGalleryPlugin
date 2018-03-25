@@ -53,6 +53,7 @@ API. See source code for developer details.
    * Multiple zoom levels (mouse zoom?) in photoswipe. Is it possible?
    * Better SVG size calculation.
    * Allow images from multiple topics.
+   * use contenteditable=true instead of input fields
    * ...
 
 =cut
