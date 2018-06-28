@@ -296,12 +296,12 @@ bulk upload skin extension:%BR% \
 
 
 
-%META:FILEATTACHMENT{name="screenshot0.jpg" attachment="screenshot0.jpg" comment="plugin screenshot" date="1460910771" size="160970" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot1.jpg" attachment="screenshot1.jpg" comment="plugin screenshot" date="1456439258" size="45945" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="PhilippeKehl" version="1"}%
-%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1478966365" size="50985" user="PhilippeKehl" version="2"}%
+%META:FILEATTACHMENT{name="screenshot0.jpg" attachment="screenshot0.jpg" comment="plugin screenshot" date="1460910771" size="160970" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="screenshot1.jpg" attachment="screenshot1.jpg" comment="plugin screenshot" date="1456439258" size="45945" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="screenshot2.jpg" attachment="screenshot2.jpg" comment="plugin screenshot" date="1456439258" size="27609" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="screenshot3.jpg" attachment="screenshot3.jpg" comment="plugin screenshot" date="1456439258" size="25858" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="screenshot4.jpg" attachment="screenshot4.jpg" comment="plugin screenshot" date="1456439258" size="30404" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="screenshot5.jpg" attachment="screenshot5.jpg" comment="plugin screenshot" date="1478966365" size="50985" user="ProjectContributor" version="2"}%
 %META:FORM{name="PackageForm"}%
 %META:FIELD{name="Author" title="Author" value="[[Foswiki:Main/PhilippeKehl][Philippe Kehl]]"}%
 %META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
