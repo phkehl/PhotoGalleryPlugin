@@ -201,9 +201,10 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
-|  xx xxx xxx   |  v.14-dev  |\
+|  28 Jun 2018  |  v.14  |\
 - fix an uncritical warning%BR%  \
-- remove leading and trailing whitespace from edited filenames  \
+- remove leading and trailing whitespace from edited filenames%BR% \
+- fix for installations that don't use the strikeone request validation thingy  \
 |
 |  25 Feb 2018  |  v1.13  |\
 - fix default parameter%BR%  \
