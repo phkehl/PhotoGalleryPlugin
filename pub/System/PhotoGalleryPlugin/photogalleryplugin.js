@@ -604,7 +604,7 @@ jQuery(function($)
         // calculate validation_key & fire REST request for the action
         // http://foswiki.org/Development/HowToIntegrateWithRequestValidation
         var nonce = helper.pgGlobalsDiv.data('nonce');
-        var validation_key = StrikeOne.calculateNewKey(nonce);
+        var validation_key = typeof StrikeOne === 'object' ? StrikeOne.calculateNewKey(nonce) : '';
 
         var data = $.extend(
         {
