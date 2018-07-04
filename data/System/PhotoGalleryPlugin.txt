@@ -201,8 +201,10 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
-|  xx xxx xxxx  |  v1.15-dev |\
-- ...  \
+|  5 Jul 2018   |  v1.15  |\
+- fix attachment meta data%BR%  \
+- fix bulk upload skin extension for installations that don't use the strikeone request validation thingy%BR%  \
+- fix gallery layout for a Firefox weirdness when layout.css.devPixelsPerPx is non-integer (!HiDPI screens)%BR%  \
 |
 |  28 Jun 2018  |  v1.14  |\
 - fix an uncritical warning%BR%  \

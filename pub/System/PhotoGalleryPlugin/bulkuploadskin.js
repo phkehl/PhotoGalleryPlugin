@@ -459,13 +459,16 @@ jQuery(function($)
 
             // set required foswiki upload form data
             form.append('noredirect', 1);
-            if (nonce.charAt(0) == '?')
+            if (nonce !== undefined)
             {
-                form.append('validation_key', StrikeOne.calculateNewKey(nonce));
-            }
-            else if (nonce)
-            {
-                form.append('validation_key', nonce);
+                if ( (nonce.charAt(0) == '?') && (typeof StrikeOne === 'object') )
+                {
+                    form.append('validation_key', StrikeOne.calculateNewKey(nonce));
+                }
+                else if (nonce)
+                {
+                    form.append('validation_key', nonce);
+                }
             }
 
             var dropZoneForm = $(file.previewElement).find('.dropZoneForm');

@@ -165,7 +165,8 @@ jQuery(function($)
         if (helper.pgDiv.hasClass('pg-auto-width'))
         {
             var nFrames = helper.items.length;
-            var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5;
+            var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5
+                + 1; // add 1px to account for Firefox weirdness when layout.css.devPixelsPerPx is non-integer
             var debounceTimer;
             $(window).on('resize', function (e)
             {

@@ -79,8 +79,8 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.15-dev';
-our $RELEASE           = '26 Jun 2018';
+our $VERSION           = '1.15';
+our $RELEASE           = '5 Jul 2018';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics).';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
