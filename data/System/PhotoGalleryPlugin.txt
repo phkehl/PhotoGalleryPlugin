@@ -201,6 +201,9 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
+| xx xxx xxxx   |  v1.16-dev  |\
+- ...  \
+|
 |  5 Jul 2018   |  v1.15  |\
 - fix attachment meta data%BR%  \
 - fix bulk upload skin extension for installations that don't use the strikeone request validation thingy%BR%  \
