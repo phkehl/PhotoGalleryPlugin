@@ -93,7 +93,8 @@ parameters:
    * =quality=  &ndash; (optional) JPEG quality factor of the generated thumbnail
    * =width=    &ndash; (required) width in pixels of the generated thumbnail
    * =height=   &ndash; (required) height in pixels of the generated thumbnail
-   * =ver=      &ndash; (optional) image version (serial), used to invalidate cache
+   * =ver=      &ndash: (optional) attachment version, used to invalidate cache
+   * =uid=      &ndash; (optional) image version (serial), used to invalidate cache
 
 The handler returns a thumbnail in JPEG format. It caches the thumbnail and respects attachment/topic view permissions.
 
@@ -202,6 +203,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
 | xx xxx xxxx   |  v1.16-dev  |\
+- minor fixes%BR% \
 - ...  \
 |
 |  5 Jul 2018   |  v1.15  |\

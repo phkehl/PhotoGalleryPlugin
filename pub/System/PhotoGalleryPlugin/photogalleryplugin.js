@@ -606,7 +606,6 @@ jQuery(function($)
         // http://foswiki.org/Development/HowToIntegrateWithRequestValidation
         var nonce = helper.pgGlobalsDiv.data('nonce');
         var validation_key = typeof StrikeOne === 'object' ? StrikeOne.calculateNewKey(nonce) : '';
-
         var data = $.extend(
         {
             validation_key: validation_key, att_web: helper.att_web, att_topic: helper.att_topic

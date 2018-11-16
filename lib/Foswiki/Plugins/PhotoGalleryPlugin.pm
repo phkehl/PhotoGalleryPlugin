@@ -396,7 +396,7 @@ sub doPHOTOGALLERY
         #    ($tr < 1 ? 'width' : 'height', $params->{size}));
         $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
             topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
-            uid => ($att->{pguid} || 0), ver => $info->{version}, width => $tw, height => $th);
+            uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th);
         $img->{thumbWidth}  = $tw;
         $img->{thumbHeight} = $th;
         $img->{attTs}     = $att->{date} || 0;
