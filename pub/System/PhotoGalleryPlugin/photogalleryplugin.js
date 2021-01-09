@@ -122,17 +122,20 @@ jQuery(function($)
         helper.options.pswp = undefined;
         helper.pgDiv.find('a.img').on('click', function (e)
         {
-            helper.options.index = $(this).data('ix');
+            DEBUG("click", this);
+            helper.options.index = parseInt($(this).data('ix'), 10);
+            DEBUG("index=" + helper.options.index, helper.options);
             if (helper.pswp)
             {
                 helper.pswp.close();
             }
             helper.pswp = new PhotoSwipe(
-                helper.pgDiv.find('div.pswp')[0], PhotoSwipeUI_Default,
+                helper.pgDiv.find('div.pswp').get(0), PhotoSwipeUI_Default,
                 helper.items, helper.options);
             helper.pswp.init();
             helper.pswp.listen('destroy', function ()
             {
+                DEBUG("destroy", this.currItem.thumb);
                 if (this && this.currItem && this.currItem.thumb)
                 {
                     var y0 = this.currItem.thumb.offset().top;
@@ -153,10 +156,10 @@ jQuery(function($)
                     slideshowIv = null;
                     helper.slideshowButton.toggleClass('stopped playing');
                 }
-                if (location.hash)
-                {
-                    location.hash = location.hash.replace(/&gid=(\d+)&pid=(\d+)/, '');
-                }
+                // if (location.hash.length > 0)
+                // {
+                //     location.hash = location.hash.replace(/&gid=(\d+)&pid=(\d+)/, '');
+                // }
             });
             return false;
         });

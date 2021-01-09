@@ -79,9 +79,9 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.16-dev';
-our $RELEASE           = '5 Jul 2018';
-our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics).';
+our $VERSION           = '1.16';
+our $RELEASE           = '9 Jan 2021';
+our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics)';
 our $NO_PREFS_IN_TOPIC = 1;
 our $CREATED_AUTHOR    = 'Philippe Kehl';
 our $CREATED_YEAR      = '2018';
@@ -506,6 +506,7 @@ sub doPHOTOGALLERY
     for (my $ix = 0; $ix <= $#images; $ix++)
     {
         my $img = $images[$ix];
+        #_debug("img=%s", $img);
 
         # add headings if enabled
         if ( ($params->{dayheading} ne '') && ($img->{day} > $prevDayheading) )
@@ -517,7 +518,7 @@ sub doPHOTOGALLERY
         }
 
         #$tml .= '<div class="frame" style="width: ' . $img->{thumbWidth}. 'px; height: ' . $img->{thumbHeight} . 'px;">';
-        $tml .= '<div class="frame" data-name="' . $img->{name} . '">';
+        $tml .= '<div class="frame" data-name="<literal>' . $img->{name} . '</literal>">';
         $tml .=   '<div class="crop" style="width: ' . $params->{size}. 'px; height: ' . $params->{size} . 'px;">';
         $tml .=     '<a class="img" data-ix="' . $ix . '" data-w="' . $img->{imgWidth} . '" data-h="' . $img->{imgHeight} . '" href="' . $img->{imgUrl} . '">';
         $tml .=       '<img class="thumb" src="' . $img->{thumbUrl} . '" width="' . $img->{thumbWidth} . '" height="' . $img->{thumbHeight} . '" '

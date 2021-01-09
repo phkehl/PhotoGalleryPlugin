@@ -202,9 +202,10 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
-| xx xxx xxxx   |  v1.16-dev  |\
+|  9 Jan 2021   |  v1.16      |\
 - minor fixes%BR% \
-- ...  \
+- fix html problem with filenames that contain <literal>WikiWords</literal>%BR% \
+- fix bug where clicking a thumb would sometimes open another picture \
 |
 |  5 Jul 2018   |  v1.15  |\
 - fix attachment meta data%BR%  \
