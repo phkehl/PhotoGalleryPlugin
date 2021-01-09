@@ -79,7 +79,7 @@ use List::Util;
 
 ####################################################################################################
 
-our $VERSION           = '1.16';
+our $VERSION           = '1.17-dev';
 our $RELEASE           = '9 Jan 2021';
 our $SHORTDESCRIPTION  = 'A gallery plugin for JPEG photos from digital cameras (and PNG, GIF and SVG graphics)';
 our $NO_PREFS_IN_TOPIC = 1;

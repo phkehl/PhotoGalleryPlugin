@@ -202,6 +202,9 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
+|  xx xxx xxxx  |  v1.17-dev      |\
+- ... %BR% \
+|
 |  9 Jan 2021   |  v1.16      |\
 - minor fixes%BR% \
 - fix html problem with filenames that contain <literal>WikiWords</literal>%BR% \
