@@ -178,6 +178,7 @@ sub doPHOTOGALLERY
     $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
     $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
     $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', '-date', 'name', '-name', 'off');
+    $params->{lazy}        = _checkBool($params->{lazy} || $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault});
     $params->{caption}   //= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
     $params->{thumbcap}  //= $params->{caption};
     $params->{zoomcap}   //= $params->{caption};
@@ -394,9 +395,15 @@ sub doPHOTOGALLERY
         #$img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('ImagePlugin', 'resize', 'rest',
         #    topic => "$params->{web}.$params->{topic}", file => $att->{name},
         #    ($tr < 1 ? 'width' : 'height', $params->{size}));
-        $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
-            topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
-            uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th);
+        if ($params->{lazy} ) {
+            $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
+               topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
+               uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th)
+        } else {
+            $img->{thumbUrl} = _resizeThumb(
+                $meta->web()."\.".$meta->topic(), $att->{name}, $params->{quality},
+                ($att->{pguid} || 0), $att->{version}, $tw, $th);
+        }
         $img->{thumbWidth}  = $tw;
         $img->{thumbHeight} = $th;
         $img->{attTs}     = $att->{date} || 0;
@@ -1081,6 +1088,54 @@ sub _doRestAdminResponse
     $response->body($json);
     # no further processing by Foswiki::writeCompletePage()
     return undef;
+}
+
+sub _resizeThumb{
+    my ($topic, $name, $quality, $uid, $ver, $width, $height) = @_;
+    
+    (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
+    my ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+    my $cacheFile = _getCacheFileName('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
+
+    # cache thumbnail unless it exists already
+    my $cached = 1;
+    if (! -f $cacheFile)
+    {
+        $cached = 0;
+        
+        my $fh = $meta->openAttachment($name, '<');
+        my $tFile = _getTempFileName();
+        File::Copy::copy($fh, $tFile);
+
+        if ($name =~ m{\.jpe?g$})
+        {
+            my $epeg = Image::Epeg->new($tFile);
+            $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
+            $epeg->set_quality($quality);
+            $epeg->write_file($cacheFile);
+            unlink($tFile);
+        }
+        else
+        {
+            my $m = _getMagick();
+            if ($m)
+            {
+                eval
+                {
+                    $m->Read($tFile);
+                    $m->Resize(width => $width, height => $height);
+                    $m->Set(quality => $quality);
+                    $m->Write('jpg:' . $cacheFile);
+                }
+            }
+        }
+    }
+
+    my ($tFileName) = ( $cacheFile =~ m!([^/]+)\Z! );
+    my $linkFile = $Foswiki::cfg{PubDir} . "/$web/$topic/$tFileName";
+    symlink( $cacheFile, $linkFile ) unless -e $linkFile;
+
+    return Foswiki::Func::getPubUrlPath( $web, $topic, $tFileName );    
 }
 
 sub doRestThumb

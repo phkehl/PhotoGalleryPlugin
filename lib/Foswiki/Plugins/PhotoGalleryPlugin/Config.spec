@@ -31,5 +31,8 @@ $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault} = 'user';
 # Default <code>size</code> parameter (thumbnail size) for <a href="view/System/VarPHOTOGALLERY"><code>%PHOTOGALLERY%</code></a> (50..500).
 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault} = 150;
 
+# **BOOLEAN**
+# Default <code>lazy</code> parameter. <code>on</code> uses rest interfave to delay thumbnail creation untill after the page is rendered. <code>off</code> resizes images and then returns the page.
+$Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault} = '1';
 
 1;
