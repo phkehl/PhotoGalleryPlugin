@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1434650530" format="1.1" version="1"}%
+%META:TOPICINFO{author="BramVanOosterhout" comment="" date="1645425793" format="1.1" reprev="2" version="2"}%
 %META:TOPICPARENT{name="Macros"}%
 ---+ PHOTOGALLERY -- render photo gallery from attachments
 
@@ -27,6 +27,12 @@ Each selection can be:%BR% \
 | =size=  \
 | Sets the size in pixels for the thumbnails (50..500).  \
 | 150 %RED%<sup>1</sup>%ENDCOLOR%  \
+|
+| =lazy=  \
+| Selects when the thumbnails are created: %BR% \
+- =on= uses the =rest= interface after the topic is rendered. %BR% \
+- =off= creates the thumbnails as part of the original request. \
+| =on= %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =quality=  \
 | Sets the thumbnail quality factor (1..100).  \
