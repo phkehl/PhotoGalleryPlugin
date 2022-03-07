@@ -12,3 +12,5 @@ igp*.png
 *.compressed.js
 *.compressed.css
 /pub/System/PhotoGalleryPlugin/igp_*
+/.vscode
+/.vstags

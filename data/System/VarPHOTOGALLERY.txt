@@ -30,7 +30,7 @@ Each selection can be:%BR% \
 |
 | =lazy=  \
 | Selects when the thumbnails are created: %BR% \
-- =on= uses the =rest= interface after the topic is rendered. %BR% \
+- =on= uses the [[PhotoGalleryPlugin#Thumbnail_REST_Service][rest]] interface after the topic is rendered. %BR% \
 - =off= creates the thumbnails as part of the original request. \
 | =on= %RED%<sup>1</sup>%ENDCOLOR%  \
 |

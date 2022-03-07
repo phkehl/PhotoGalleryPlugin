@@ -170,7 +170,7 @@ sub doPHOTOGALLERY
     $params->{topic}     ||= $topic;
     ($params->{web}, $params->{topic})
                            = Foswiki::Func::normalizeWebTopicName($params->{web}, $params->{topic});
-    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g$/';
+    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g$/i';
     $params->{size}        = _checkRange($params->{size},
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}, 50, 500);
     $params->{quality}     = _checkRange($params->{quality},
@@ -1126,6 +1126,7 @@ sub _resizeThumb{
                     $m->Resize(width => $width, height => $height);
                     $m->Set(quality => $quality);
                     $m->Write('jpg:' . $cacheFile);
+                    @$m = (); # clear the image list
                 }
             }
         }
@@ -1222,6 +1223,7 @@ sub doRestThumb
                     $m->Resize(width => $width, height => $height);
                     $m->Set(quality => $quality);
                     $m->Write('jpg:' . $cacheFile);
+                    @$m = (); # clear the image list
                 }
             }
         }
