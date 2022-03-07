@@ -178,7 +178,7 @@ sub doPHOTOGALLERY
     $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
     $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
     $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', '-date', 'name', '-name', 'off');
-    $params->{lazy}        = _checkBool($params->{lazy} || $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault});
+    $params->{lazy}        = _checkBool($params->{lazy} // $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault});
     $params->{caption}   //= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
     $params->{thumbcap}  //= $params->{caption};
     $params->{zoomcap}   //= $params->{caption};
@@ -206,7 +206,8 @@ sub doPHOTOGALLERY
            "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}",
            "random=$params->{random}", "caption=$params->{caption}",
            "thumbcap=" . ($params->{thumbcap} eq $params->{caption} ? '<ditto>' : $params->{thumbcap}),
-           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}));
+           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}),
+           "lazy=" . $params->{lazy});
     #_debug($params->stringify());
 
     # check if all required jquery plugins are available and active
@@ -395,15 +396,19 @@ sub doPHOTOGALLERY
         #$img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('ImagePlugin', 'resize', 'rest',
         #    topic => "$params->{web}.$params->{topic}", file => $att->{name},
         #    ($tr < 1 ? 'width' : 'height', $params->{size}));
-        if ($params->{lazy} ) {
+        if ($params->{lazy})
+        {
             $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
                topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
                uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th)
-        } else {
+        }
+        else
+        {
             $img->{thumbUrl} = _resizeThumb(
-                $meta->web()."\.".$meta->topic(), $att->{name}, $params->{quality},
+                $meta->web() . '.' . $meta->topic(), $att->{name}, $params->{quality},
                 ($att->{pguid} || 0), $att->{version}, $tw, $th);
         }
+
         $img->{thumbWidth}  = $tw;
         $img->{thumbHeight} = $th;
         $img->{attTs}     = $att->{date} || 0;
@@ -1090,11 +1095,13 @@ sub _doRestAdminResponse
     return undef;
 }
 
-sub _resizeThumb{
+sub _resizeThumb
+{
     my ($topic, $name, $quality, $uid, $ver, $width, $height) = @_;
-    
-    (my $web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
+
+    my ($web, $topic) = Foswiki::Func::normalizeWebTopicName('', $topic);
     my ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+
     my $cacheFile = _getCacheFileName('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
 
     # cache thumbnail unless it exists already
@@ -1102,7 +1109,7 @@ sub _resizeThumb{
     if (! -f $cacheFile)
     {
         $cached = 0;
-        
+
         my $fh = $meta->openAttachment($name, '<');
         my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
@@ -1132,11 +1139,11 @@ sub _resizeThumb{
         }
     }
 
-    my ($tFileName) = ( $cacheFile =~ m!([^/]+)\Z! );
+    my ($tFileName) = ( $cacheFile =~ m{([^/]+)\Z} );
     my $linkFile = $Foswiki::cfg{PubDir} . "/$web/$topic/$tFileName";
     symlink( $cacheFile, $linkFile ) unless -e $linkFile;
 
-    return Foswiki::Func::getPubUrlPath( $web, $topic, $tFileName );    
+    return Foswiki::Func::getPubUrlPath( $web, $topic, $tFileName );
 }
 
 sub doRestThumb
@@ -1679,8 +1686,6 @@ sub _makeCaption
 
     return $caption;
 }
-
-
 
 ####################################################################################################
 1;

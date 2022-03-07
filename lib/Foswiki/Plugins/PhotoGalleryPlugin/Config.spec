@@ -32,7 +32,8 @@ $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{AdminDefault} = 'user';
 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault} = 150;
 
 # **BOOLEAN**
-# Default <code>lazy</code> parameter. <code>on</code> uses rest interfave to delay thumbnail creation untill after the page is rendered. <code>off</code> resizes images and then returns the page.
+# Default <code>lazy</code> parameter for <a href="view/System/VarPHOTOGALLERY"><code>%PHOTOGALLERY%</code></a>. Enabled (<code>lazy="on"</code>) uses rest interface to delay thumbnail creation until after the page is rendered. Disabled (<code>lazy="off"</code>) creates the thumbnails as part of the original request.
 $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault} = '1';
 
 1;
+
