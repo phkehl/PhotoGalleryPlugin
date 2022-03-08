@@ -3,7 +3,8 @@
 
 %TOC%
 
-Here's some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
+Some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
+
 
 ---++ Example 1
 
@@ -48,6 +49,7 @@ Produces:
 
 %PHOTOGALLERY{ remaining="on" }%
 
+
 ---++ Example 5
 
 <verbatim class="tml">
@@ -86,6 +88,17 @@ blabla blablabla blabla blablabla blabla
 Produces:
 
 %PHOTOGALLERY{ "/^notjpeg/" }%
+
+
+---++ Example 7
+
+<verbatim class="tml">
+%PHOTOGALLERY{ "IMG_1262.jpg,notjpeg_withmeta.png" lazy="off" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "IMG_1262.jpg,notjpeg_withmeta.png" lazy="off" }%
 
 
 ---++ List of all Galleries

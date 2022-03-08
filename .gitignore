@@ -14,3 +14,4 @@ igp*.png
 /pub/System/PhotoGalleryPlugin/igp_*
 /.vscode
 /.vstags
+/pub/Sandbox/PhotoGalleryPluginTest/thumb-*.jpg
