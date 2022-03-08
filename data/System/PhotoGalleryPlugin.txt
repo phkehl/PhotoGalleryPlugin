@@ -101,8 +101,10 @@ The handler returns a thumbnail in JPEG format. It caches the thumbnail and resp
 Example:
 =&lt;img src="%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/&gt;=
 
-Gives (if plugin is activated):
+Gives (if the plugin is activated):
 <img width="200" height="150" style="border: 1px solid #000;" src="%SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/>
+
+This service is used by VarPHOTOGALLERY with =lazy=on=.
 
 ---
 ---++ Preferences
@@ -119,6 +121,7 @@ interface for several of VarPHOTOGALLERY's defaults:
    * ={Plugins}{PhotoGalleryPlugin}{AdminDefault}=      &ndash; the default admin mode
    * ={Plugins}{PhotoGalleryPlugin}{SizeDefault}=       &ndash; the default thumbnail size
    * ={Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault}= &ndash; the default day heading format
+   * ={Plugins}{PhotoGalleryPlugin}{LazyDefault}=       &ndash; the default for the lazy parameter
 
 The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference settings]].
 
@@ -204,6 +207,7 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 | *Date*        |  *Version*  | *Comments*   |
 |  xx xxx xxxx  |  v1.17-dev      |\
 - add =lazy= parameter%BR% \
+- minor documentation updates%BR% \
 - ... %BR% \
 |
 |  9 Jan 2021   |  v1.16      |\

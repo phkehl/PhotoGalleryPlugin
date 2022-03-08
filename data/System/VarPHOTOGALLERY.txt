@@ -183,14 +183,14 @@ hovering the gear icon. The following admin actions are available from the menu:
    * _timestamp_ sets the attachment timestamp to the photo exposure time. The
      menu entry is only shown if the photo has the necessary EXIF data and if
      the attachment time differs from the exposure time.
-   * _delete_ will delete the photo by moving it to the [[Trash.TrashAttachment]]
+   * _delete_ allows deleting the photo by moving it to the [[Trash.TrashAttachment]]
      topic (see also %SYSTEMWEB%.FileAttachment)
    * _move_ allows moving a photo to another topic. The provided dialog input
      field uses %SYSTEMWEB%.JQueryUIAutocomplete to suggest topic names as you
-     type. By default it will look for topic names in the current web. If you
-     specify the web sperated by a dot (e.g. "Main.searchtext") it will look in
+     type. By default it looks for topic names in the current web. If you
+     specify the web sperated by a dot (e.g. "Main.searchtext") it looks in
      that web. If you prefix the search text with a dot (e.g. ".searchtext") it
-     will look for matching topic names in all webs.
+     looks for matching topic names in all webs.
 
 
 ---++ Related
