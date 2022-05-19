@@ -170,7 +170,7 @@ sub doPHOTOGALLERY
     $params->{topic}     ||= $topic;
     ($params->{web}, $params->{topic})
                            = Foswiki::Func::normalizeWebTopicName($params->{web}, $params->{topic});
-    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g$/i';
+    $params->{images}    ||= $params->{_DEFAULT} || '/.+\.jpe?g$/';
     $params->{size}        = _checkRange($params->{size},
                              $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{SizeDefault}, 50, 500);
     $params->{quality}     = _checkRange($params->{quality},
