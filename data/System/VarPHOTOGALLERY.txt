@@ -30,7 +30,8 @@ Each selection can be:%BR% \
 | =lazy=  \
 | Selects when the thumbnails are created: %BR% \
 - =on= uses the [[PhotoGalleryPlugin#Thumbnail_REST_Service][rest]] interface to load the thumbnails on demand (after the topic is rendered). %BR% \
-- =off= creates the thumbnails as part of the original request. \
+- =off= creates the thumbnails as part of the original request.%BR% \
+In both cases the thumbnails are cached and only (re-)generated when necessary. \
 | =on= %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =quality=  \

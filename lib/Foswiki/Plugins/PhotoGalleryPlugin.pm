@@ -1267,7 +1267,7 @@ sub _getMagick
     }
     else
     {
-        # Clear image list (Appartently this is a thing... WTF?! See http://www.graphicsmagick.org/perl.html#overview)
+        # Clear image list (Apparently this is a thing... WTF?! See http://www.graphicsmagick.org/perl.html#overview)
         @{$RV->{magic}} = ();
     }
     return $RV->{magic};
