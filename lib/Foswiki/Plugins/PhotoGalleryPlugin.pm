@@ -1230,7 +1230,6 @@ sub _makeThumb
                     $m->Resize(width => $width, height => $height);
                     $m->Set(quality => $quality);
                     $m->Write('jpg:' . $cacheFile);
-                    @$m = (); # clear the image list
                 }
             }
         }
