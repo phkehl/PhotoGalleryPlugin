@@ -399,7 +399,7 @@ sub doPHOTOGALLERY
         {
             $img->{thumbUrl} = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
                topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
-               uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th)
+               uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th);
         }
         # Generate thumbnail now and place it in the pub directory
         else
@@ -1211,7 +1211,7 @@ sub _makeThumb
         my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
 
-        if ($name =~ m{\.jpe?g$})
+        if ($name =~ m{\.jpe?g$}i)
         {
             my $epeg = Image::Epeg->new($tFile);
             $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
@@ -1265,6 +1265,11 @@ sub _getMagick
     {
         _warning('No magick found :-(');
         $RV->{magic} = undef;
+    }
+    else
+    {
+        # Clear image list (Appartently this is a thing... WTF?! See http://www.graphicsmagick.org/perl.html#overview)
+        @{$RV->{magic}} = ();
     }
     return $RV->{magic};
 }
@@ -1428,7 +1433,7 @@ sub _getImageInfo
     my ($web, $topic) = ($meta->web(), $meta->topic());
 
     # try cache first
-    my $cacheVer = 'v2'; # bump this if something below changes
+    my $cacheVer = 'v3'; # bump this if something below changes
     my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
     my $info;
     try { $info = Storable::retrieve($cacheFile); }
