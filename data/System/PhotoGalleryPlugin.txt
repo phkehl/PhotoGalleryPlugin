@@ -207,7 +207,8 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 | *Date*        |  *Version*  | *Comments*   |
 |  xx xxx xxxx  |  v1.17-dev      |\
 - add =lazy= parameter%BR% \
-- minor documentation updates%BR% \
+- minor documentation updates%BR%
+- fix some bugs%BR% \
 - ... %BR% \
 |
 |  9 Jan 2021   |  v1.16      |\
