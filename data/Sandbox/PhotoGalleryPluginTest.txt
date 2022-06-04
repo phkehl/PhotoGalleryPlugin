@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1297286796" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1654342835" format="1.1" version="1"}%
 ---+!! Testing !PhotoGalleryPlugin
 
 %TOC%
@@ -101,9 +101,21 @@ Produces:
 %PHOTOGALLERY{ "IMG_1262.jpg,notjpeg_withmeta.png" lazy="off" }%
 
 
+---++ Example 8
+
+%TABPANE%
+%TAB{"Hello"}%
+We can have a gallery initially hidden, for example in a tab. Switch to the "Gallery" tab to view it.
+%ENDTAB%
+%TAB{"Gallery"}%
+%PHOTOGALLERY%
+%ENDTAB%
+%ENDTABPANE%
+
+
 ---++ List of all Galleries
 
-Here's a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Sandbox.WebHome][Sandbox]] web:
+We can generate a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Sandbox.WebHome][Sandbox]] web:
 
 <verbatim class="tml">
 %SEARCH{ "%PHOTOGALLERY" web="Sandbox" type="literal" nonoise="on" format="   * [[$item][$item]]" }%
