@@ -8,6 +8,8 @@ Some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
 
 ---++ Example 1
 
+Explicitly select images.
+
 <verbatim class="tml">
 %PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%
 </verbatim>
@@ -19,27 +21,33 @@ Produces:
 
 ---++ Example 2
 
+Select a range of images.
+
 <verbatim class="tml">
-%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1324.jpg" }%
 </verbatim>
 
 Produces:
 
-%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1324.jpg" }%
 
 
 ---++ Example 3
+
+Selecting an image (attachment) that does not exist.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ "doesnotexist" }%
 </verbatim>
 
-Produces:
+Produces an error:
 
 %PHOTOGALLERY{ "doesnotexist" }%
 
 
 ---++ Example 4
+
+A gallery with all the images (attachments) not already used in the the galleries above.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ remaining="on" }%
@@ -52,6 +60,8 @@ Produces:
 
 ---++ Example 5
 
+Using images (attachments) from another topic.
+
 <verbatim class="tml">
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" }%
 </verbatim>
@@ -62,6 +72,8 @@ Produces:
 
 
 ---++ Example 6
+
+Showing a single, random image without decorations, floating to the right of a text.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" random="1" width="1" float="right" size="100" thumbcap="" }%
@@ -80,6 +92,8 @@ blabla blablabla blabla blablabla blabla
 
 
 ---++ Example 7
+
+Select all images with a name that start with "notjepg".
 
 <verbatim class="tml">
 %PHOTOGALLERY{ "/^notjpeg/" }%
