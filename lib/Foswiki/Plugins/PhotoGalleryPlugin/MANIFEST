@@ -29,7 +29,10 @@ pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.css     0644 Plugin 
 pub/System/PhotoGalleryPlugin/default-skin.css                      0644 PhotoSwipe skin styles
 pub/System/PhotoGalleryPlugin/default-skin.compressed.css           0644 PhotoSwipe skin styles
 pub/System/PhotoGalleryPlugin/default-skin.png                      0644 PhotoSwipe skin data
+#preloader.gif from https://commons.wikimedia.org/wiki/File:Loading_icon.gif
+#Created by Ahm Masum
 pub/System/PhotoGalleryPlugin/default-skin.svg                      0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/preloader.gif                         0644 PhotoSwipe skin data
 pub/System/PhotoGalleryPlugin/photoswipe-ui-default.js              0644 PhotoSwipe UI javascript code
 pub/System/PhotoGalleryPlugin/photoswipe-ui-default.compressed.js   0644 PhotoSwipe UI javascript code
 pub/System/PhotoGalleryPlugin/photoswipe.css                        0644 PhotoSwipe stylesheet
