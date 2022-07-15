@@ -15,3 +15,4 @@ igp*.png
 /.vscode
 /.vstags
 /pub/Sandbox/PhotoGalleryPluginTest/thumb-*.jpg
+/watchlogmin.sh
