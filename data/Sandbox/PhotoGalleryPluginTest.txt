@@ -1,11 +1,14 @@
-%META:TOPICINFO{author="ProjectContributor" date="1297286796" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1654342835" format="1.1" version="1"}%
 ---+!! Testing !PhotoGalleryPlugin
 
 %TOC%
 
-Here's some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
+Some examples of the %SYSTEMWEB%.PhotoGalleryPlugin in action.
+
 
 ---++ Example 1
+
+Explicitly select images.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ "IMG_1262.jpg,IMG_1265.jpg" }%
@@ -18,28 +21,34 @@ Produces:
 
 ---++ Example 2
 
+Select a range of images.
+
 <verbatim class="tml">
-%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1324.jpg" }%
 </verbatim>
 
 Produces:
 
-%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1323.jpg" }%
+%PHOTOGALLERY{ "IMG_1265.jpg..IMG_1324.jpg" }%
 
 
 ---++ Example 3
+
+Selecting an image (attachment) that does not exist.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ "doesnotexist" }%
 </verbatim>
 
-Produces:
+Produces an error:
 
 %PHOTOGALLERY{ "doesnotexist" }%
 
 
 ---++ Example 4
 
+A gallery with all the images (attachments) not already used in the the galleries above.
+
 <verbatim class="tml">
 %PHOTOGALLERY{ remaining="on" }%
 </verbatim>
@@ -48,7 +57,10 @@ Produces:
 
 %PHOTOGALLERY{ remaining="on" }%
 
+
 ---++ Example 5
+
+Using images (attachments) from another topic.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" }%
@@ -60,6 +72,8 @@ Produces:
 
 
 ---++ Example 6
+
+Showing a single, random image without decorations, floating to the right of a text.
 
 <verbatim class="tml">
 %PHOTOGALLERY{ topic="System.PhotoGalleryPlugin" random="1" width="1" float="right" size="100" thumbcap="" }%
@@ -79,6 +93,8 @@ blabla blablabla blabla blablabla blabla
 
 ---++ Example 7
 
+Select all images with a name that start with "notjepg".
+
 <verbatim class="tml">
 %PHOTOGALLERY{ "/^notjpeg/" }%
 </verbatim>
@@ -88,9 +104,32 @@ Produces:
 %PHOTOGALLERY{ "/^notjpeg/" }%
 
 
+---++ Example 7
+
+<verbatim class="tml">
+%PHOTOGALLERY{ "IMG_1262.jpg,notjpeg_withmeta.png" lazy="off" }%
+</verbatim>
+
+Produces:
+
+%PHOTOGALLERY{ "IMG_1262.jpg,notjpeg_withmeta.png" lazy="off" }%
+
+
+---++ Example 8
+
+%TABPANE%
+%TAB{"Hello"}%
+We can have a gallery initially hidden, for example in a tab. Switch to the "Gallery" tab to view it.
+%ENDTAB%
+%TAB{"Gallery"}%
+%PHOTOGALLERY%
+%ENDTAB%
+%ENDTABPANE%
+
+
 ---++ List of all Galleries
 
-Here's a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Sandbox.WebHome][Sandbox]] web:
+We can generate a list of all topics that use the =%<nop>PHOTOGALLERY%= macro in the [[Sandbox.WebHome][Sandbox]] web:
 
 <verbatim class="tml">
 %SEARCH{ "%PHOTOGALLERY" web="Sandbox" type="literal" nonoise="on" format="   * [[$item][$item]]" }%

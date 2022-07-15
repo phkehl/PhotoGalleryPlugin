@@ -178,6 +178,7 @@ sub doPHOTOGALLERY
     $params->{uidelay}     = _checkRange($params->{uidelay}, 4.0, 0, 86400);
     $params->{ssdelay}     = _checkRange($params->{ssdelay}, 5.0, 1.0, 86400);
     $params->{sort}        = _checkOptions($params->{sort}, 'date', 'date', '-date', 'name', '-name', 'off');
+    $params->{lazy}        = _checkBool($params->{lazy} // $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{LazyDefault});
     $params->{caption}   //= $Foswiki::cfg{Plugins}{PhotoGalleryPlugin}{CaptFmtDefault};
     $params->{thumbcap}  //= $params->{caption};
     $params->{zoomcap}   //= $params->{caption};
@@ -205,7 +206,8 @@ sub doPHOTOGALLERY
            "user=$user", "dayheading=$params->{dayheading}", "width=$params->{width}", "align=$params->{align}",
            "random=$params->{random}", "caption=$params->{caption}",
            "thumbcap=" . ($params->{thumbcap} eq $params->{caption} ? '<ditto>' : $params->{thumbcap}),
-           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}));
+           "zoomcap=" . ($params->{zoomcap} eq $params->{caption} ? '<ditto>' : $params->{zoomcap}),
+           "lazy=" . $params->{lazy});
     #_debug($params->stringify());
 
     # check if all required jquery plugins are available and active
@@ -391,12 +393,21 @@ sub doPHOTOGALLERY
         $img->{imgHeight} = $info->{ImageHeight};
         $img->{zoomcap}   = _makeCaption($params->{zoomcap},  $info, $att);
         $img->{thumbcap}  = _makeCaption($params->{thumbcap}, $info, $att);
-        #$img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('ImagePlugin', 'resize', 'rest',
-        #    topic => "$params->{web}.$params->{topic}", file => $att->{name},
-        #    ($tr < 1 ? 'width' : 'height', $params->{size}));
-        $img->{thumbUrl}  = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
-            topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
-            uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th);
+
+        # Thumbnail URL is to the REST service to generate the thumbnail on demand
+        if ($params->{lazy})
+        {
+            $img->{thumbUrl} = Foswiki::Func::getScriptUrlPath('PhotoGalleryPlugin', 'thumb', 'rest',
+               topic => "$params->{web}.$params->{topic}", name => $att->{name}, quality => $params->{quality},
+               uid => ($att->{pguid} || 0), ver => $att->{version}, width => $tw, height => $th);
+        }
+        # Generate thumbnail now and place it in the pub directory
+        else
+        {
+            $img->{thumbUrl} = genPubThumb($meta, $att->{name}, $params->{quality}, $tw, $th,
+                ($att->{pguid} || 0), $att->{version});
+        }
+
         $img->{thumbWidth}  = $tw;
         $img->{thumbHeight} = $th;
         $img->{attTs}     = $att->{date} || 0;
@@ -1083,6 +1094,29 @@ sub _doRestAdminResponse
     return undef;
 }
 
+sub genPubThumb
+{
+    my ($meta, $name, $quality, $width, $height, $uid, $ver) = @_;
+
+    # generate and cache thumbnail unless it exists already
+    my $cacheFile = _makeThumb($meta, $name, $quality, $width, $height, $uid, $ver);
+
+    # copy thumbnail to pub directory
+    my $pubFileName = ($cacheFile =~ m{([^/]+)$})[0] . '.jpg';
+    my $web = $meta->web();
+    my $topic = $meta->topic();
+    my $pubThumbFile = $Foswiki::cfg{PubDir} . "/$web/$topic/$pubFileName";
+    if (! -f $pubThumbFile)
+    {
+        if (!File::Copy::copy($cacheFile, $pubThumbFile))
+        {
+            _warning("Could not copy $cacheFile to $pubThumbFile");
+        }
+    }
+
+    return Foswiki::Func::getPubUrlPath( $web, $topic, $pubFileName );
+}
+
 sub doRestThumb
 {
     my ($session, $subject, $verb, $response) = @_;
@@ -1137,18 +1171,47 @@ sub doRestThumb
         return undef;
     }
 
-    my $cacheFile = _getCacheFileName('thumb', $web, $topic, $name, $quality, $width, $height, $uid, $ver);
+    # generate and cache thumbnail unless it exists already
+    my $cacheFile = _makeThumb($meta, $name, $quality, $width, $height, $uid, $ver);
+
+    # read and serve cached thumbnail
+    if (-f $cacheFile)
+    {
+        my $data = Foswiki::Func::readFile($cacheFile);
+        my $dlen = length($data);
+
+        # update cache file timestamp (so that a cronjob can expire old files)
+        File::Touch::touch($cacheFile);
+
+        _debug("thumb $web.$topic/$name $quality ${width}x${height} -> $dlen");
+
+        $response->header('-Content-Type'   => 'image/jpeg',
+                          '-Content-Length' => $dlen,
+                          '-Cache-Control'  => 'max-age=86400',
+                          '-Expires'        => '+24h');
+        $response->body($data);
+        return undef;
+    }
+
+    # wtf?!
+    $response->header(-Status => 404); # not found
+    return undef;
+}
+
+sub _makeThumb
+{
+    my ($meta, $name, $quality, $width, $height, $uid, $ver) = @_;
+
+    my $cacheFile = _getCacheFileName('thumb', $meta->web(), $meta->topic(), $name, $quality, $width, $height, $uid, $ver);
 
     # cache thumbnail unless it exists already
-    my $cached = 1;
     if (! -f $cacheFile)
     {
-        $cached = 0;
         my $fh = $meta->openAttachment($name, '<');
         my $tFile = _getTempFileName();
         File::Copy::copy($fh, $tFile);
 
-        if ($name =~ m{\.jpe?g$})
+        if ($name =~ m{\.jpe?g$}i)
         {
             my $epeg = Image::Epeg->new($tFile);
             $epeg->resize($width, $height, Image::Epeg::IGNORE_ASPECT_RATIO);
@@ -1172,30 +1235,8 @@ sub doRestThumb
         }
     }
 
-    # read and serve cached thumbnail
-    if (-f $cacheFile)
-    {
-        my $data = Foswiki::Func::readFile($cacheFile);
-        my $dlen = length($data);
-
-        # update cache file timestamp (so that a cronjob can expire old files)
-        File::Touch::touch($cacheFile);
-
-        _debug("thumb $web.$topic/$name $quality ${width}x${height} -> $dlen" . ($cached ? ' cached' : ''));
-
-        $response->header('-Content-Type'   => 'image/jpeg',
-                          '-Content-Length' => $dlen,
-                          '-Cache-Control'  => 'max-age=86400',
-                          '-Expires'        => '+24h');
-        $response->body($data);
-        return undef;
-    }
-
-    # wtf?!
-    $response->header(-Status => 404); # not found
-    return undef;
+    return $cacheFile;
 }
-
 
 sub _getMagick
 {
@@ -1224,9 +1265,13 @@ sub _getMagick
         _warning('No magick found :-(');
         $RV->{magic} = undef;
     }
+    else
+    {
+        # Clear image list (Apparently this is a thing... WTF?! See http://www.graphicsmagick.org/perl.html#overview)
+        @{$RV->{magic}} = ();
+    }
     return $RV->{magic};
 }
-
 
 ####################################################################################################
 # utility functions
@@ -1387,7 +1432,7 @@ sub _getImageInfo
     my ($web, $topic) = ($meta->web(), $meta->topic());
 
     # try cache first
-    my $cacheVer = 'v2'; # bump this if something below changes
+    my $cacheVer = 'v3'; # bump this if something below changes
     my $cacheFile = _getCacheFileName('info', $cacheVer, $web, $topic, $att->{name}, $att->{size}, $att->{version}, $att->{pguid} || 0);
     my $info;
     try { $info = Storable::retrieve($cacheFile); }
@@ -1622,8 +1667,6 @@ sub _makeCaption
 
     return $caption;
 }
-
-
 
 ####################################################################################################
 1;

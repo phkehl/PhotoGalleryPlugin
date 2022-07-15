@@ -1,8 +1,9 @@
 /* PhotoGalleryPlugin javascript code */
 
+"use strict";
+
 jQuery(function($)
 {
-    "use strict";
 
     // add "debug=1" to query string to enable
     var doDEBUG = false;
@@ -10,24 +11,26 @@ jQuery(function($)
 
     /* ***** init each gallery once ************************************************************** */
 
-    $('div.photoGallery:not(.photoGalleryInited').livequery(function()
+    $(document).ready(function()
     {
-        var t0 = +(new Date);
-        $(this).addClass('photoGalleryInited');
-
-        var pgGlobalsDiv = $('#photoGalleryGlobals');
+        let pgGlobalsDiv = $('#photoGalleryGlobals');
         doDEBUG = pgGlobalsDiv.data('debug');
-        pgSetup(
+
+        $('div.photoGallery:not(.photoGalleryInited').livequery(function()
         {
-            t0:           t0,
-            pgDiv:        $(this),
-            pgGlobalsDiv: pgGlobalsDiv,
-            pgUid:        $(this).data('uid'),
-            att_web:      $(this).data('web'),
-            att_topic:    $(this).data('topic')
+            var t0 = +(new Date);
+            $(this).addClass('photoGalleryInited');
+            pgSetup(
+            {
+                t0:           t0,
+                pgDiv:        $(this),
+                pgGlobalsDiv: pgGlobalsDiv,
+                pgUid:        $(this).data('uid'),
+                att_web:      $(this).data('web'),
+                att_topic:    $(this).data('topic')
+            });
         });
     });
-
 
     /* ***** setup a single PHOTOGALLERY ********************************************************* */
 
@@ -167,9 +170,6 @@ jQuery(function($)
         // add window resize event that centres the gallery
         if (helper.pgDiv.hasClass('pg-auto-width'))
         {
-            var nFrames = helper.items.length;
-            var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5
-                + 1; // add 1px to account for Firefox weirdness when layout.css.devPixelsPerPx is non-integer
             var debounceTimer;
             $(window).on('resize', function (e)
             {
@@ -179,11 +179,14 @@ jQuery(function($)
                 }
                 debounceTimer = setTimeout(function ()
                 {
+                    var nFrames = helper.items.length;
+                    var frameWidth = helper.items[0].frame.outerWidth() + 5 + 5
+                        + 1; // add 1px to account for Firefox weirdness when layout.css.devPixelsPerPx is non-integer
                     var availableSpace = helper.pgDiv.innerWidth();
                     var nPossible = Math.floor(availableSpace / frameWidth);
                     var w = (nPossible > 0 ? (nPossible > nFrames ? nFrames : nPossible) : 1) * frameWidth;
                     helper.pgDiv.find('div.gallery').width(w);
-                    //DEBUG('availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
+                    //DEBUG('nFrames=' + nFrames + ' frameWidth=' + frameWidth + ' availableSpace=' + availableSpace + ' nPossible=' + nPossible + ' w=' + w);
                     // FIXME: optimise for least number of columns and rows (fewest empty spots)
                 }, 25);
             });

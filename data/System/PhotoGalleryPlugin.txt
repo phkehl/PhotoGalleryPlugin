@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1456435698" format="1.1" version="4"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1654342835" format="1.1" version="4"}%
 %META:TOPICPARENT{name="Plugins"}%
 ---+!! %SPACEOUT{ "%TOPIC%" }%
 %FORMFIELD{"Description"}%
@@ -101,8 +101,10 @@ The handler returns a thumbnail in JPEG format. It caches the thumbnail and resp
 Example:
 =&lt;img src="%<nop>SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/&gt;=
 
-Gives (if plugin is activated):
+Gives (if the plugin is activated):
 <img width="200" height="150" style="border: 1px solid #000;" src="%SCRIPTURLPATH{"rest"}%/PhotoGalleryPlugin/thumb?topic=Sandbox.PhotoGalleryPluginTest;name=IMG_1262.jpg;quality=85;uid=0;width=200;height=150"/>
+
+This service is used by VarPHOTOGALLERY with =lazy=on=.
 
 ---
 ---++ Preferences
@@ -119,6 +121,7 @@ interface for several of VarPHOTOGALLERY's defaults:
    * ={Plugins}{PhotoGalleryPlugin}{AdminDefault}=      &ndash; the default admin mode
    * ={Plugins}{PhotoGalleryPlugin}{SizeDefault}=       &ndash; the default thumbnail size
    * ={Plugins}{PhotoGalleryPlugin}{HeadingFmtDefault}= &ndash; the default day heading format
+   * ={Plugins}{PhotoGalleryPlugin}{LazyDefault}=       &ndash; the default for the lazy parameter
 
 The plugin does not use any [[%SYSTEMWEB%.PreferenceSettings][preference settings]].
 
@@ -202,10 +205,13 @@ upgrading this plugin. See [[%SYSTEMWEB%.PageCaching][PageCaching]] for details.
 
 %TABLE{ columnwidths="7em,2em" tablewidth="100%" tablerules="all" sort="off" }%
 | *Date*        |  *Version*  | *Comments*   |
-|  xx xxx xxxx  |  v1.17-dev      |\
+|  xx xxx xxxx  |  v1.17-dev  |\
+- add =lazy= parameter%BR% \
+- minor documentation updates%BR% \
+- fix some bugs%BR% \
 - ... %BR% \
 |
-|  9 Jan 2021   |  v1.16      |\
+|  9 Jan 2021   |  v1.16  |\
 - minor fixes%BR% \
 - fix html problem with filenames that contain <literal>WikiWords</literal>%BR% \
 - fix bug where clicking a thumb would sometimes open another picture \
@@ -319,7 +325,7 @@ bulk upload skin extension:%BR% \
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/phkehl/PhotoGalleryPlugin"}%
-%META:FIELD{name="Copyright" title="Copyright" value="&copy; 2016&ndash;2018 Philippe Kehl, https://oinkzwurgl.org"}%
+%META:FIELD{name="Copyright" title="Copyright" value="&copy; 2016&ndash;2022 Philippe Kehl, https://oinkzwurgl.org"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25$ROOTMODULE%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25$ROOTMODULE%25"}%

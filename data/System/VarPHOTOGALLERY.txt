@@ -1,9 +1,8 @@
-%META:TOPICINFO{author="ProjectContributor" date="1434650530" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" date="1654342835" format="1.1" version="1"}%
 %META:TOPICPARENT{name="Macros"}%
 ---+ PHOTOGALLERY -- render photo gallery from attachments
 
 The =%<nop>PHOTOGALLERY%= [[%SYSTEMWEB%.Macros][macro]] is handled by the PhotoGalleryPlugin.
-
 
 ---++ Parameters
 
@@ -27,6 +26,13 @@ Each selection can be:%BR% \
 | =size=  \
 | Sets the size in pixels for the thumbnails (50..500).  \
 | 150 %RED%<sup>1</sup>%ENDCOLOR%  \
+|
+| =lazy=  \
+| Selects when the thumbnails are created: %BR% \
+- =on= uses the [[PhotoGalleryPlugin#Thumbnail_REST_Service][rest]] interface to load the thumbnails on demand (after the topic is rendered). %BR% \
+- =off= creates the thumbnails as part of the original request.%BR% \
+In both cases the thumbnails are cached and only (re-)generated when necessary. \
+| =on= %RED%<sup>1</sup>%ENDCOLOR%  \
 |
 | =quality=  \
 | Sets the thumbnail quality factor (1..100).  \
@@ -178,14 +184,14 @@ hovering the gear icon. The following admin actions are available from the menu:
    * _timestamp_ sets the attachment timestamp to the photo exposure time. The
      menu entry is only shown if the photo has the necessary EXIF data and if
      the attachment time differs from the exposure time.
-   * _delete_ will delete the photo by moving it to the [[Trash.TrashAttachment]]
+   * _delete_ allows deleting the photo by moving it to the [[Trash.TrashAttachment]]
      topic (see also %SYSTEMWEB%.FileAttachment)
    * _move_ allows moving a photo to another topic. The provided dialog input
      field uses %SYSTEMWEB%.JQueryUIAutocomplete to suggest topic names as you
-     type. By default it will look for topic names in the current web. If you
-     specify the web sperated by a dot (e.g. "Main.searchtext") it will look in
+     type. By default it looks for topic names in the current web. If you
+     specify the web sperated by a dot (e.g. "Main.searchtext") it looks in
      that web. If you prefix the search text with a dot (e.g. ".searchtext") it
-     will look for matching topic names in all webs.
+     looks for matching topic names in all webs.
 
 
 ---++ Related

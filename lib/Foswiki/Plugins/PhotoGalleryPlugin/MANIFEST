@@ -22,14 +22,19 @@ pub/System/PhotoGalleryPlugin/screenshot2.jpg                       0644 Plugin 
 pub/System/PhotoGalleryPlugin/screenshot3.jpg                       0644 Plugin screenshot
 pub/System/PhotoGalleryPlugin/screenshot4.jpg                       0644 Plugin screenshot
 pub/System/PhotoGalleryPlugin/screenshot5.jpg                       0644 Plugin screenshot
+
+# plugin js and css
 pub/System/PhotoGalleryPlugin/photogalleryplugin.js                 0644 Plugin Javascript code
 pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.js      0644 Plugin Javascript code
 pub/System/PhotoGalleryPlugin/photogalleryplugin.css                0644 Plugin stylesheet
 pub/System/PhotoGalleryPlugin/photogalleryplugin.compressed.css     0644 Plugin stylesheet
+
+# photoswipe (https://photoswipe.com/) assets
 pub/System/PhotoGalleryPlugin/default-skin.css                      0644 PhotoSwipe skin styles
 pub/System/PhotoGalleryPlugin/default-skin.compressed.css           0644 PhotoSwipe skin styles
 pub/System/PhotoGalleryPlugin/default-skin.png                      0644 PhotoSwipe skin data
 pub/System/PhotoGalleryPlugin/default-skin.svg                      0644 PhotoSwipe skin data
+pub/System/PhotoGalleryPlugin/preloader.gif                         0644 PhotoSwipe skin data
 pub/System/PhotoGalleryPlugin/photoswipe-ui-default.js              0644 PhotoSwipe UI javascript code
 pub/System/PhotoGalleryPlugin/photoswipe-ui-default.compressed.js   0644 PhotoSwipe UI javascript code
 pub/System/PhotoGalleryPlugin/photoswipe.css                        0644 PhotoSwipe stylesheet

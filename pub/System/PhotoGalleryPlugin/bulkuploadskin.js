@@ -1,9 +1,9 @@
 /* PhotoGalleryPlugin DropzoneJS Foswiki integration javascript code */
 
+"use strict";
+
 jQuery(function($)
 {
-    "use strict";
-
     // add "debug=1" to the query string to enable debugging
     var doDEBUG = location && location.href && (location.href.indexOf('debug=1') >= 0) ? true : false;
 

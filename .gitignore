@@ -12,3 +12,7 @@ igp*.png
 *.compressed.js
 *.compressed.css
 /pub/System/PhotoGalleryPlugin/igp_*
+/.vscode
+/.vstags
+/pub/Sandbox/PhotoGalleryPluginTest/thumb-*.jpg
+/watchlogmin.sh
